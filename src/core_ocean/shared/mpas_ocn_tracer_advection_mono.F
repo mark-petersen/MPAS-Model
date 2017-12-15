@@ -106,8 +106,8 @@ module ocn_tracer_advection_mono
                                      hProvInvField, hProvField, highOrderFluxField
 
       real (kind=RKIND), dimension(:,:,:), pointer :: &
-              activeTracerHorizontalAdvectionTendency, &
-              activeTracerVerticalAdvectionTendency
+              activeTracerHorizontalAdvectionTendency, activeTracerVerticalAdvectionTendency, &
+              IRFTracerHorizontalAdvectionTendency, IRFTracerVerticalAdvectionTendency
 
       real (kind=RKIND), parameter :: eps = 1.e-10_RKIND
 
@@ -135,6 +135,13 @@ module ocn_tracer_advection_mono
                  activeTracerHorizontalAdvectionTendency)
          call mpas_pool_get_array(diagnosticsPool,'activeTracerVerticalAdvectionTendency', &
                  activeTracerVerticalAdvectionTendency)
+      end if
+
+      if (tracerGroupName == 'IRFTracers') then
+         call mpas_pool_get_array(diagnosticsPool,'IRFTracerHorizontalAdvectionTendency', &
+                 IRFTracerHorizontalAdvectionTendency)
+         call mpas_pool_get_array(diagnosticsPool,'IRFTracerVerticalAdvectionTendency', &
+                 IRFTracerVerticalAdvectionTendency)
       end if
 
       call mpas_pool_get_field(scratchPool, 'tracerCur', tracerCurField)
@@ -409,6 +416,16 @@ module ocn_tracer_advection_mono
            end if
         end if
 
+        if (tracerGroupName == 'IRFTracers') then
+           !$omp do schedule(runtime) private(k)
+           do iCell = 1, nCells
+             do k = 1, maxLevelCell(iCell)
+                 IRFTracerHorizontalAdvectionTendency(iTracer,k,iCell) = work_tend(k,iCell)
+             end do
+           end do ! iCell loop
+           !$omp end do
+        end if
+
 #ifdef _ADV_TIMERS
         call mpas_timer_stop('flux accumulate')
 #endif
@@ -624,6 +641,16 @@ module ocn_tracer_advection_mono
               end do ! iCell loop
               !$omp end do
            end if
+        end if
+
+        if (tracerGroupName == 'IRFTracers') then
+           !$omp do schedule(runtime) private(k)
+           do iCell = 1, nCells
+             do k = 1, maxLevelCell(iCell)
+                 IRFTracerVerticalAdvectionTendency(iTracer,k,iCell) = work_tend(k,iCell)
+             end do
+           end do ! iCell loop
+           !$omp end do
         end if
 #ifdef _ADV_TIMERS
         call mpas_timer_stop('flux accumulate')

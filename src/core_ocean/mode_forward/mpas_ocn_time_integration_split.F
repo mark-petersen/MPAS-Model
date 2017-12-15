@@ -140,7 +140,7 @@ module ocn_time_integration_split
       logical, pointer :: config_disable_vel_all_tend
       logical, pointer :: config_disable_tr_all_tend
       logical, pointer :: config_use_cvmix_kpp
-      logical, pointer :: config_use_tracerGroup
+      logical, pointer :: config_use_tracerGroup, config_use_IRFTracers
       logical, pointer :: config_compute_active_tracer_budgets
 
       character (len=StrKIND), pointer :: config_land_ice_flux_mode
@@ -204,6 +204,12 @@ module ocn_time_integration_split
         activeTracerVerticalAdvectionTendency,        &
         activeTracerSurfaceFluxTendency,              &
         activeTracerNonLocalTendency
+
+      real (kind=RKIND), dimension(:,:,:), pointer :: &
+        IRFTracerHorizontalAdvectionTendency,      &
+        IRFTracerVerticalAdvectionTendency,        &
+        IRFTracerSurfaceFluxTendency,              &
+        IRFTracerNonLocalTendency
 
       real (kind=RKIND), dimension(:,:), pointer :: &
         temperatureShortWaveTendency
@@ -345,6 +351,17 @@ module ocn_time_integration_split
                call mpas_pool_get_array(tracersPool, groupItr % memberName, tracersGroupNew, 2)
 
                if ( associated(tracersGroupCur) .and. associated(tracersGroupNew) ) then
+                  ! Reset Impulse Response Functions to original value
+                  if ( trim(groupItr % memberName) == 'IRFTracers' ) then
+                     !$omp do schedule(runtime) private(k)
+                     do iCell = 1, nCells
+                        do k = 1, maxLevelCell(iCell)
+                           tracersGroupCur(:,k,iCell) = tracersGroupNew(:,k,iCell)
+                        end do
+                     end do
+                     !$omp end do
+                  end if
+
                   !$omp do schedule(runtime) private(k)
                   do iCell = 1, nCells
                      do k = 1, maxLevelCell(iCell)
@@ -1662,6 +1679,32 @@ module ocn_time_integration_split
 
                         activeTracerNonLocalTendency(:,k,iCell) = &
                            activeTracerNonLocalTendency(:,k,iCell) / &
+                           layerThicknessNew(k,iCell)
+                     end do
+                  end do 
+                  !$omp end do
+               endif
+
+              call mpas_pool_get_config(domain % configs, 'config_use_IRFTracers', config_use_IRFTracers)
+              if ( config_use_IRFTracers ) then
+                  call mpas_pool_get_array(diagnosticsPool,'IRFTracerHorizontalAdvectionTendency', &
+                          IRFTracerHorizontalAdvectionTendency)
+                  call mpas_pool_get_array(diagnosticspool,'IRFTracerVerticalAdvectionTendency', &
+                          IRFTracerVerticalAdvectionTendency)
+                  call mpas_pool_get_array(diagnosticsPool,'IRFTracerNonLocalTendency',IRFTracerNonLocalTendency)
+                  !$omp do schedule(runtime) private(k)
+                  do iCell = 1, nCells
+                     do k= 1, maxLevelCell(iCell)
+                        IRFTracerHorizontalAdvectionTendency(:,k,iCell) = &
+                           IRFTracerHorizontalAdvectionTendency(:,k,iCell) / &
+                           layerThicknessNew(k,iCell)
+        
+                        IRFTracerVerticalAdvectionTendency(:,k,iCell) = &
+                           IRFTracerVerticalAdvectionTendency(:,k,iCell) / &
+                           layerThicknessNew(k,iCell)
+
+                        IRFTracerNonLocalTendency(:,k,iCell) = &
+                           IRFTracerNonLocalTendency(:,k,iCell) / &
                            layerThicknessNew(k,iCell)
                      end do
                   end do 

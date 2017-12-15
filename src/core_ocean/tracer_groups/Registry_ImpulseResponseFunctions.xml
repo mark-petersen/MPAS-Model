@@ -1,0 +1,252 @@
+	<nml_record name="tracer_forcing_IRFTracers">
+		<nml_option name="config_use_IRFTracers" type="logical" default_value=".false." units="unitless"
+			description="if true, the 'IRFGRP' category is enabled for the run"
+			possible_values=".true. or .false."
+		/>
+		<nml_option name="config_use_IRFTracers_surface_bulk_forcing" type="logical" default_value=".false." units="unitless"
+			description="if true, surface bulk forcing from coupler is added to surfaceTracerFlux in 'IRFGRP' category"
+			possible_values=".true. or .false."
+		/>
+		<nml_option name="config_use_IRFTracers_surface_restoring" type="logical" default_value=".false." units="unitless"
+			description="if true, surface restoring source is applied to tracers in 'IRFGRP' category"
+			possible_values=".true. or .false."
+		/>
+		<nml_option name="config_use_IRFTracers_interior_restoring" type="logical" default_value=".false." units="unitless"
+			description="if true, interior restoring source is applied to tracers in 'IRFGRP' category"
+			possible_values=".true. or .false."
+		/>
+		<nml_option name="config_use_IRFTracers_exponential_decay" type="logical" default_value=".false." units="unitless"
+			description="if true, exponential decay source is applied to tracers in 'IRFGRP' category"
+			possible_values=".true. or .false."
+		/>
+		<nml_option name="config_use_IRFTracers_idealAge_forcing" type="logical" default_value=".false." units="unitless"
+			description="if true, idealAge forcing source is applied to tracers in 'IRFGRP' category"
+			possible_values=".true. or .false."
+		/>
+		<nml_option name="config_use_IRFTracers_ttd_forcing" type="logical" default_value=".false." units="unitless"
+			description="if true, transit time distribution forcing source is applied to tracers in 'IRFGRP' category"
+			possible_values=".true. or .false."
+		/>
+		<nml_option name="config_use_IRFTracers_surface_value" type="logical" default_value=".false." units="unitless"
+			description="if true, surface value is computed for 'IRFGRP' category"
+			possible_values=".true. or .false."
+		/>
+		<nml_option name="config_use_IRFTracers_sea_ice_coupling" type="logical" default_value=".false." units="unitless"
+			description="if true, couple IRF fields with sea ice"
+			possible_values=".true. or .false."
+		/>
+	</nml_record>
+
+	<packages>
+		<package name="IRFTracersPKG" description="This package includes variables required to include IRFGRP."/>
+		<package name="IRFTracersBulkRestoringPKG" description="This package includes variables required to compute bulk restoring on the IRF tracer group."/>
+		<package name="IRFTracersSurfaceRestoringPKG" description="This package includes variables required to compute surface restoring on the IRF tracer group."/>
+		<package name="IRFTracersInteriorRestoringPKG" description="This package includes variables required to compute interior restoring on the IRF tracer group."/>
+		<package name="IRFTracersExponentialDecayPKG" description="This package includes variables required to compute exponential decay on the IRF tracer group."/>
+		<package name="IRFTracersIdealAgePKG" description="This package includes variables required to compute ideal age forcing on the IRF tracer group."/>
+		<package name="IRFTracersTTDPKG" description="This package includes variables required to compute transit-time distribution forcing on the IRF tracer group."/>
+	</packages>
+
+	<var_struct name="state" time_levs="2">
+		<var_struct name="tracers" time_levs="2">
+			<var_array name="IRFTracers" dimensions="nVertLevels nCells Time" type="real" packages="IRFTracersPKG" >
+    			<var name="IRF_1" array_group="IRFGRP" units="IRF unit m^{-3}"
+    				description="Impulse Response Function"
+    			/>
+    			<var name="IRF_2" array_group="IRFGRP" units="IRF unit m^{-3}"
+    				description="Impulse Response Function"
+    			/>
+    			<var name="IRF_3" array_group="IRFGRP" units="IRF unit m^{-3}"
+    				description="Impulse Response Function"
+    			/>
+			</var_array>
+		</var_struct>
+	</var_struct>
+
+	<var_struct name="tend" time_levs="1">
+		<var_struct name="tracersTend" time_levs="1">
+			<var_array name="IRFTracersTend" type="real" dimensions="nVertLevels nCells Time" packages="IRFTracersPKG">
+    			<var name="IRF_1Tend" array_group="IRFGRP" units="IRF unit m^{-3} s^{-1}"
+    				description="Impulse Response Function Tendency"
+    			/>
+    			<var name="IRF_2Tend" array_group="IRFGRP" units="IRF unit m^{-3} s^{-1}"
+    				description="Impulse Response Function Tendency"
+    			/>
+    			<var name="IRF_3Tend" array_group="IRFGRP" units="IRF unit m^{-3} s^{-1}"
+    				description="Impulse Response Function Tendency"
+    			/>
+			</var_array>
+		</var_struct>
+	</var_struct>
+
+	<var_struct name="forcing" time_levs="1">
+		<var_struct name="tracersSurfaceFlux" time_levs="1">
+			<var_array name="IRFTracersSurfaceFlux" type="real" dimensions="nCells Time" packages="IRFTracersPKG">
+				<var name="IRF_1SurfaceFlux" array_group="IRFSurfaceFluxGRP" units="IRF unit m^{-3} m s^{-1}"
+			        description="Impulse Response Function Surface Flux"
+				/>
+				<var name="IRF_2SurfaceFlux" array_group="IRFSurfaceFluxGRP" units="IRF unit m^{-3} m s^{-1}"
+			        description="Impulse Response Function Surface Flux"
+				/>
+				<var name="IRF_3SurfaceFlux" array_group="IRFSurfaceFluxGRP" units="IRF unit m^{-3} m s^{-1}"
+			        description="Impulse Response Function Surface Flux"
+				/>
+			</var_array>
+			<var_array name="IRFTracersSurfaceFluxRunoff" type="real" dimensions="nCells Time" packages="IRFTracersPKG">
+				<var name="IRF_1SurfaceFluxRunoff" array_group="IRFSurfaceFluxRunoffGRP" units="IRF unit m^{-3} m s^{-1}"
+					description="Impulse Response Function Surface Flux Due to Runoff"
+				/>
+				<var name="IRF_2SurfaceFluxRunoff" array_group="IRFSurfaceFluxRunoffGRP" units="IRF unit m^{-3} m s^{-1}"
+					description="Impulse Response Function Surface Flux Due to Runoff"
+				/>
+				<var name="IRF_3SurfaceFluxRunoff" array_group="IRFSurfaceFluxRunoffGRP" units="IRF unit m^{-3} m s^{-1}"
+					description="Impulse Response Function Surface Flux Due to Runoff"
+				/>
+			</var_array>
+			<var_array name="IRFTracersSurfaceFluxRemoved" type="real" dimensions="nCells Time" packages="IRFTracersPKG">
+				<var name="IRF_1SurfaceFluxRemoved" array_group="IRFSurfaceFluxRemovedGRP" units="IRF unit m^{-3} m s^{-1}"
+					description="Impulse Response Function Surface Flux that is ignored"
+				/>
+				<var name="IRF_2SurfaceFluxRemoved" array_group="IRFSurfaceFluxRemovedGRP" units="IRF unit m^{-3} m s^{-1}"
+					description="Impulse Response Function Surface Flux that is ignored"
+				/>
+				<var name="IRF_3SurfaceFluxRemoved" array_group="IRFSurfaceFluxRemovedGRP" units="IRF unit m^{-3} m s^{-1}"
+					description="Impulse Response Function Surface Flux that is ignored"
+				/>
+			</var_array>
+		</var_struct>
+		<var_struct name="tracersSurfaceRestoringFields" time_levs="1">
+			<var_array name="IRFTracersPistonVelocity" type="real" dimensions="nCells Time" packages="IRFTracersSurfaceRestoringPKG">
+				<var name="IRF_1PistonVelocity" array_group="IRFPVGRP" units="m s^{-1}"
+			        description="A non-negative field controlling the rate at which IRF_1 is restored to IRF_1SurfaceRestoringValue"
+				/>
+				<var name="IRF_2PistonVelocity" array_group="IRFPVGRP" units="m s^{-1}"
+			        description="A non-negative field controlling the rate at which IRF_2 is restored to IRF_2SurfaceRestoringValue"
+				/>
+				<var name="IRF_3PistonVelocity" array_group="IRFPVGRP" units="m s^{-1}"
+			        description="A non-negative field controlling the rate at which IRF_3 is restored to IRF_3SurfaceRestoringValue"
+				/>
+			</var_array>
+			<var_array name="IRFTracersSurfaceRestoringValue" type="real" dimensions="nCells Time" packages="IRFTracersSurfaceRestoringPKG">
+				<var name="IRF_1SurfaceRestoringValue" array_group="IRFSRVGRP" units="IRF unit m^{3}"
+			        description="Tracer is restored toward this field at a rate controlled by IRF_1PistonVelocity."
+				/>
+				<var name="IRF_2SurfaceRestoringValue" array_group="IRFSRVGRP" units="IRF unit m^{3}"
+			        description="Tracer is restored toward this field at a rate controlled by IRF_2PistonVelocity."
+				/>
+				<var name="IRF_3SurfaceRestoringValue" array_group="IRFSRVGRP" units="IRF unit m^{3}"
+			        description="Tracer is restored toward this field at a rate controlled by IRF_3PistonVelocity."
+				/>
+			</var_array>
+		</var_struct>
+		<var_struct name="tracersInteriorRestoringFields" time_levs="1">
+			<var_array name="IRFTracersInteriorRestoringRate" type="real" dimensions="nVertLevels nCells Time" packages="IRFTracersInteriorRestoringPKG">
+				<var name="IRF_1InteriorRestoringRate" array_group="IRFIRRGRP" units="{s}^-1"
+			        description="A non-negative field controlling the rate at which IRF_1 is restored to IRF_1InteriorRestoringValue"
+				/>
+				<var name="IRF_2InteriorRestoringRate" array_group="IRFIRRGRP" units="{s}^-1"
+			        description="A non-negative field controlling the rate at which IRF_2 is restored to IRF_2InteriorRestoringValue"
+				/>
+				<var name="IRF_3InteriorRestoringRate" array_group="IRFIRRGRP" units="{s}^-1"
+			        description="A non-negative field controlling the rate at which IRF_3 is restored to IRF_3InteriorRestoringValue"
+				/>
+			</var_array>
+			<var_array name="IRFTracersInteriorRestoringValue" type="real" dimensions="nVertLevels nCells Time" packages="IRFTracersInteriorRestoringPKG">
+				<var name="IRF_1InteriorRestoringValue" array_group="IRFIRVGRP" units="IRF unit m^{3}"
+			        description="Tracer is restored toward this field at a rate controlled by IRF_1InteriorRestoringRate."
+				/>
+				<var name="IRF_2InteriorRestoringValue" array_group="IRFIRVGRP" units="IRF unit m^{3}"
+			        description="Tracer is restored toward this field at a rate controlled by IRF_2InteriorRestoringRate."
+				/>
+				<var name="IRF_3InteriorRestoringValue" array_group="IRFIRVGRP" units="IRF unit m^{3}"
+			        description="Tracer is restored toward this field at a rate controlled by IRF_3InteriorRestoringRate."
+				/>
+			</var_array>
+		</var_struct>
+		<var_struct name="tracersExponentialDecayFields" time_levs="1">
+			<var_array name="IRFTracersExponentialDecayRate" type="real" dimensions="Time" packages="IRFTracersExponentialDecayPKG">
+				<var name="IRF_1ExponentialDecayRate" array_group="IRFGRP" units="s^{-1}"
+			        description="A non-negative field controlling the exponential decay of IRF_1"
+				/>
+				<var name="IRF_2ExponentialDecayRate" array_group="IRFGRP" units="s^{-1}"
+			        description="A non-negative field controlling the exponential decay of IRF_2"
+				/>
+				<var name="IRF_3ExponentialDecayRate" array_group="IRFGRP" units="s"
+			        description="A non-negative field controlling the exponential decay of IRF_3"
+				/>
+			</var_array>
+		</var_struct>
+		<var_struct name="tracersIdealAgeFields" time_levs="1">
+			<var_array name="IRFTracersIdealAgeMask" type="real" dimensions="nCells Time" packages="IRFTracersIdealAgePKG">
+				<var name="IRF_1IdealAgeMask" array_group="IRFGRP" units="unitless"
+			        description="In top layer, IRF_1 is reset to IRF_1 * IRF_1IdealAgeMask, valid values of IRF_1IdealAgeMask or 0 and 1"
+				/>
+				<var name="IRF_2IdealAgeMask" array_group="IRFGRP" units="unitless"
+			        description="In top layer, IRF_2 is reset to IRF_2 * IRF_2IdealAgeMask, valid values of IRF_2IdealAgeMask or 0 and 1"
+				/>
+				<var name="IRF_3IdealAgeMask" array_group="IRFGRP" units="unitless"
+			        description="In top layer, IRF_3 is reset to IRF_3 * IRF_3IdealAgeMask, valid values of IRF_3IdealAgeMask or 0 and 1"
+				/>
+			</var_array>
+		</var_struct>
+		<var_struct name="tracersTTDFields" time_levs="1">
+			<var_array name="IRFTracersTTDMask" type="real" dimensions="nCells Time" packages="IRFTracersTTDPKG">
+				<var name="IRF_1TTDMask" array_group="IRFGRP" units="unitless"
+			        description="In top layer, IRF_1 is reset to TTDMask, valid values of IRF_1TTDMask or 0 and 1"
+				/>
+				<var name="IRF_2TTDMask" array_group="IRFGRP" units="unitless"
+			        description="In top layer, IRF_2 is reset to TTDMask, valid values of IRF_2TTDMask or 0 and 1"
+				/>
+				<var name="IRF_3TTDMask" array_group="IRFGRP" units="unitless"
+			        description="In top layer, IRF_3 is reset to IRF_3TTDMask, valid values of IRF_3TTDMask or 0 and 1"
+				/>
+			</var_array>
+		</var_struct>
+	</var_struct>
+
+	<var_struct name="diagnostics" time_levs="1">
+		<var_array name="IRFTracerNonLocalTendency" type="real" dimensions="nVertLevels nCells Time" packages="tracerBudget">
+		      <var name="IRF_1NonLocalTendency" array_group="IRFTracerNLTendGroup" units="IRF unit per second" name_in_code="IRF_1NonLocalTendency"
+			     description="IRF_1 tendency due to kpp non-local flux"
+		      />
+		      <var name="IRF_2NonLocalTendency" array_group="IRFTracerNLTendGroup" units="IRF unit per second" name_in_code="IRF_2NonLocalTendency"
+			     description="IRF_2 tendency due to kpp non-local flux"
+		      />
+		      <var name="IRF_3NonLocalTendency" array_group="IRFTracerNLTendGroup" units="IRF unit per second" name_in_code="IRF_3NonLocalTendency"
+			     description="IRF_3 tendency due to kpp non-local flux"
+		      />
+		</var_array>
+		<var_array name="IRFTracerHorizontalAdvectionTendency" type="real" dimensions="nVertLevels nCells Time" packages="tracerBudget">
+		      <var name="IRF_1HorizontalAdvectionTendency" array_group="IRFTracerHorAdvTendGroup" units="IRF unit per second" name_in_code="IRF_1HorizontaldvectionTendency"
+			     description="IRF_1 tendency due to horizontal advection"
+		      />
+		      <var name="IRF_2HorizontalAdvectionTendency" array_group="IRFTracerHorAdvTendGroup" units="IRF unit per second" name_in_code="IRF_2HorizontalAdvectionTendency"
+			     description="IRF_2 tendency due to horizontal advection"
+		      />
+		      <var name="IRF_3HorizontalAdvectionTendency" array_group="IRFTracerHorAdvTendGroup" units="IRF unit per second" name_in_code="IRF_3HorizontalAdvectionTendency"
+			     description="IRF_3 tendency due to horizontal advection"
+		      />
+		</var_array>
+		<var_array name="IRFTracerVerticalAdvectionTendency" type="real" dimensions="nVertLevels nCells Time" packages="tracerBudget">
+		      <var name="IRF_1VerticalAdvectionTendency" array_group="IRFTracerVertAdvTendGroup" units="IRF unit per second" name_in_code="IRF_1VerticalAdvectionTendency"
+			     description="IRF_1 tendency due to vertical advection"
+		      />
+		      <var name="IRF_2VerticalAdvectionTendency" array_group="IRFTracerVertAdvTendGroup" units="IRF unit per second" name_in_code="IRF_2VerticalAdvectionTendency"
+			     description="IRF_2 tendency due to vertical advection"
+		      />
+		      <var name="IRF_3VerticalAdvectionTendency" array_group="IRFTracerVertAdvTendGroup" units="IRF unit per second" name_in_code="IRF_3VerticalAdvectionTendency"
+			     description="IRF_3 tendency due to vertical advection"
+		      />
+		</var_array>
+		<var_array name="IRFTracerVertMixTendency" type="real" dimensions="nVertLevels nCells Time" packages="tracerBudget">
+		      <var name="IRF_1VertMixTendency" array_group="IRFTracerVertMixTendGroup" units="IRF unit per second" name_in_code="IRF_1VertMixTendency"
+			     description="IRF_1 tendency due to vertical mixing"
+		      />
+		      <var name="IRF_2VertMixTendency" array_group="IRFTracerVertMixTendGroup" units="IRF unit per second" name_in_code="IRF_2VertMixTendency"
+			     description="IRF_2 tendency due to vertical mixing"
+		      />
+		      <var name="IRF_3VertMixTendency" array_group="IRFTracerVertMixTendGroup" units="IRF unit per second" name_in_code="IRF_3VertMixTendency"
+			     description="IRF_3 tendency due to vertical mixing"
+		      />
+		</var_array>
+	</var_struct>
