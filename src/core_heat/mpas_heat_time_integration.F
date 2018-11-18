@@ -7,7 +7,6 @@
 !
 module heat_time_integration
 
-   use mpas_vector_reconstruction
    use mpas_derived_types
    use mpas_pool_routines
    use mpas_constants
@@ -83,8 +82,6 @@ module heat_time_integration
       type (mpas_pool_type), pointer :: statePool
       type (mpas_pool_type), pointer :: meshPool
       type (mpas_pool_type), pointer :: tendPool
-      type (mpas_pool_type), pointer :: provisStatePool
-      type (mpas_pool_type), pointer :: prevProvisPool, nextProvisPool
 
       integer :: rk_step
 
@@ -109,12 +106,6 @@ module heat_time_integration
         call mpas_pool_get_subpool(block % structs, 'mesh', meshPool)
         call mpas_pool_get_subpool(block % structs, 'state', statePool)
 
-        allocate(provisStatePool)
-        call mpas_pool_create_pool(provisStatePool)
-        call mpas_pool_clone_pool(statePool, provisStatePool, 1)
-
-        call mpas_pool_add_subpool(block % structs, 'provis_state', provisStatePool)
-
         call mpas_pool_get_dimension(meshPool, 'nCells', nCells)
         call mpas_pool_get_dimension(meshPool, 'nVertLevels', nVertLevels)
 
@@ -138,49 +129,15 @@ module heat_time_integration
         block => block % next
      end do
 
-     block => domain % blocklist
-     do while(associated(block))
-        if (associated(block % prev)) then
-           call mpas_pool_get_subpool(block % prev % structs, 'provis_state', prevProvisPool)
-        else
-           nullify(prevProvisPool)
-        end if
-
-        if (associated(block % next)) then
-           call mpas_pool_get_subpool(block % next % structs, 'provis_state', nextProvisPool)
-        else
-           nullify(nextProvisPool)
-        end if
-
-        call mpas_pool_get_subpool(block % structs, 'provis_state', provisStatePool)
-
-        if (associated(prevProvisPool) .and. associated(nextProvisPool)) then
-           call mpas_pool_link_pools(provisStatePool, prevProvisPool, nextProvisPool)
-        else if (associated(prevProvisPool)) then
-           call mpas_pool_link_pools(provisStatePool, prevProvisPool)
-        else if (associated(nextProvisPool)) then
-           call mpas_pool_link_pools(provisStatePool, nextPool=nextProvisPool)
-        else
-           call mpas_pool_link_pools(provisStatePool)
-        end if
-
-        call mpas_pool_link_parinfo(block, provisStatePool)
-
-        block => block % next
-     end do
-
 
 ! --- compute tendencies
-
        block => domain % blocklist
        do while (associated(block))
           call mpas_pool_get_subpool(block % structs, 'tend', tendPool)
-          call mpas_pool_get_subpool(block % structs, 'provis_state', provisStatePool)
           call mpas_pool_get_subpool(block % structs, 'mesh', meshPool)
 
-          call heat_compute_tend(tendPool, provisStatePool, meshPool, 1)
-          call heat_compute_tracer_tend(tendPool, provisStatePool, meshPool, 1)
-          call heat_enforce_boundary_edge(tendPool, meshPool)
+          call heat_compute_tracer_tend(tendPool, statePool, meshPool, 1)
+
           block => block % next
        end do
 
@@ -196,20 +153,10 @@ module heat_time_integration
           call mpas_pool_get_dimension(meshPool, 'nCells', nCells)
           call mpas_pool_get_dimension(meshPool, 'nVertLevels', nVertLevels)
 
-          call mpas_pool_get_array(statePool, 'u', uOld, 1)
-          call mpas_pool_get_array(statePool, 'h', hOld, 1)
           call mpas_pool_get_array(statePool, 'tracers', tracersOld, 1)
-
-          call mpas_pool_get_array(statePool, 'u', uNew, 2)
-          call mpas_pool_get_array(statePool, 'h', hNew, 2)
           call mpas_pool_get_array(statePool, 'tracers', tracersNew, 2)
-
-          call mpas_pool_get_array(tendPool, 'u', uTend)
-          call mpas_pool_get_array(tendPool, 'h', hTend)
           call mpas_pool_get_array(tendPool, 'tracers', tracersTend)
 
-!del          uNew(:,:) = uNew(:,:) + rk_weights(rk_step) * uTend(:,:) 
-!del          hNew(:,:) = hNew(:,:) + rk_weights(rk_step) * hTend(:,:) 
           do iCell = 1, nCells
              do k = 1, nVertLevels
                 tracersNew(:,k,iCell) = tracersNew(:,k,iCell) + dt * tracersTend(:,k,iCell)
@@ -217,17 +164,6 @@ module heat_time_integration
           end do
           block => block % next
        end do
-
-      block => domain % blocklist
-      do while(associated(block))
-         call mpas_pool_get_subpool(block % structs, 'provis_state', provisStatePool)
-
-         call mpas_pool_destroy_pool(provisStatePool)
-
-         call mpas_pool_remove_subpool(block % structs, 'provis_state')
-         block => block % next
-      end do
-
 
 
    end subroutine heat_forward_Euler
