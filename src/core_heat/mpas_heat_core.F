@@ -272,7 +272,6 @@ module heat_core
       use mpas_pool_routines
       use heat_time_integration
       use mpas_timer
-      use heat_global_diagnostics
    
       implicit none
    
@@ -289,41 +288,6 @@ module heat_core
       call mpas_pool_get_config(domain % configs, 'config_stats_interval', config_stats_interval)
    
       call heat_timestep(domain, dt, timeStamp)
-   
-      if(config_stats_interval .gt. 0) then
-          if(mod(itimestep, config_stats_interval) == 0) then
-              block_ptr => domain % blocklist
-              if(associated(block_ptr % next)) then
-                  call mpas_log_write('computeGlobalDiagnostics assumes '//&
-                             'that there is only one block per processor.', MPAS_LOG_ERR)
-              end if
-
-              call mpas_pool_get_subpool(block_ptr % structs, 'state', statePool)
-              call mpas_pool_get_subpool(block_ptr % structs, 'mesh', meshPool)
-   
-              call mpas_timer_start("global_diagnostics")
-              call heat_compute_global_diagnostics(domain % dminfo, &
-                       statePool, meshPool, itimestep, dt, 2)
-              call mpas_timer_stop("global_diagnostics")
-          end if
-      end if
-
-      !TODO: replace the above code block with this if we desire to convert config_stats_interval to use alarms
-      !if (mpas_is_alarm_ringing(clock, statsAlarmID, ierr=ierr)) then
-      !   call mpas_reset_clock_alarm(clock, statsAlarmID, ierr=ierr)
-
-      !   block_ptr => domain % blocklist
-      !   if(associated(block_ptr % next)) then
-      !      write(0,*) 'Error: computeGlobalDiagnostics assumes ',&
-      !                 'that there is only one block per processor.'
-      !   end if
-
-      !   call mpas_timer_start("global_diagnostics")
-      !   call heat_compute_global_diagnostics(domain % dminfo, &
-      !            block_ptr % state % time_levs(2) % state, block_ptr % mesh, &
-      !            timeStamp, dt)
-      !   call mpas_timer_stop("global_diagnostics")
-      !end if
    
    end subroutine mpas_timestep
    

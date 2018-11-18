@@ -1,9 +1,10 @@
 .SUFFIXES: .F .o
 
 OBJS = 	mpas_heat_core.o \
+        mpas_heat_test_cases.o \
         mpas_heat_time_integration.o \
 		mpas_heat_core_interface.o \
-        mpas_heat_constants.o
+		mpas_heat_constants.o
 
 all: core_heat
 
@@ -27,17 +28,9 @@ post_build:
 
 mpas_heat_core_interface.o: mpas_heat_core.o
 
-mpas_heat_constants.o:
-
-mpas_heat_test_cases.o: mpas_heat_constants.o
-
-mpas_heat_advection.o: mpas_heat_constants.o
+mpas_heat_core.o: mpas_heat_time_integration.o mpas_heat_test_cases.o
 
 mpas_heat_time_integration.o: mpas_heat_constants.o
-
-mpas_heat_global_diagnostics.o: mpas_heat_constants.o
-
-mpas_heat_core.o: mpas_heat_global_diagnostics.o mpas_heat_test_cases.o mpas_heat_time_integration.o mpas_heat_advection.o mpas_heat_constants.o
 
 clean:
 	$(RM) *.o *.mod *.f90 libdycore.a
