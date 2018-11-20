@@ -169,26 +169,7 @@ module heat_core
 
       type (mpas_pool_type), pointer :: statePool
 
-      real (kind=RKIND), dimension(:,:), pointer :: u, uReconstructX, uReconstructY, uReconstructZ, uReconstructZonal, uReconstructMeridional
-   
       call mpas_pool_get_subpool(block % structs, 'state', statePool)
-
-
-      call mpas_pool_get_array(statePool, 'u', u, 1)
-      call mpas_pool_get_array(statePool, 'uReconstructX', uReconstructX, 1)
-      call mpas_pool_get_array(statePool, 'uReconstructY', uReconstructY, 1)
-      call mpas_pool_get_array(statePool, 'uReconstructZ', uReconstructZ, 1)
-      call mpas_pool_get_array(statePool, 'uReconstructZonal', uReconstructZonal, 1)
-      call mpas_pool_get_array(statePool, 'uReconstructMeridional', uReconstructMeridional, 1)
-
-      call heat_compute_solve_diagnostics(dt, statePool, meshPool, 1)
-      call compute_mesh_scaling(meshPool) 
-
-      call mpas_rbf_interp_initialize(meshPool)
-      call mpas_init_reconstruct(meshPool)
-      call mpas_reconstruct(meshPool, u,                  &
-                       uReconstructX, uReconstructY, uReconstructZ, &
-                       uReconstructZonal, uReconstructMeridional)
 
    
    end subroutine mpas_init_block

@@ -98,6 +98,7 @@ module heat_time_integration
 ! --- compute tendencies
        block => domain % blocklist
        do while (associated(block))
+          call mpas_pool_get_subpool(block % structs, 'state', statePool)
           call mpas_pool_get_subpool(block % structs, 'tend', tendPool)
           call mpas_pool_get_subpool(block % structs, 'mesh', meshPool)
 

@@ -12,7 +12,7 @@
 		<dim name="TWENTYONE"          definition="21"/>
 		<dim name="vertexDegree"/>
 		<dim name="nVertLevels"/>
-		<dim name="nTracers"/>
+		<dim name="nTracers" definition="3"/>
 	</dims>
 	<nml_record name="heat_model" in_defaults="true">
 		<nml_option name="config_test_case"                  type="integer"       default_value="5"/>
