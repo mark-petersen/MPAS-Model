@@ -16,7 +16,7 @@
 	</dims>
 	<nml_record name="heat_model" in_defaults="true">
 		<nml_option name="config_test_case"                  type="integer"       default_value="5"/>
-		<nml_option name="config_time_integration"           type="character"     default_value="RK4"/>
+		<nml_option name="config_time_integration"           type="character"     default_value="forward_Euler"/>
 		<nml_option name="config_dt"                         type="real"          default_value="172.8"/>
 		<nml_option name="config_calendar_type"              type="character"     default_value="gregorian_noleap"/>
 		<nml_option name="config_start_time"                 type="character"     default_value="0000-01-01_00:00:00"/>

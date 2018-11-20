@@ -31,6 +31,9 @@ module mpas_subdriver
 #ifdef CORE_SW
    use sw_core_interface
 #endif
+#ifdef CORE_HEAT
+   use heat_core_interface
+#endif
 #ifdef CORE_TEST
    use test_core_interface
 #endif
@@ -180,6 +183,10 @@ module mpas_subdriver
 #ifdef CORE_SW
       call sw_setup_core(corelist)
       call sw_setup_domain(domain_ptr)
+#endif
+#ifdef CORE_HEAT
+      call heat_setup_core(corelist)
+      call heat_setup_domain(domain_ptr)
 #endif
 #ifdef CORE_TEST
       call test_setup_core(corelist)
