@@ -1,5 +1,5 @@
 .. role:: math(raw)
-   :format: html latex
+
 ..
 
 * This is a bulleted list.
