@@ -1,5 +1,4 @@
-.. role:: raw-math(raw)
-    :format: latex html
+
 
 * This is a bulleted list.
 * It has two items, the second
@@ -116,4 +115,4 @@ This is a heading
 
 This is an equation.:math: `A=r^2`.
 So is this ..math::
-a^2 + b^2 = c^2
+    a^2 + b^2 = c^2
