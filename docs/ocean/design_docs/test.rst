@@ -111,4 +111,6 @@ Section headers (ref) are created by underlining (and optionally overlining) the
 This is a heading
 =================
 
-This is an equation.:math:'A=r^2'
+This is an equation.:math: `A=r^2`.
+So is this ..math::
+a^2 + b^2 = c^2
