@@ -1,4 +1,6 @@
-
+.. role:: math(raw)
+   :format: html latex
+..
 
 * This is a bulleted list.
 * It has two items, the second
