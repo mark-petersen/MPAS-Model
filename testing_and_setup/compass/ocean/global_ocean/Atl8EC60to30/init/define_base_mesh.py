@@ -24,32 +24,27 @@ def cellWidthVsLatLon():
         lat,
         cellWidthEC60to30,
         cellWidthQU8,
-        5.0, # transition latitude
-        5.0) # transition width
+        5.0,  # southern transition latitude
+        5.0)  # transition width
 
     cellWidthAtlantic = mdt.mergeCellWidthVsLat(
         lat,
         cellWidthAtlanticSouth,
         cellWidthEC60to30,
-        70.0,
-        5.0)
+        70.0,  # nourthern transition latitude
+        5.0)  # transition width
 
-    cellWidth= mdt.AtlanticPacificGrid(
+    cellWidth = mdt.AtlanticPacificGrid(
         lat,
         lon,
         cellWidthAtlantic,
         cellWidthEC60to30)
 
-    print 'cellWidth',cellWidth 
-    #print 'cellWidthEC60to30', cellWidthEC60to30
-    #print 'cellWidthQU8', cellWidthQU8
-    #print 'cellWidthAtlanticSouth', cellWidthAtlanticSouth
-    #print 'cellWidthAtlantic', cellWidthAtlantic
-    #print 'cellWidthVsLat', cellWidthVsLat
-    import matplotlib.pyplot as plt
-    plt.imshow(cellWidth)
-    plt.gca().invert_yaxis()
-    plt.colorbar()
-    plt.savefig('cellWidth.png')
+    # plot:
+    #import matplotlib.pyplot as plt
+    # plt.imshow(cellWidth)
+    # plt.gca().invert_yaxis()
+    # plt.colorbar()
+    # plt.savefig('cellWidth.png')
 
     return cellWidth, lon, lat

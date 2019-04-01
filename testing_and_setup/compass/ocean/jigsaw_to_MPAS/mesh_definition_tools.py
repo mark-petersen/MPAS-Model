@@ -218,11 +218,7 @@ def AtlanticPacificGrid(
    
     # set to Pacific mask as default
     cellWidthOut = np.outer(cellWidthPacific, np.ones([1, lon.size]))
-    print cellWidthOut.shape
-    print 'lon.size',    lon.size
-    print 'lat.size',    lat.size
-    print 'cellWidthAtlantic',cellWidthAtlantic.size
-    print 'cellWidthPacific',cellWidthPacific.size
+
     for i in range(lon.size):
         for j in range(lat.size):
             if lat[j] > 50.0:
