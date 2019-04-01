@@ -19,15 +19,13 @@ def cellWidthVsLatLon():
 
     cellWidthEC60to30 = mdt.EC_CellWidthVsLat(lat)
     cellWidthQU8 = 8 * np.ones(lat.size)
-    latTransition = -30
-    latWidthTransition = 5
 
     cellWidthAtlanticSouth = mdt.mergeCellWidthVsLat(
         lat,
         cellWidthEC60to30,
         cellWidthQU8,
-        0.0,
-        5.0)
+        5.0, # transition latitude
+        5.0) # transition width
 
     cellWidthAtlantic = mdt.mergeCellWidthVsLat(
         lat,

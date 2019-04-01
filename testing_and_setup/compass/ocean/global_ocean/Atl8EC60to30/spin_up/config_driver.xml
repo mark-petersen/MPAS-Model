@@ -11,11 +11,17 @@
 	<case name="spin_up4">
 		<step executable="./run.py" quiet="true" pre_message=" * Running spin_up4" post_message=" - Complete"/>
 	</case>
-	<case name="forward">
-		<step executable="./run.py" quiet="true" pre_message=" * Running forward" post_message=" - Complete"/>
+	<case name="spin_up5">
+		<step executable="./run.py" quiet="true" pre_message=" * Running spin_up5" post_message=" - Complete"/>
+	</case>
+	<case name="spin_up6">
+		<step executable="./run.py" quiet="true" pre_message=" * Running spin_up6" post_message=" - Complete"/>
+	</case>
+	<case name="test_final_settings">
+		<step executable="./run.py" quiet="true" pre_message=" * Running test_final_settings" post_message=" - Complete"/>
 	</case>
 	<validation>
-		<compare_fields file1="forward/output.nc">
+		<compare_fields file1="test_final_settings/output.nc">
 			<template file="prognostic_comparison.xml" path_base="script_core_dir" path="templates/validations"/>
 		</compare_fields>
 	</validation>
