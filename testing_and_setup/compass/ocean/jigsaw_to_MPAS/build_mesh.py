@@ -23,25 +23,25 @@ def removeFile(fileName):
         pass
 
 
-#print 'Step 1. Build cellWidth array as function of latitude and longitude'
-#cellWidth, lon, lat = define_base_mesh.cellWidthVsLatLon()
-#sio.savemat(
-#    'cellWidthVsLatLon.mat', {
-#        'cellWidth': cellWidth, 'lon': lon, 'lat': lat})
-#
-#print 'Step 2. Build mesh using JIGSAW'
-#args = ["octave", "--silent", "--eval",
-#        "jigsaw_driver"]
-#print "running", ' '.join(args)
-#subprocess.check_call(args, env=os.environ.copy())
-#
-#print 'Step 3. Convert triangles from jigsaw format to netcdf'
-#args = ['./triangle_jigsaw_to_netcdf.py',
-#        '-s',
-#        '-m', 'mesh-MESH.msh',
-#        '-o', 'mesh_triangles.nc']
-#print "running", ' '.join(args)
-#subprocess.check_call(args, env=os.environ.copy())
+print 'Step 1. Build cellWidth array as function of latitude and longitude'
+cellWidth, lon, lat = define_base_mesh.cellWidthVsLatLon()
+sio.savemat(
+    'cellWidthVsLatLon.mat', {
+        'cellWidth': cellWidth, 'lon': lon, 'lat': lat})
+
+print 'Step 2. Build mesh using JIGSAW'
+args = ["octave", "--silent", "--eval",
+        "jigsaw_driver"]
+print "running", ' '.join(args)
+subprocess.check_call(args, env=os.environ.copy())
+
+print 'Step 3. Convert triangles from jigsaw format to netcdf'
+args = ['./triangle_jigsaw_to_netcdf.py',
+        '-s',
+        '-m', 'mesh-MESH.msh',
+        '-o', 'mesh_triangles.nc']
+print "running", ' '.join(args)
+subprocess.check_call(args, env=os.environ.copy())
 
 print 'Step 4. Convert from triangles to MPAS mesh'
 args = ['./MpasMeshConverter.x',
