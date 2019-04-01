@@ -192,66 +192,60 @@ def RRS_CellWidthVsLat(lat, cellWidthEq, cellWidthPole):
     cellWidthOut = cellWidthPole / np.power(densityRRS, 0.25)
     return cellWidthOut
 
-# '''
-# AtlanticPacificGrid: combine two cell width distributions using a tanh function.
-# This is inted as part of the workflow to make an MPAS global mesh.
-#
-# Syntax: cellWidthOut = AtlanticPacificGrid(lat, lon, cellWidthInAtlantic, cellWidthInPacific)
-#
-# Inputs:
-#   lon - vector of length m, with entries between -180, 180, degrees
-#   lat - vector of length n, with entries between -90, 90, degrees
-#   cellWidthInAtlantic - vector of length n, cell width in Atlantic as a function of lon, km
-#   cellWidthInPacific - vector of length n, cell width in Pacific as a function of lon, km
-#
-# Optional inputs:
-#
-# Outputs:
-#   cellWidthOut - m by n array, grid cell width on globe, km
-#
-# Example:
-#   RRS18to6 = RRS_CellWidthVsLat(lat,18,6)
-#
-# See also:
-#
-# Author: Mark Petersen
-# Los Alamos National Laboratory
-# March 2018 # Last revision: 3/27/2018
-# '''
-#
-#cellWidthOut = zeros(length(lon),length(lat))
-# for i in range(length(lon)
-#  for j in range(length(lat)
-#    set to Pacific mask as default
-#    cellWidthOut(i,j) = cellWidthInPacific[j]
-#    test if in Atlantic Basin:
-#    if lat[j]>65.0
-#      if and(lon[i]>-150.0, lon[i]<170.0)
-#        cellWidthOut(i,j) = cellWidthInAtlantic[j]
-#
-#    else:if lat[j]>20.0
-#      if and(lon[i]>-100.0, lon[i]<35.0)
-#        cellWidthOut(i,j) = cellWidthInAtlantic[j]
-#
-#    else:if lat[j]>0.0
-#      if and(lon[i]>-2*lat[j]-60.0, lon[i]<35.0)
-#        cellWidthOut(i,j) = cellWidthInAtlantic[j]
-#
-#    else:
-#      if and(lon[i]>-60.0, lon[i]<20.0)
-#       cellWidthOut(i,j) = cellWidthInAtlantic[j]
-#
-#
-#
-#
-# return cellWidthOut
-#
+
+def AtlanticPacificGrid(
+        lat,
+        lon,
+        cellWidthAtlantic,
+        cellWidthPacific):
+    '''
+    AtlanticPacificGrid: combine two cell width distributions using a tanh function.
+    This is inted as part of the workflow to make an MPAS global mesh.
+   
+    Syntax: cellWidthOut = AtlanticPacificGrid(lat, lon, cellWidthAtlantic, cellWidthPacific)
+   
+    Inputs:
+      lon - vector of length m, with entries between -180, 180, degrees
+      lat - vector of length n, with entries between -90, 90, degrees
+      cellWidthAtlantic - vector of length n, cell width in Atlantic as a function of lon, km
+      cellWidthPacific - vector of length n, cell width in Pacific as a function of lon, km
+   
+    Optional inputs:
+   
+    Outputs:
+      cellWidthOut - m by n array, grid cell width on globe, km
+    '''
+   
+    # set to Pacific mask as default
+    cellWidthOut = np.outer(cellWidthPacific, np.ones([1, lon.size]))
+    print cellWidthOut.shape
+    print 'lon.size',    lon.size
+    print 'lat.size',    lat.size
+    print 'cellWidthAtlantic',cellWidthAtlantic.size
+    print 'cellWidthPacific',cellWidthPacific.size
+    for i in range(lon.size):
+        for j in range(lat.size):
+            if lat[j] > 50.0:
+                if lon[i] > -78.0 and lon[i] < 30.0:
+                    cellWidthOut[j,i] = cellWidthAtlantic[j]
+            elif lat[j] > 20.0:
+                if lon[i] > -100.0 and lon[i] < 35.0:
+                    cellWidthOut[j,i] = cellWidthAtlantic[j]
+            elif lat[j] > 0.0:
+                if lon[i] > -1.8*lat[j]-64.0 and lon[i] < 35.0:
+                    cellWidthOut[j,i] = cellWidthAtlantic[j]
+            else:
+                if lon[i] > -64.0 and lon[i] < 20.0:
+                    cellWidthOut[j,i] = cellWidthAtlantic[j]
+    return cellWidthOut
+
+
 # def  circleOnGrid(lon, lat, centerLon, centerLat, radius, tanhWidth)
 # '''
 # circleOnGrid: combine two cell width distributions using a tanh function.
 # This is inted as part of the workflow to make an MPAS global mesh.
 #
-# Syntax: cellWidthOut = circleOnGrid(lat, lon, cellWidthInAtlantic, cellWidthInPacific)
+# Syntax: cellWidthOut = circleOnGrid(lat, lon, cellWidthAtlantic, cellWidthPacific)
 #
 # Inputs:
 #   lon - vector of length m, with entries between -180, 180, degrees
@@ -276,7 +270,7 @@ def RRS_CellWidthVsLat(lat, cellWidthEq, cellWidthPole):
 # for i in range(length(lon)
 #  for j in range(length(lat)
 #    [dist d2km]=lldistkm([centerLat, centerLon], [lat[j], lon[i]])
-#    cellWidthOut(i,j) = 0.5*(-tanh((dist - radius)/tanhWidth) + 1.0)
+#    cellWidthOut[i,j] = 0.5*(-tanh((dist - radius)/tanhWidth) + 1.0)
 #
 #
 #
