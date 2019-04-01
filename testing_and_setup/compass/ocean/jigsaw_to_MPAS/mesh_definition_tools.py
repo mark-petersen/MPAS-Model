@@ -228,10 +228,11 @@ def AtlanticPacificGrid(
                 if lon[i] > -100.0 and lon[i] < 35.0:
                     cellWidthOut[j,i] = cellWidthAtlantic[j]
             elif lat[j] > 0.0:
-                if lon[i] > -1.8*lat[j]-64.0 and lon[i] < 35.0:
+                # Diagonal line cuts through Panama at (84W, 10N) to (100W, 20N)
+                if lon[i] > -1.6*lat[j]-68.0 and lon[i] < 35.0:
                     cellWidthOut[j,i] = cellWidthAtlantic[j]
             else:
-                if lon[i] > -64.0 and lon[i] < 20.0:
+                if lon[i] > -68.0 and lon[i] < 20.0:
                     cellWidthOut[j,i] = cellWidthAtlantic[j]
     return cellWidthOut
 
