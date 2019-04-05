@@ -13,6 +13,7 @@ import mesh_definition_tools as mdt
 def cellWidthVsLatLon():
 
     ddeg = 0.1
+    ddeg = 1.0
 
     lat = np.arange(-90, 90.01, ddeg)
     lon = np.arange(-180, 180.01, ddeg)
@@ -34,17 +35,23 @@ def cellWidthVsLatLon():
         70.0,  # nourthern transition latitude
         5.0)  # transition width
 
-    cellWidth = mdt.AtlanticPacificGrid(
+    cellWidthStep = mdt.AtlanticPacificGrid(
         lat,
         lon,
         cellWidthAtlantic,
         cellWidthEC60to30)
 
+    cellWidth =  mdt.smoothInLongitude(
+        lat,
+        lon,
+        cellWidthStep,
+        10)
+
     # plot:
-    #import matplotlib.pyplot as plt
-    # plt.imshow(cellWidth)
-    # plt.gca().invert_yaxis()
-    # plt.colorbar()
-    # plt.savefig('cellWidth.png')
+    import matplotlib.pyplot as plt
+    plt.imshow(cellWidth)
+    plt.gca().invert_yaxis()
+    plt.colorbar()
+    plt.savefig('cellWidth.png')
 
     return cellWidth, lon, lat

@@ -41,7 +41,6 @@ def mergeCellWidthVsLat(
         latWidthTransition):
     '''
     mergeCellWidthVsLat: combine two cell width distributions using a tanh function.
-    This is inted as part of the workflow to make an MPAS global mesh.
 
     Syntax: cellWidthOut = mergeCellWidthVsLat(lat, cellWidthInSouth, cellWidthInNorth, latTransition, latWidthTransition)
 
@@ -86,7 +85,6 @@ def mergeCellWidthVsLat(
 def EC_CellWidthVsLat(lat):
     '''
     EC_CellWidthVsLat - Create Eddy Closure spacing as a function of lat.
-    This is inted as part of the workflow to make an MPAS global mesh.
 
     Syntax: cellWidthOut = EC_CellWidthVsLat(lat, cellWidthEq, cellWidthMidLat, cellWidthPole,
                                              latPosEq, latPosPole, latTransition,
@@ -163,7 +161,6 @@ def EC_CellWidthVsLat(lat):
 def RRS_CellWidthVsLat(lat, cellWidthEq, cellWidthPole):
     '''
     RRS_CellWidthVsLat - Create Rossby Radius Scaling as a function of lat.
-    This is inted as part of the workflow to make an MPAS global mesh.
 
     Syntax: cellWidthOut = RRS_CellWidthVsLat(lat, cellWidthEq, cellWidthPole)
 
@@ -200,7 +197,6 @@ def AtlanticPacificGrid(
         cellWidthPacific):
     '''
     AtlanticPacificGrid: combine two cell width distributions using a tanh function.
-    This is inted as part of the workflow to make an MPAS global mesh.
    
     Syntax: cellWidthOut = AtlanticPacificGrid(lat, lon, cellWidthAtlantic, cellWidthPacific)
    
@@ -222,7 +218,7 @@ def AtlanticPacificGrid(
     for i in range(lon.size):
         for j in range(lat.size):
             if lat[j] > 50.0:
-                if lon[i] > -78.0 and lon[i] < 30.0:
+                if lon[i] > -73.0 and lon[i] < 30.0:
                     cellWidthOut[j,i] = cellWidthAtlantic[j]
             elif lat[j] > 20.0:
                 if lon[i] > -100.0 and lon[i] < 35.0:
@@ -237,10 +233,45 @@ def AtlanticPacificGrid(
     return cellWidthOut
 
 
+def smoothInLongitude(
+        lat,
+        lon,
+        cellWidthIn,
+        nIterations):
+    '''
+    smoothInLongitude: simple smoother to get rid of step functions in longitude
+   
+    Inputs:
+      lon - vector of length m, with entries between -180, 180, degrees
+      lat - vector of length n, with entries between -90, 90, degrees
+      cellWidthIn - m by n array, grid cell width on globe, km
+      nIterations - number of iterations
+   
+    Optional inputs:
+   
+    Outputs:
+      cellWidthOut - m by n array, grid cell width on globe, km
+    '''
+   
+    cellWidthOut = np.ones(np.shape(cellWidthIn))
+    A = np.ones(np.shape(cellWidthIn))
+    B = np.ones(np.shape(cellWidthIn))
+    A[:,:] = cellWidthIn[:,:]
+    B[:,:] = cellWidthIn[:,:]
+
+    for n in range(nIterations):
+        for j in range(2,lon.size-1):
+            for i in range(2,lat.size-1):
+                B[i,j] = (A[i,j-1] + A[i,j] + A[i,j+1])/3.0
+        A[:,:] = B[:,:]
+
+    cellWidthOut[:,:] = B[:,:]
+    return cellWidthOut
+
+
 # def  circleOnGrid(lon, lat, centerLon, centerLat, radius, tanhWidth)
 # '''
 # circleOnGrid: combine two cell width distributions using a tanh function.
-# This is inted as part of the workflow to make an MPAS global mesh.
 #
 # Syntax: cellWidthOut = circleOnGrid(lat, lon, cellWidthAtlantic, cellWidthPacific)
 #
