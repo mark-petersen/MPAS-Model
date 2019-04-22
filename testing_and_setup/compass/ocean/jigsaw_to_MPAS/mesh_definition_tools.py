@@ -182,10 +182,13 @@ def RRS_CellWidthVsLat(lat, cellWidthEq, cellWidthPole):
 
     degToRad = np.pi / 180.0                 # convert degrees to radians
     # ratio between high and low resolution
-    gamma = (cellWidthPole / cellWidthEq)**4.0
+    gamma = (float(cellWidthPole) / cellWidthEq)**4.0
 
+    print 'gamma',gamma
     densityRRS = (1.0 - gamma) * \
         np.power(np.sin(np.absolute(lat) * degToRad), 4.0) + gamma
+    print 'densityRRS',densityRRS
+    print 'np.power(densityRRS, 0.25)',np.power(densityRRS, 0.25)
     cellWidthOut = cellWidthPole / np.power(densityRRS, 0.25)
     return cellWidthOut
 

@@ -3,7 +3,7 @@
 # Phillip Wolfram, 01/19/2018
 
 import matplotlib.pyplot as plt
-from open_msh import readmsh
+#from open_msh import readmsh
 import numpy as np
 from scipy import interpolate
 import netCDF4 as nc4
@@ -75,7 +75,7 @@ def interpolate_SRTM(lon_pts, lat_pts):
 
 def interpolate_topomsh(lon_pts, lat_pts):
 
-    topo = readmsh('topo.msh')
+    topo = 0.0 #readmsh('topo.msh')
     xpos = topo['COORD1'] * dtor
     ypos = topo['COORD2'] * dtor
     zlev = np.reshape(topo['VALUE'], (len(ypos), len(xpos)))
