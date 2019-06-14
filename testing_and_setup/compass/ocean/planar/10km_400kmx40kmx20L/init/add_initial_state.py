@@ -31,7 +31,7 @@ def read_Registry_surface_gravity_wave():
            SGWGaussianSurfaceElevationDecayScaleParam
     
     # Parse the surfac gravity wave Registry file 
-    Registry_surface_gravity_wave = etree.parse("Registry_surface_gravity_wave.xml")
+    Registry_surface_gravity_wave = etree.parse("Registry_initial_state.xml")
     
     for nml_option in Registry_surface_gravity_wave.xpath('//nml_option'):
         if nml_option.attrib['name'] == 'config_surface_gravity_wave_vert_levels':

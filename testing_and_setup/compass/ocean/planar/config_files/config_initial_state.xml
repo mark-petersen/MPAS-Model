@@ -8,7 +8,7 @@
     <add_link source_path="script_test_dir" source="Registry_initial_state.xml" dest="Registry_initial_state.xml"/>
 
 	<run_script name="run.py">
-		<step executable="add_initial_state.py">
+		<step executable="./add_initial_state.py">
 		</step>
 	</run_script>
 
