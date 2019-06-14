@@ -1,0 +1,38 @@
+	<nml_record name="surface_gravity_wave" mode="init" configuration="surface_gravity_wave">
+		<nml_option name="config_surface_gravity_wave_vert_levels" type="integer" default_value="20" units="unitless"
+			description="Number of vertical levels in surface gravity wave test case. Typical value is 20."
+			possible_values="Any positive integer number greater than 0."
+		/>
+		<nml_option name="config_surface_gravity_wave_use_distances" type="logical" default_value=".false." units="unitless"
+			description="Logical flag that determines if locations of features are defined by distances of fractions. False means fractions."
+			possible_values=".true. or .false."
+		/>
+		<nml_option name="config_surface_gravity_wave_surface_temperature" type="real" default_value="13.1" units="deg C"
+			description="Temperature of the surface."
+			possible_values="Any real number"
+		/>
+		<nml_option name="config_surface_gravity_wave_bottom_temperature" type="real" default_value="13.1" units="deg C"
+			description="Temperature of the bottom."
+			possible_values="Any real number"
+		/>
+		<nml_option name="config_surface_gravity_wave_bottom_depth" type="real" default_value="1000.0" units="m"
+			description="Depth of the bottom of the ocean for the surface gravity wave test case."
+			possible_values="Any positive real number."
+		/>
+		<nml_option name="config_surface_gravity_wave_salinity" type="real" default_value="35.0" units="PSU"
+			description="Salinity of the water in the entire domain."
+			possible_values="Any real number greater than 0."
+		/>
+		<nml_option name="config_surface_gravity_wave_coriolis_parameter" type="real" default_value="-1.2e-4" units="s^{-1}"
+			description="Coriolis parameter for entrie domain."
+			possible_values="Any real number."
+		/>
+		<nml_option name="config_surface_elevation_to_mean_depth_ratio" type="real" default_value="1.0e-2" units="fraction"
+			description="Ratio of the maximum surface elevation to the mean depth."
+			possible_values="Any positive real number (preferably much) smaller than unity."
+		/>
+		<nml_option name="config_Gaussian_surface_elevation_decay_scale" type="real" default_value="5.0e4" units="m"
+			description="Decay scale of the initial Gaussian surface elevation in the meridional direction."
+			possible_values="Any positive real number (preferably smaller than 12.5% of the meridional extent of the domain)."
+		/>
+	</nml_record>

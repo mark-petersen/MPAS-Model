@@ -3,15 +3,12 @@
 
 	<add_link source="../base_mesh/base_mesh.nc" dest="base_mesh.nc"/>
 	<add_link source="../base_mesh/graph.info" dest="graph.info"/>
-    <add_link source_path="mpas_model" source="src/core_ocean" dest="Registry.xml"/>
+    <add_link source_path="mpas_model" source="src/core_ocean/Registry_processed.xml" dest="Registry.xml"/>
+    <add_link source_path="script_test_dir" source="add_initial_state.py" dest="add_initial_state.py"/>
+    <add_link source_path="script_test_dir" source="Registry_initial_state.xml" dest="Registry_initial_state.xml"/>
 
 	<run_script name="run.py">
-		<step executable="planar_hex">
-			<argument flag="--nx">4</argument>
-			<argument flag="--ny">40</argument>
-			<argument flag="--dc">10</argument>
-			<argument flag="--nonperiodic_y"></argument>
-			<argument flag="-o">planar_hex_mesh.nc</argument>
+		<step executable="add_initial_state.py">
 		</step>
 	</run_script>
 
