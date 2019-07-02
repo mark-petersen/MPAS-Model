@@ -1,0 +1,14 @@
+.SUFFIXES: .f90 .o
+
+OBJS = ppr_1d.o
+
+all: $(OBJS)
+
+ppr_1d.o:
+
+clean:
+	$(RM) *.o *.i *.mod
+
+.f90.o:
+	$(RM) $@ $*.mod
+	$(FC) $(CPPFLAGS) $(FFLAGS) -cpp -c $*.f90 $(FCINCLUDES)
