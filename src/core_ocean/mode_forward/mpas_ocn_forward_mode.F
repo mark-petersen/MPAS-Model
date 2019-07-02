@@ -79,6 +79,8 @@ module ocn_forward_mode
    use ocn_sea_ice
    use ocn_time_varying_forcing
 
+   use ocn_vertical_remap
+
    use ocn_constants
 
    implicit none
@@ -191,6 +193,9 @@ module ocn_forward_mode
 
       ! Initialize submodules before initializing blocks.
       call ocn_timestep_init(ierr)
+
+! just a test mrp
+call ocn_test_ppr_1d()
 
       call ocn_thick_hadv_init(err_tmp)
       ierr = ior(ierr, err_tmp)

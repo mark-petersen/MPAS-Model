@@ -43,7 +43,7 @@ if [ ! -d ppr ]; then
 	if [ "${GIT}" != "" ]; then
 		echo " ** Using git to acquire ppr source. ** "
 		PROTOCOL="git ssh"
-		git clone ${PPR_GIT_SSH_ADDRESS} .ppr_all &> /dev/null
+		git clone ${PPR_GIT_HTTP_ADDRESS} .ppr_all &> /dev/null
 		if [ -d .ppr_all ]; then
 			cd .ppr_all
 			git checkout ${PPR_HASH} &> /dev/null
