@@ -110,8 +110,9 @@ contains
       integer, pointer :: nCells, nVertLevels
       integer, dimension(:), pointer :: maxLevelCell
 
-      real (kind=RKIND) :: thicknessSum, remainder, newThickness, thicknessWithRemainder
+      real (kind=RKIND) :: thicknessSum, remainder, newThickness, thicknessWithRemainder, weightSum
       real (kind=RKIND), dimension(:), pointer :: vertCoordMovementWeights
+      real (kind=RKIND), dimension(:), pointer :: bottomDepth
       real (kind=RKIND), dimension(:), allocatable :: &
          SSH_ALE_thickness,      & !> ALE thickness alteration due to SSH (z-star)
          prelim_ALE_Thickness,   & !> ALE thickness at new time
@@ -134,6 +135,7 @@ contains
       call mpas_pool_get_config(ocnConfigs, 'config_min_thickness', config_min_thickness)
 
       call mpas_pool_get_array(meshPool, 'maxLevelCell', maxLevelCell)
+      call mpas_pool_get_array(meshPool, 'bottomDepth', bottomDepth)
       call mpas_pool_get_array(meshPool, 'vertCoordMovementWeights', vertCoordMovementWeights)
 
       call mpas_pool_get_array(verticalMeshPool, 'restingThickness', restingThickness)
@@ -147,20 +149,44 @@ contains
       !
       ! ALE thickness alteration due to SSH (z-star)
       !
+!      !$omp do schedule(runtime)
+!      do iCell = 1, nCells
+!         kMax = maxLevelCell(iCell)
+!
+!         thicknessSum = 1e-14_RKIND
+!         do k = 1, kMax
+!            SSH_ALE_Thickness(k) = SSH(iCell) * vertCoordMovementWeights(k) * restingThickness(k, iCell)
+!            thicknessSum = thicknessSum + vertCoordMovementWeights(k) * restingThickness(k, iCell)
+!         end do
+!
+!         ! Note that restingThickness is nonzero, and remaining terms are perturbations about zero.
+!         do k = 1, kMax
+!            SSH_ALE_Thickness(k) = SSH_ALE_Thickness(k) / thicknessSum
+!            ALE_Thickness(k, iCell) = restingThickness(k, iCell) + SSH_ALE_Thickness(k)
+!         end do
+!      enddo
+!      !$omp end do
+
+      !
+      ! ALE thickness, but without resting thickness in the weights
+      !
       !$omp do schedule(runtime)
       do iCell = 1, nCells
          kMax = maxLevelCell(iCell)
 
-         thicknessSum = 1e-14_RKIND
+         weightSum = 1e-14_RKIND
          do k = 1, kMax
-            SSH_ALE_Thickness(k) = SSH(iCell) * vertCoordMovementWeights(k) * restingThickness(k, iCell)
-            thicknessSum = thicknessSum + vertCoordMovementWeights(k) * restingThickness(k, iCell)
+            weightSum = weightSum + vertCoordMovementWeights(k) 
          end do
 
-         ! Note that restingThickness is nonzero, and remaining terms are perturbations about zero.
          do k = 1, kMax
-            SSH_ALE_Thickness(k) = SSH_ALE_Thickness(k) / thicknessSum
-            ALE_Thickness(k, iCell) = restingThickness(k, iCell) + SSH_ALE_Thickness(k)
+            ! Using this, we must require that sum(restingThickness(k, iCell))
+            ! summed over k is equal to bottomDepth.
+            ALE_Thickness(k, iCell) = restingThickness(k, iCell) + ssh(iCell) * vertCoordMovementWeights(k) / weightSum
+
+            ! Note, this would work for equally-spaced sigma coordinates, but
+            ! not for sigma + z-star combo:
+            ! ALE_Thickness(k, iCell) = ( bottomDepth(iCell) + SSH(iCell) ) * vertCoordMovementWeights(k) / weightSum
          end do
       enddo
       !$omp end do
