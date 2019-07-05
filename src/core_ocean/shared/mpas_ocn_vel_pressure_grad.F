@@ -28,6 +28,7 @@ module ocn_vel_pressure_grad
    use mpas_log
 
    use ocn_constants
+   use ppr_1d
 
    implicit none
    private
@@ -137,6 +138,12 @@ contains
       real (kind=RKIND), dimension(:), allocatable :: JacobianDxDs,JacobianTz,JacobianSz,T1,T2,S1,S2
       real (kind=RKIND), dimension(:,:), allocatable :: FXTop, work1, work2
       real (kind=RKIND) :: invdcEdge, pGrad, sumAJTop, AJTop, FC, FCPrev, alpha, beta
+
+    !------------------------------ method data-structures !
+        type(rmap_work) :: work
+        type(rmap_opts) :: opts
+        type(rcon_ends) :: bc_l(nvar)
+        type(rcon_ends) :: bc_r(nvar)
 
       err = 0
 
@@ -311,6 +318,154 @@ contains
          !$omp end do
 
          deallocate(JacobianDxDs,JacobianTz,JacobianSz, T1, T2, S1, S2)
+
+     elseif (config_pressure_gradient_type.eq.'Jacobian_TS_high_order') then
+
+         nVertLevelsHO = nVertLevels * nVertLevelsFactorHO
+         allocate(JacobianDxDs(nVertLevelsHO),JacobianTz(nVertLevelsHO),JacobianSz(nVertLevelsHO))
+         allocate(T1(nVertLevelsHO), T2(nVertLevelsHO))
+         allocate(S1(nVertLevelsHO), S2(nVertLevelsHO))
+         allocate(zMid1(nVertLevelsHO), zMid2(nVertLevelsHO))
+
+         allocate(Tcell(nCells,nVertLevelsHO))
+         allocate(Scell(nCells,nVertLevelsHO))
+         allocate(alpha(nCells,nVertLevelsHO))
+         allocate(beta(nCells,nVertLevelsHO))
+
+    ! prepare PPR parameters:
+    !------------------------------ specify method options !
+
+        opts%edge_meth = p3e_method     ! 3rd-order edge interp.
+        opts%cell_meth = ppm_method     ! PPM method in cells
+        opts%cell_lims = null_limit     ! no slope limiter
+
+    !------------------------------ set BC.'s at endpoints !
+
+        bc_l%bcopt = bcon_loose         ! "loose" = extrapolate
+        bc_r%bcopt = bcon_loose
+
+    !------------------------------ init. method workspace !
+
+        call work%init(npos,nvar,opts)
+      !$omp do schedule(runtime)
+      do iCell = 1, nCells
+! call Engwirda interpolator (or linear first?) for zMidHO, T_HO, S_HO, per cell.
+
+! compute zMidHO
+    !------------------------------ re-map from dat-to-tmp !
+    maxLevelCellHO =  maxLevelCell(iCell) + nAddedPointsPerCell * (maxLevelCell(iCell) - 1 )
+
+        call rmap1d(
+maxLevelCell(iCell)          ,! NPOS  no. edges in old grid.
+maxLevelCellHO               ,! NNEW  no. edges in new grid.
+2                            ,! NVAR  no. discrete variables to remap.
+1                            ,! NDOF  no. degrees-of-freedom per cell.
+zMid(1,iCell)                ,! XPOS  old grid edge positions. XPOS is a length NPOS array.
+zMidHO(1,iCell)              ,! XNEW  new grid edge positions. XNEW is a length NNEW array.
+                             ,! FDAT  grid-cell moments on old grid. FNEW has SIZE = 
+                             ,!       NDOF-by-NVAR-by-NNEW-1 .
+                             ,! FNEW  grid-cell moments on new grid. FNEW has SIZE = 
+                             ,!       NDOF-by-NVAR-by-NNEW-1 .
+                             ,! BCLO  boundary condition at lower endpoint .
+                             ,! BCHI  boundary condition at upper endpoint . 
+                             ,! WORK  method work-space. See RCON-WORK for details .
+                             ,! OPTS  method parameters. See RCON-OPTS for details .
+                             ,! TCPU  method tcpu-timer.
+)
+!        npos,ntmp,nvar,ndof, &
+!        &           xpos,xtmp,fdat,ftmp, &
+!        &           bc_l,bc_r,work,opts)
+
+! Then need alphaHO and betaHO
+
+
+
+
+! call EOS here instead, with high order thing. Could put that just above too,
+! in a cell loop.
+
+          end do
+      end do
+      !$omp end do
+
+         !$omp do schedule(runtime)
+         do iEdge=1,nEdges
+            cell1 = cellsOnEdge(1,iEdge)
+            cell2 = cellsOnEdge(2,iEdge)
+            invdcEdge = 1.0_RKIND / dcEdge(iEdge)
+            kMax = maxLevelEdgeTop(iEdge)
+            kMaxHO = maxLevelEdgeTop(iEdge)*nVertLevelsFactorHO ! TODO: Check exact value
+
+
+! This would be the same, just use high order everything.
+            ! compute J(T,z) and J(S,z) in Shchepetkin and McWilliams (2003) (7.16)
+            call pGrad_Jacobian_common_level(T1, T2 ,zMidHO(:,cell1),zMidHO(:,cell2),kMaxHO,config_common_level_weight, JacobianTz)
+            call pGrad_Jacobian_common_level(S1, S2 ,zMidHO(:,cell1),zMidHO(:,cell2),kMaxHO,config_common_level_weight, JacobianSz)
+
+            ! In layer 1, use pressure for generalized coordinates
+            ! pGrad = -1/density_0 (grad p_k + density g grad z_k^{mid})
+            k = 1
+            pGrad = edgeMask(k,iEdge) * invdcEdge * ( &
+                 - density0Inv * ( pressure(k,cell2) - pressure(k,cell1) ) &
+                 - gdensity0Inv * 0.5_RKIND*(density(k,cell1)+density(k,cell2)) * ( zMid(k,cell2) - zMid(k,cell1) ) )
+
+            tend(k,iEdge) = tend(k,iEdge) + pGrad
+
+            do k=2,kMax
+                ! add a loop for internal factor here.
+                do j=1,nVertLevelsFactorHO
+
+               ! Average alpha and beta over four data points of the Jacobian cell.
+               ! Note that inSituThermalExpansionCoeff and inSituSalineContractionCoeff include a 1/density factor,
+               ! so must multiply by density here.
+               alpha = 0.25_RKIND*(  density(k,cell1)*inSituThermalExpansionCoeff (k,cell1) &
+                                   + density(k-1,cell1)*inSituThermalExpansionCoeff (k-1,cell1) &
+                                   + density(k,cell2)*inSituThermalExpansionCoeff (k,cell2) &
+                                   + density(k-1,cell2)*inSituThermalExpansionCoeff (k-1,cell2) )
+               beta  = 0.25_RKIND*(  density(k,cell1)*inSituSalineContractionCoeff(k,cell1) &
+                                   + density(k-1,cell1)*inSituSalineContractionCoeff(k-1,cell1) &
+                                   + density(k,cell2)*inSituSalineContractionCoeff(k,cell2) &
+                                   + density(k-1,cell2)*inSituSalineContractionCoeff(k-1,cell2) )
+
+         ! eqn 2.7 in Shchepetkin and McWilliams (2003)
+         ! Note delta x was removed.  It must be an error in the paper,
+         ! as it makes the units incorrect.
+         Area = 0.5_RKIND*(z1(k-1) - z1(k) + z2(k-1) - z2(k) )
+
+         ! eqn 2.8
+         zStar = ( z2(k-1)*z1(k-1) - z2(k)*z1(k) )/(z2(k-1)-z2(k) + z1(k-1)-z1(k))
+
+         ! eqn 3.2
+         zC = 0.25_RKIND*( z1(k) + z1(k-1) + z2(k) + z2(k-1) )
+
+         ! eqn 4.1
+         zGamma = (1.0_RKIND - gamma)*zStar + gamma*zC
+
+         TL = (T1(k)*(z1(k-1)-zGamma) + T1(k-1)*(zGamma-z1(k)))/(z1(k-1) - z1(k))
+         TR = (T2(k)*(z2(k-1)-zGamma) + T2(k-1)*(zGamma-z2(k)))/(z2(k-1) - z2(k))
+
+         SL = (S1(k)*(z1(k-1)-zGamma) + S1(k-1)*(zGamma-z1(k)))/(z1(k-1) - z1(k))
+         SR = (S2(k)*(z2(k-1)-zGamma) + S2(k-1)*(zGamma-z2(k)))/(z2(k-1) - z2(k))
+         ! eqn 2.6 in Shchepetkin and McWilliams (2003)
+         JacobianTz = Area * (TL - TR)
+         JacobianSz = Area * (SL - SR)
+
+               ! Shchepetkin and McWilliams (2003) (7.16)
+               JacobianDxDs = -alpha*JacobianTz + beta*JacobianSz
+
+               ! note JacobianDxDs includes negative sign, so
+               ! pGrad is - g/rho_0 dP/dx
+
+               pGrad = pGrad + gdensity0Inv * JacobianDxDs * invdcEdge
+
+               end do
+               tend(k,iEdge) = tend(k,iEdge) + pGrad
+
+            end do
+         end do
+         !$omp end do
+
+         deallocate(JacobianDxDs,JacobianTz,JacobianSz, T1, T2, S1, S2, zMid1, zMid2)
 
       else
 
