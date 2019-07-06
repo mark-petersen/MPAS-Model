@@ -438,22 +438,22 @@ opts                          ! OPTS  method parameters. See RCON-OPTS for detai
          ! eqn 2.7 in Shchepetkin and McWilliams (2003)
          ! Note delta x was removed.  It must be an error in the paper,
          ! as it makes the units incorrect.
-         Area = 0.5_RKIND*(z1(k-1) - z1(k) + z2(k-1) - z2(k) )
+         Area = 0.5_RKIND*(zMidHO(k-1,cell1) - zMidHO(k,cell1) + zMidHO(k-1,cell2) - zMidHO(k,cell2) )
 
          ! eqn 2.8
-         zStar = ( z2(k-1)*z1(k-1) - z2(k)*z1(k) )/(z2(k-1)-z2(k) + z1(k-1)-z1(k))
+         zStar = ( zMidHO(k-1,cell2)*zMidHO(k-1,cell1) - zMidHO(k,cell2)*zMidHO(k,cell1) )/(zMidHO(k-1,cell2)-zMidHO(k,cell2) + zMidHO(k-1,cell1)-zMidHO(k,cell1))
 
          ! eqn 3.2
-         zC = 0.25_RKIND*( z1(k) + z1(k-1) + z2(k) + z2(k-1) )
+         zC = 0.25_RKIND*( zMidHO(k,cell1) + zMidHO(k-1,cell1) + zMidHO(k,cell2) + zMidHO(k-1,cell2) )
 
          ! eqn 4.1
          zGamma = (1.0_RKIND - gamma)*zStar + gamma*zC
 
-         TL = (T1(k)*(z1(k-1)-zGamma) + T1(k-1)*(zGamma-z1(k)))/(z1(k-1) - z1(k))
-         TR = (T2(k)*(z2(k-1)-zGamma) + T2(k-1)*(zGamma-z2(k)))/(z2(k-1) - z2(k))
+         TL = (T1(k)*(zMidHO(k-1,cell1)-zGamma) + T1(k-1)*(zGamma-zMidHO(k,cell1)))/(zMidHO(k-1,cell1) - zMidHO(k,cell1))
+         TR = (T2(k)*(zMidHO(k-1,cell2)-zGamma) + T2(k-1)*(zGamma-zMidHO(k,cell2)))/(zMidHO(k-1,cell2) - zMidHO(k,cell2))
 
-         SL = (S1(k)*(z1(k-1)-zGamma) + S1(k-1)*(zGamma-z1(k)))/(z1(k-1) - z1(k))
-         SR = (S2(k)*(z2(k-1)-zGamma) + S2(k-1)*(zGamma-z2(k)))/(z2(k-1) - z2(k))
+         SL = (S1(k)*(zMidHO(k-1,cell1)-zGamma) + S1(k-1)*(zGamma-zMidHO(k,cell1)))/(zMidHO(k-1,cell1) - zMidHO(k,cell1))
+         SR = (S2(k)*(zMidHO(k-1,cell2)-zGamma) + S2(k-1)*(zGamma-zMidHO(k,cell2)))/(zMidHO(k-1,cell2) - zMidHO(k,cell2))
          ! eqn 2.6 in Shchepetkin and McWilliams (2003)
          JacobianTz = Area * (TL - TR)
          JacobianSz = Area * (SL - SR)
