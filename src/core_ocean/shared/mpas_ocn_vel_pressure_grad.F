@@ -362,15 +362,15 @@ maxLevelCellHO               ,! NNEW  no. edges in new grid.
 1                            ,! NDOF  no. degrees-of-freedom per cell.
 zMid(1,iCell)                ,! XPOS  old grid edge positions. XPOS is a length NPOS array.
 zMidHO(1,iCell)              ,! XNEW  new grid edge positions. XNEW is a length NNEW array.
-                             ,! FDAT  grid-cell moments on old grid. FNEW has SIZE = 
+tracers(:,:,iCell)           ,! FDAT  grid-cell moments on old grid. FDAT has SIZE = 
+                             ,!       NDOF-by-NVAR-by-NPOS-1 .
+! Note this has size nVertLevels, not maxLevelCell!
+tracersNew(:,:,iCell)        ,! FNEW  grid-cell moments on new grid. FNEW has SIZE = 
                              ,!       NDOF-by-NVAR-by-NNEW-1 .
-                             ,! FNEW  grid-cell moments on new grid. FNEW has SIZE = 
-                             ,!       NDOF-by-NVAR-by-NNEW-1 .
-                             ,! BCLO  boundary condition at lower endpoint .
-                             ,! BCHI  boundary condition at upper endpoint . 
-                             ,! WORK  method work-space. See RCON-WORK for details .
-                             ,! OPTS  method parameters. See RCON-OPTS for details .
-                             ,! TCPU  method tcpu-timer.
+bc_l                         ,! BCLO  boundary condition at lower endpoint .
+bc_r                         ,! BCHI  boundary condition at upper endpoint . 
+work                         ,! WORK  method work-space. See RCON-WORK for details .
+opts                          ! OPTS  method parameters. See RCON-OPTS for details .
 )
 !        npos,ntmp,nvar,ndof, &
 !        &           xpos,xtmp,fdat,ftmp, &
@@ -379,13 +379,18 @@ zMidHO(1,iCell)              ,! XNEW  new grid edge positions. XNEW is a length 
 ! Then need alphaHO and betaHO
 
 
+! This doesn't work, since I need to call the EOS for more levels. Hmm...
+! I need to make my own EOS call for a larger number of levels, but for a single
+! column.
 
-
+      ! compute EOS by displacing SST/SSS to every vertical layer in column
+      call ocn_equation_of_state_density(statePool, diagnosticsPool, meshPool, scratchPool, nCells, 0, 'surfaceDisplaced', &
+                                         densitySurfaceDisplaced, err, thermalExpansionCoeff, salineContractionCoeff, &
+                                         timeLevel)
 ! call EOS here instead, with high order thing. Could put that just above too,
 ! in a cell loop.
 
-          end do
-      end do
+      end do ! iCell
       !$omp end do
 
          !$omp do schedule(runtime)
@@ -411,13 +416,16 @@ zMidHO(1,iCell)              ,! XNEW  new grid edge positions. XNEW is a length 
 
             tend(k,iEdge) = tend(k,iEdge) + pGrad
 
-            do k=2,kMax
+            do kB=2, kMax
                 ! add a loop for internal factor here.
-                do j=1,nVertLevelsFactorHO
+                do kHO=1,nAddedPointsPerCell + 1
+                    k = (kB - 2) * nAddedPointsPerCell + kHO
 
                ! Average alpha and beta over four data points of the Jacobian cell.
                ! Note that inSituThermalExpansionCoeff and inSituSalineContractionCoeff include a 1/density factor,
                ! so must multiply by density here.
+               ! TODO remove density from alpha, beta computation above and
+               ! here.
                alpha = 0.25_RKIND*(  density(k,cell1)*inSituThermalExpansionCoeff (k,cell1) &
                                    + density(k-1,cell1)*inSituThermalExpansionCoeff (k-1,cell1) &
                                    + density(k,cell2)*inSituThermalExpansionCoeff (k,cell2) &
@@ -458,7 +466,7 @@ zMidHO(1,iCell)              ,! XNEW  new grid edge positions. XNEW is a length 
 
                pGrad = pGrad + gdensity0Inv * JacobianDxDs * invdcEdge
 
-               end do
+               end do ! internal loop
                tend(k,iEdge) = tend(k,iEdge) + pGrad
 
             end do
