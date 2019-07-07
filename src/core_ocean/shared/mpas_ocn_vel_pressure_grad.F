@@ -139,6 +139,14 @@ contains
       real (kind=RKIND), dimension(:,:), allocatable :: FXTop, work1, work2
       real (kind=RKIND) :: invdcEdge, pGrad, sumAJTop, AJTop, FC, FCPrev, alpha, beta
 
+      ! for high order interpolation of pressure
+      integer :: nVertLevelsHO, nHOPointsPerCell, nAddedHOPointsPerCell, kHO, j
+      real (kind=RKIND) :: alpharef, betaref, Tref, Sref, densityref
+      real (kind=RKIND) :: TL, TR, SL, SR, 
+      real (kind=RKIND) :: JacobianTz1, JacobianSz1, JacobianDxDs1
+      real (kind=RKIND), dimension(:), allocatable :: 
+      real (kind=RKIND), dimension(:,:), allocatable :: TcellHO, ScellHO,
+      alphaHO, betaHO, zMidHO
 !    !------------------------------ method data-structures !
 !        type(rmap_work) :: work
 !        type(rmap_opts) :: opts
@@ -322,15 +330,16 @@ contains
      elseif (config_pressure_gradient_type.eq.'Jacobian_TS_high_order') then
 
          nVertLevelsHO = nVertLevels * nVertLevelsFactorHO
-         allocate(JacobianDxDs(nVertLevelsHO),JacobianTz(nVertLevelsHO),JacobianSz(nVertLevelsHO))
-         allocate(T1(nVertLevelsHO), T2(nVertLevelsHO))
-         allocate(S1(nVertLevelsHO), S2(nVertLevelsHO))
-         allocate(zMid1(nVertLevelsHO), zMid2(nVertLevelsHO))
+         !allocate(JacobianDxDs(nVertLevelsHO),JacobianTz(nVertLevelsHO),JacobianSz(nVertLevelsHO))
+         !allocate(T1(nVertLevelsHO), T2(nVertLevelsHO))
+         !allocate(S1(nVertLevelsHO), S2(nVertLevelsHO))
+         !allocate(zMid1(nVertLevelsHO), zMid2(nVertLevelsHO))
 
-         allocate(Tcell(nCells,nVertLevelsHO))
-         allocate(Scell(nCells,nVertLevelsHO))
-         allocate(alpha(nCells,nVertLevelsHO))
-         allocate(beta(nCells,nVertLevelsHO))
+         allocate(zMidHO(nCells,nVertLevelsHO))
+         allocate(TcellHO(nCells,nVertLevelsHO))
+         allocate(ScellHO(nCells,nVertLevelsHO))
+         allocate(alphaHO(nCells,nVertLevelsHO))
+         allocate(betaHO(nCells,nVertLevelsHO))
 
 !    ! prepare PPR parameters:
 !    !------------------------------ specify method options !
@@ -352,16 +361,16 @@ contains
       nHOPointsPerCell = nAddedHOPointsPerCell+1
       !$omp do schedule(runtime)
       do iCell = 1, nCells
-         k=1
-         do kB=1, maxLevelCell(iCell)
+         j=1
+         do k=1, maxLevelCell(iCell)
             do kHO=0,nAddedHOPointsPerCell
-               zMidHO(k,iCell) = zMid(kB,iCell) + kHO/nHOPointsPerCell*(zMid(kB+1,iCell) - zMid(kB,iCell))
-               TCell(k,iCell) = tracers(indexT,kB,iCell) + kHO/nHOPointsPerCell*(tracers(indexT,kB+1,iCell) - tracers(indexT,kB,iCell) )
-               SCell(k,iCell) = tracers(indexS,kB,iCell) + kHO/nHOPointsPerCell*(tracers(indexS,kB+1,iCell) - tracers(indexS,kB,iCell) )
+               zMidHO(j,iCell) = zMid(k,iCell) + kHO/nHOPointsPerCell*(zMid(k+1,iCell) - zMid(k,iCell))
+               TCell(j,iCell) = tracers(indexT,k,iCell) + kHO/nHOPointsPerCell*(tracers(indexT,k+1,iCell) - tracers(indexT,k,iCell) )
+               SCell(j,iCell) = tracers(indexS,k,iCell) + kHO/nHOPointsPerCell*(tracers(indexS,k+1,iCell) - tracers(indexS,k,iCell) )
                
-               k = k + 1
+               j = j + 1
             end do ! kHO
-         end do ! kB
+         end do ! k
          !------------------------------ re-map from dat-to-tmp !
          maxLevelCellHO =  maxLevelCell(iCell) + nAddedHOPointsPerCell * (maxLevelCell(iCell) - 1 )
          !
@@ -408,12 +417,12 @@ contains
          densityref=1000.0
          
          do k=1,maxLevelCellHO
-         density(k,iCell) = densityref &
-            - alpharef * (Tcell(k,iCell) - Tref) &
-            + betaref  * (Scell(k,iCell) - Sref) 
+         density(j,iCell) = densityref &
+            - alpharef * (TcellHO(j,iCell) - Tref) &
+            + betaref  * (ScellHO(j,iCell) - Sref) 
          
-         alphaHO(k,iCell) = alpharef
-         betaHO(k,iCell) = betaref
+         alphaHO(j,iCell) = alpharef
+         betaHO(j,iCell) = betaref
 
       end do ! k
       end do ! iCell
@@ -442,61 +451,67 @@ contains
 
             tend(k,iEdge) = tend(k,iEdge) + pGrad
 
-            do kB=2, kMax
+! Think about indexing here again!!!
+            do k=2, kMax
              ! add a loop for internal factor here.
              do kHO=1,nAddedHOPointsPerCell + 1
-               k = (kB - 2) * nAddedHOPointsPerCell + kHO
+               j = (k - 2) * nAddedHOPointsPerCell + kHO
 
                ! Average alpha and beta over four data points of the Jacobian cell.
                ! Note that inSituThermalExpansionCoeff and inSituSalineContractionCoeff include a 1/density factor,
                ! so must multiply by density here.
                ! TODO remove density from alpha, beta computation above and
                ! here.
-               alpha = 0.25_RKIND*(  alphaHO(k,cell1) + alphaHO(k-1,cell1) &
-                                   + alphaHO(k,cell2) + alphaHO(k-1,cell2) )
-               beta  = 0.25_RKIND*(  betaHO(k,cell1) + betaHO(k-1,cell1) &
-                                   + betaHO(k,cell2) + betaHO(k-1,cell2) )
+               alpha = 0.25_RKIND*(  alphaHO(j,cell1) + alphaHO(j-1,cell1) &
+                                   + alphaHO(j,cell2) + alphaHO(j-1,cell2) )
+               beta  = 0.25_RKIND*(  betaHO(j,cell1) + betaHO(j-1,cell1) &
+                                   + betaHO(j,cell2) + betaHO(j-1,cell2) )
 
                ! eqn 2.7 in Shchepetkin and McWilliams (2003)
                ! Note delta x was removed.  It must be an error in the paper,
                ! as it makes the units incorrect.
-               Area = 0.5_RKIND*(zMidHO(k-1,cell1) - zMidHO(k,cell1) + zMidHO(k-1,cell2) - zMidHO(k,cell2) )
+               Area = 0.5_RKIND*(zMidHO(j-1,cell1) - zMidHO(j,cell1) + zMidHO(j-1,cell2) - zMidHO(j,cell2) )
 
                ! eqn 2.8
-               zStar = ( zMidHO(k-1,cell2)*zMidHO(k-1,cell1) - zMidHO(k  ,cell2)*zMidHO(k,cell1) ) &
-                      /( zMidHO(k-1,cell2)-zMidHO(k  ,cell2) + zMidHO(k-1,cell1)-zMidHO(k,cell1) )
+               zStar = ( zMidHO(j-1,cell2)*zMidHO(j-1,cell1) - zMidHO(j  ,cell2)*zMidHO(j,cell1) ) &
+                      /( zMidHO(j-1,cell2)-zMidHO(j  ,cell2) + zMidHO(j-1,cell1)-zMidHO(j,cell1) )
 
                ! eqn 3.2
-               zC = 0.25_RKIND*( zMidHO(k,cell1) + zMidHO(k-1,cell1) + zMidHO(k,cell2) + zMidHO(k-1,cell2) )
+               zC = 0.25_RKIND*( zMidHO(j,cell1) + zMidHO(j-1,cell1) + zMidHO(j,cell2) + zMidHO(j-1,cell2) )
 
                ! eqn 4.1
-               zGamma = (1.0_RKIND - gamma)*zStar + gamma*zC
+               zG = (1.0_RKIND - gamma)*zStar + gamma*zC
 
-               TL = (T1(k)*(zMidHO(k-1,cell1)-zGamma) + T1(k-1)*(zGamma-zMidHO(k,cell1)))/(zMidHO(k-1,cell1) - zMidHO(k,cell1))
-               TR = (T2(k)*(zMidHO(k-1,cell2)-zGamma) + T2(k-1)*(zGamma-zMidHO(k,cell2)))/(zMidHO(k-1,cell2) - zMidHO(k,cell2))
+               TL = (TcellHO(j,cell1)*(zMidHO(j-1,cell1)-zG) + TcellHO(j-1,cell1)*(zG-zMidHO(j,cell1)))/(zMidHO(j-1,cell1) - zMidHO(j,cell1))
+               TR = (TcellHO(j,cell2)*(zMidHO(j-1,cell2)-zG) + TcellHO(j-1,cell2)*(zG-zMidHO(j,cell2)))/(zMidHO(j-1,cell2) - zMidHO(j,cell2))
+               SL = (ScellHO(j,cell1)*(zMidHO(j-1,cell1)-zG) + ScellHO(j-1,cell1)*(zG-zMidHO(j,cell1)))/(zMidHO(j-1,cell1) - zMidHO(j,cell1))
+               SR = (ScellHO(j,cell2)*(zMidHO(j-1,cell2)-zG) + ScellHO(j-1,cell2)*(zG-zMidHO(j,cell2)))/(zMidHO(j-1,cell2) - zMidHO(j,cell2))
 
-               SL = (S1(k)*(zMidHO(k-1,cell1)-zGamma) + S1(k-1)*(zGamma-zMidHO(k,cell1)))/(zMidHO(k-1,cell1) - zMidHO(k,cell1))
-               SR = (S2(k)*(zMidHO(k-1,cell2)-zGamma) + S2(k-1)*(zGamma-zMidHO(k,cell2)))/(zMidHO(k-1,cell2) - zMidHO(k,cell2))
                ! eqn 2.6 in Shchepetkin and McWilliams (2003)
-               JacobianTz = Area * (TL - TR)
-               JacobianSz = Area * (SL - SR)
+               JacobianTz1 = Area * (TL - TR)
+               JacobianSz1 = Area * (SL - SR)
 
                ! Shchepetkin and McWilliams (2003) (7.16)
-               JacobianDxDs = -alpha*JacobianTz + beta*JacobianSz
+               JacobianDxDs1 = -alpha*JacobianTz1 + beta*JacobianSz1
 
                ! note JacobianDxDs includes negative sign, so
                ! pGrad is - g/rho_0 dP/dx
 
                pGrad = pGrad + gdensity0Inv * JacobianDxDs * invdcEdge
+               j = j + 1
 
              end do ! kHO
              tend(k,iEdge) = tend(k,iEdge) + pGrad
 
-            end do ! kB
+            end do ! k
          end do ! iCell
          !$omp end do
 
-         deallocate(JacobianDxDs,JacobianTz,JacobianSz, T1, T2, S1, S2, zMid1, zMid2)
+         deallocate(zMidHO)
+         deallocate(TcellHO)
+         deallocate(ScellHO)
+         deallocate(alphaHO)
+         deallocate(betaHO)
 
       else
 
