@@ -5,7 +5,7 @@
 		<step executable="planar_hex">
 			<argument flag="--nx">4</argument>
 			<argument flag="--ny">40</argument>
-			<argument flag="--dc">10</argument>
+			<argument flag="--dc">10e2</argument>
 			<argument flag="--nonperiodic_y"></argument>
 			<argument flag="-o">planar_hex_mesh.nc</argument>
 		</step>
