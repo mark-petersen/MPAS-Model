@@ -144,7 +144,7 @@ contains
       real (kind=RKIND) :: alpharef, betaref, Tref, Sref, densityref
       real (kind=RKIND) :: TL, TR, SL, SR
       real (kind=RKIND) :: JacobianTz1, JacobianSz1, JacobianDxDs1
-      real (kind=RKIND) :: Area, zStar, rhoL, rhoR, zC, zG, 
+      real (kind=RKIND) :: Area, zStar, rhoL, rhoR, zC, zG, &
          gamma   ! weight between zStar (original Jacobian) and z_C (weighted Jacobian)
       real (kind=RKIND), dimension(:,:), allocatable :: TcellHO, ScellHO, alphaHO, betaHO, zMidHO
 !    !------------------------------ method data-structures !
@@ -331,6 +331,14 @@ contains
 
      elseif (config_pressure_gradient_type.eq.'Jacobian_TS_high_order') then
 
+         ! Current simplifications, to be altered one-by-one:
+         ! 1. Linear interpolation of TcellHO, ScellHO. Replace with Engwirda
+         ! Library
+         ! 2. Linear EOS in-line here. Change to call to JM, but all we need are
+         ! alpha and beta, not density.
+         ! 3. Move nVertLevelsFactorHO or similar to a flag.
+         ! 4. 
+
          ! put in flags later
          gamma = 0.5 ! config_common_level_weight
          nVertLevelsFactorHO = 1
@@ -423,7 +431,7 @@ contains
          densityref=1000.0
          
          do k=1,maxLevelCellHO
-         ! We don't actually 
+         ! We don't actually need density, ironically.
          !density(j,iCell) = densityref &
          !   - alpharef * (TcellHO(j,iCell) - Tref) &
          !   + betaref  * (ScellHO(j,iCell) - Sref) 
@@ -504,7 +512,7 @@ contains
                ! note JacobianDxDs includes negative sign, so
                ! pGrad is - g/rho_0 dP/dx
 
-               pGrad = pGrad + gdensity0Inv * JacobianDxDs * invdcEdge
+               pGrad = pGrad + gdensity0Inv * JacobianDxDs1 * invdcEdge
                j = j + 1
 
              end do ! kHO
