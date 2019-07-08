@@ -130,7 +130,7 @@ contains
 
       integer :: iEdge, k, cell1, cell2, iCell, kMax, nEdges
       integer, pointer :: nVertLevels
-      integer, dimension(:), pointer :: nEdgesArray
+      integer, dimension(:), pointer :: nEdgesArray, nCellsArray
       integer, dimension(:), pointer :: maxLevelEdgeTop, maxLevelCell
       integer, dimension(:,:), pointer :: cellsOnEdge, edgeMask
 
@@ -140,13 +140,13 @@ contains
       real (kind=RKIND) :: invdcEdge, pGrad, sumAJTop, AJTop, FC, FCPrev, alpha, beta
 
       ! for high order interpolation of pressure
-      integer :: nVertLevelsHO, nHOPointsPerCell, nAddedHOPointsPerCell, kHO, j
+      integer :: nVertLevelsHO, nHOPointsPerCell, nAddedHOPointsPerCell, kHO, j, nCells, maxLevelCellHO, nVertLevelsFactorHO
       real (kind=RKIND) :: alpharef, betaref, Tref, Sref, densityref
-      real (kind=RKIND) :: TL, TR, SL, SR, 
+      real (kind=RKIND) :: TL, TR, SL, SR
       real (kind=RKIND) :: JacobianTz1, JacobianSz1, JacobianDxDs1
-      real (kind=RKIND), dimension(:), allocatable :: 
-      real (kind=RKIND), dimension(:,:), allocatable :: TcellHO, ScellHO,
-      alphaHO, betaHO, zMidHO
+      real (kind=RKIND) :: Area, zStar, rhoL, rhoR, zC, zG, 
+         gamma   ! weight between zStar (original Jacobian) and z_C (weighted Jacobian)
+      real (kind=RKIND), dimension(:,:), allocatable :: TcellHO, ScellHO, alphaHO, betaHO, zMidHO
 !    !------------------------------ method data-structures !
 !        type(rmap_work) :: work
 !        type(rmap_opts) :: opts
@@ -161,6 +161,7 @@ contains
 
       call mpas_pool_get_dimension(meshPool, 'nVertLevels',nVertLevels)
       call mpas_pool_get_dimension(meshPool, 'nEdgesArray', nEdgesArray)
+      call mpas_pool_get_dimension(meshPool, 'nCellsArray', nCellsArray)
       call mpas_pool_get_array(meshPool, 'maxLevelEdgeTop', maxLevelEdgeTop)
       call mpas_pool_get_array(meshPool, 'maxLevelCell', maxLevelCell)
       call mpas_pool_get_array(meshPool, 'cellsOnEdge', cellsOnEdge)
@@ -168,6 +169,7 @@ contains
       call mpas_pool_get_array(meshPool, 'edgeMask', edgeMask)
 
       nEdges = nEdgesArray( 1 )
+      nCells = nCellsArray( 1 ) ! TODO CHECK THIS
 
       if (config_pressure_gradient_type.eq.'pressure_and_zmid') then
 
@@ -329,6 +331,10 @@ contains
 
      elseif (config_pressure_gradient_type.eq.'Jacobian_TS_high_order') then
 
+         ! put in flags later
+         gamma = 0.5 ! config_common_level_weight
+         nVertLevelsFactorHO = 1
+
          nVertLevelsHO = nVertLevels * nVertLevelsFactorHO
          !allocate(JacobianDxDs(nVertLevelsHO),JacobianTz(nVertLevelsHO),JacobianSz(nVertLevelsHO))
          !allocate(T1(nVertLevelsHO), T2(nVertLevelsHO))
@@ -365,8 +371,8 @@ contains
          do k=1, maxLevelCell(iCell)
             do kHO=0,nAddedHOPointsPerCell
                zMidHO(j,iCell) = zMid(k,iCell) + kHO/nHOPointsPerCell*(zMid(k+1,iCell) - zMid(k,iCell))
-               TCell(j,iCell) = tracers(indexT,k,iCell) + kHO/nHOPointsPerCell*(tracers(indexT,k+1,iCell) - tracers(indexT,k,iCell) )
-               SCell(j,iCell) = tracers(indexS,k,iCell) + kHO/nHOPointsPerCell*(tracers(indexS,k+1,iCell) - tracers(indexS,k,iCell) )
+               TcellHO(j,iCell) = tracers(indexT,k,iCell) + kHO/nHOPointsPerCell*(tracers(indexT,k+1,iCell) - tracers(indexT,k,iCell) )
+               ScellHO(j,iCell) = tracers(indexS,k,iCell) + kHO/nHOPointsPerCell*(tracers(indexS,k+1,iCell) - tracers(indexS,k,iCell) )
                
                j = j + 1
             end do ! kHO
