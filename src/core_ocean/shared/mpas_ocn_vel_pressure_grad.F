@@ -423,9 +423,10 @@ contains
          densityref=1000.0
          
          do k=1,maxLevelCellHO
-         density(j,iCell) = densityref &
-            - alpharef * (TcellHO(j,iCell) - Tref) &
-            + betaref  * (ScellHO(j,iCell) - Sref) 
+         ! We don't actually 
+         !density(j,iCell) = densityref &
+         !   - alpharef * (TcellHO(j,iCell) - Tref) &
+         !   + betaref  * (ScellHO(j,iCell) - Sref) 
          
          alphaHO(j,iCell) = alpharef
          betaHO(j,iCell) = betaref
@@ -440,7 +441,7 @@ contains
             cell2 = cellsOnEdge(2,iEdge)
             invdcEdge = 1.0_RKIND / dcEdge(iEdge)
             kMax = maxLevelEdgeTop(iEdge)
-            kMaxHO = maxLevelEdgeTop(iEdge)*nVertLevelsFactorHO ! TODO: Check exact value
+            !kMaxHO = maxLevelEdgeTop(iEdge)*nVertLevelsFactorHO ! TODO: Check exact value
 
 
 ! This would be the same, just use high order everything.
