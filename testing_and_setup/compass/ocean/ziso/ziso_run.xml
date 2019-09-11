@@ -15,6 +15,7 @@
 		<option name="config_cvmix_shear_mixing_scheme">'KPP'</option>
 		<option name="config_use_cvmix_kpp">.true.</option>
 		<option name="config_use_bulk_wind_stress">.true.</option>
+		<option name="config_use_bulk_thickness_flux">.true.</option>
 		<option name="config_eos_linear_alpha">0.255</option>
 		<option name="config_eos_linear_Tref">19.0</option>
 		<option name="config_eos_linear_Sref">34.0</option>
