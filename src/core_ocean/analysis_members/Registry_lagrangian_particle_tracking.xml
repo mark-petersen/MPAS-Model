@@ -132,8 +132,10 @@
 			<var name="xParticle"/>
 			<var name="yParticle"/>
 			<var name="zParticle"/>
+<!-- MRP COMMENT OUT EXTRA FIELDS 
 			<var name="lonParticle"/>
 			<var name="latParticle"/>
+MRP COMMENT OUT EXTRA FIELDS END -->  
 			<var name="zLevelParticle"/>
 			<var name="xParticleReset"/>
 			<var name="yParticleReset"/>
@@ -312,12 +314,14 @@
 		<var name="zParticle" type="real" dimensions="nParticles Time" units="m"
 			 description="z location of horizontal particle position"
 		/>
+<!-- MRP COMMENT OUT EXTRA FIELDS 
 		<var name="lonParticle" type="real" dimensions="nParticles Time" units="m"
 			 description="longitude location of horizontal particle position"
 		/>
 		<var name="latParticle" type="real" dimensions="nParticles Time" units="m"
 			 description="latitude location of horizontal particle position"
 		/>
+MRP COMMENT OUT EXTRA FIELDS END -->  
 		<var name="zLevelParticle" type="real" dimensions="nParticles Time" units="m"
 			 description="z-level for vertical elevation of particle position"
 		/>

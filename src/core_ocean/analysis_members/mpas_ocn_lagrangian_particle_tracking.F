@@ -263,7 +263,7 @@ contains
       real (kind=RKIND), dimension(3) :: particlePosition, particleVelocity
       real (kind=RKIND), pointer :: xParticle, yParticle, zParticle, buoyancyParticle !, &
 !        lonVel, latVel, sumU, sumV, sumUU, sumUV, sumVV
-      real (kind=RKIND), pointer :: lonParticle, latParticle
+! MRP extra      real (kind=RKIND), pointer :: lonParticle, latParticle
       real (kind=RKIND), dimension(3) :: xSubStep, diffSubStep, diffParticlePosition
       real (kind=RKIND), pointer :: zLevelParticle
       real (kind=RKIND), dimension(:,:), pointer :: zTop, vertVelocityTop, zMid, areaBArray
@@ -556,11 +556,11 @@ contains
           call mpas_pool_get_array(particle % haloDataPool, 'xParticle', xParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'yParticle', yParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'zParticle', zParticle)
-          call mpas_pool_get_array(particle % haloDataPool, 'lonParticle', lonParticle)
-          call mpas_pool_get_array(particle % haloDataPool, 'latParticle', latParticle)
+! MRP extra          call mpas_pool_get_array(particle % haloDataPool, 'lonParticle', lonParticle)
+! MRP extra          call mpas_pool_get_array(particle % haloDataPool, 'latParticle', latParticle)
 
           ! compute particle lat/lon position
-          call convert_latlon_from_xyz(latParticle, lonParticle, xParticle, yParticle, zParticle)
+! MRP extra          call convert_latlon_from_xyz(latParticle, lonParticle, xParticle, yParticle, zParticle)
 
           particlePosition(1) = xParticle
           particlePosition(2) = yParticle
@@ -1102,7 +1102,7 @@ contains
           zParticle = particlePosition(3)
 
           ! compute particle lat/lon position
-          call convert_latlon_from_xyz(latParticle, lonParticle, xParticle, yParticle, zParticle)
+! MRP extra          call convert_latlon_from_xyz(latParticle, lonParticle, xParticle, yParticle, zParticle)
 
           !!!!!!!!!! PASS PARTICLES FROM PROCESSOR TO PROCESSOR !!!!!!!!!!
           ! note, assumes that integration above didn't move particle past halo
@@ -1979,7 +1979,7 @@ contains
       real (kind=RKIND), dimension(3) :: particlePosition, particleVelocity
       real (kind=RKIND), pointer :: xParticle, yParticle, zParticle, lonVel, latVel, buoyancyParticle !, &
 !        lonVel, latVel, sumU, sumV, sumUU, sumUV, sumVV
-      real (kind=RKIND), pointer :: lonParticle, latParticle
+! MRP extra      real (kind=RKIND), pointer :: lonParticle, latParticle
       real (kind=RKIND), dimension(3) :: xSubStep, diffSubStep, diffParticlePosition
       real (kind=RKIND), pointer :: zLevelParticle
       real (kind=RKIND), dimension(:,:), pointer :: zTop, vertVelocityTop, zMid, areaBArray
@@ -2146,8 +2146,8 @@ contains
           call mpas_pool_get_array(particle % haloDataPool, 'xParticle', xParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'yParticle', yParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'zParticle', zParticle)
-          call mpas_pool_get_array(particle % haloDataPool, 'lonParticle', lonParticle)
-          call mpas_pool_get_array(particle % haloDataPool, 'latParticle', latParticle)
+! MRP extra          call mpas_pool_get_array(particle % haloDataPool, 'lonParticle', lonParticle)
+! MRP extra          call mpas_pool_get_array(particle % haloDataPool, 'latParticle', latParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'currentCell', iCell)
           call mpas_pool_get_array(particle % haloDataPool, 'currentCellGlobalID', currentCellGlobalID)
           iCell = -1
@@ -2157,7 +2157,7 @@ contains
           particlePosition(3) = zParticle
 
           ! compute particle lat/lon position
-          call convert_latlon_from_xyz(latParticle, lonParticle, xParticle, yParticle, zParticle)
+! MRP extra          call convert_latlon_from_xyz(latParticle, lonParticle, xParticle, yParticle, zParticle)
 
           call mpas_pool_get_array(particle % haloDataPool, 'zLevelParticle', zLevelParticle)
 
