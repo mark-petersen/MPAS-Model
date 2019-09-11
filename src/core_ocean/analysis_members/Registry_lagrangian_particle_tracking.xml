@@ -370,6 +370,7 @@
 		<var name="particleSalinity" type="real" dimensions="nParticles Time" units="grams salt per kilogram seawater"
 			 description="sampled salinity for particle"
 		/>
+<!-- MRP COMMENT OUT BGC FIELDS 
 		<var name="particleDIC" type="real" dimensions="nParticles Time" units="mmol m^{-3}"
 			 description="sampled dissolved inorganic carbon for particle"
 		/>
@@ -394,6 +395,7 @@
 		<var name="particleO2" type="real" dimensions="nParticles Time" units="meq m^{-3}"
 			 description="sampled dissolved oxygen for particle"
 		/>
+ MRP END -->
 	</var_struct>
 <!--
 	<var_struct name="lagrPartTrackNonHalo" time_levs="1" packages="lagrPartTrackAMPKG">
