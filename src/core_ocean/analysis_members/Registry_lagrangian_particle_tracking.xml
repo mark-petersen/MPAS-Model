@@ -27,6 +27,10 @@
 			description="Logical flag determining if an analysis member write occurs on start-up."
 			possible_values=".true. or .false."
 		/>
+		<nml_option name="config_AM_lagrPartTrack_global_dtParticle" type="real" default_value="60" units="s"
+			description="Time step for particle advection, applied to all particles. Only used if config_AM_lagrPartTrack_enable_extra_variables=.false. Otherwise, dtParticle is set for each particle in the input file."
+			possible_values="timestamps of form 0000_00:00:00"
+		/>
 		<nml_option name="config_AM_lagrPartTrack_filter_number" type="integer" default_value="0" units="unitless"
 			description="Number of times to apply filtering operation."
 			possible_values="0, 1, 2, ..."
@@ -132,10 +136,6 @@
 			<var name="xParticle"/>
 			<var name="yParticle"/>
 			<var name="zParticle"/>
-<!-- MRP COMMENT OUT EXTRA FIELDS 
-			<var name="lonParticle"/>
-			<var name="latParticle"/>
-MRP COMMENT OUT EXTRA FIELDS END -->  
 			<var name="zLevelParticle"/>
 			<var name="xParticleReset"/>
 			<var name="yParticleReset"/>
@@ -146,7 +146,6 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 			<var name="numTimesReset"/>
 			<var name="buoyancyParticle"/>
 			<var name="verticalTreatment"/>
-			<var name="dtParticle"/>
 			<var name="indexLevel"/>
 			<var name="cellOwnerBlock"/>
 			<var name="transfered"/>
@@ -154,6 +153,11 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 			<var name="buoyancySurfaceVelocityMeridional"/>
 			<var name="buoyancySurfaceVelocityZonal"/>
 			<var name="buoyancySurfaceDepth"/>
+<!-- MRP COMMENT OUT EXTRA FIELDS 
+			<var name="lonParticle"/>
+			<var name="latParticle"/>
+			<var name="dtParticle"/>
+MRP COMMENT OUT EXTRA FIELDS END -->  
 		</stream>
 
 		<stream name="lagrPartTrackRestart" type="input;output"
@@ -186,10 +190,12 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 			<var name="numTimesReset"/>
 			<var name="buoyancyParticle"/>
 			<var name="verticalTreatment"/>
-			<var name="dtParticle"/>
 			<var name="indexLevel"/>
 			<var name="transfered"/>
 			<var name="buoyancySurfaceValues"/>
+<!-- MRP COMMENT OUT EXTRA FIELDS 
+			<var name="dtParticle"/>
+MRP COMMENT OUT EXTRA FIELDS END -->  
 		</stream>
 
 		<stream name="lagrPartTrackInput" type="input"
@@ -215,10 +221,12 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 			<var name="resetTime"/>
 			<var name="buoyancyParticle"/>
 			<var name="verticalTreatment"/>
-			<var name="dtParticle"/>
 			<var name="indexLevel"/>
 			<var name="transfered"/>
 			<var name="buoyancySurfaceValues"/>
+<!-- MRP COMMENT OUT EXTRA FIELDS 
+			<var name="dtParticle"/>
+MRP COMMENT OUT EXTRA FIELDS END -->  
 		</stream>
 
 		<stream name="lagrPartTrackRegions" type="input"
@@ -358,9 +366,11 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 		<var name="indexLevel" type="integer" dimensions="nParticles Time" units="unitless"
 			 description="0 if particle is fixed, or index level if particle is free-floating"
 		/>
+<!-- MRP COMMENT OUT EXTRA FIELDS 
 		<var name="dtParticle" type="real" dimensions="nParticles Time" units="s"
 			 description="Any positive real value, but limited by CFL condition."
 		/>
+MRP COMMENT OUT EXTRA FIELDS END -->  
 		<var name="buoyancyParticle" type="real" dimensions="nParticles Time" units="kg m^{-3}"
 			 description="buoyancy values for particle, currently proxy for density"
 		/>

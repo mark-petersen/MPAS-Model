@@ -298,7 +298,7 @@ contains
       real (kind=RKIND), dimension(5) :: kCoeffVert
       real (kind=RKIND), dimension(2) :: timeCoeff
       real (kind=RKIND) :: dt, dtSim, tSubStep
-      real (kind=RKIND), pointer :: dtParticle
+! MRP extra      real (kind=RKIND), pointer :: dtParticle
       real (kind=RKIND) :: zSubStep
       real (kind=RKIND) :: diffSubStepVert, diffParticlePositionVert, particleVelocityVert, verticalVelocityInterp
       real (kind=RKIND) :: buoyancyInterp
@@ -317,6 +317,8 @@ contains
 
       logical, pointer :: config_AM_lagrPartTrack_sample_temperature
       logical, pointer :: config_AM_lagrPartTrack_sample_horizontal_interp
+      real (kind=RKIND), pointer :: config_AM_lagrPartTrack_global_dtParticle
+
       real (kind=RKIND), pointer :: particleTemperature
 
       logical, pointer :: config_AM_lagrPartTrack_sample_salinity
@@ -388,6 +390,8 @@ contains
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_timeIntegration', timeIntegration)
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_sample_horizontal_interp', &
                                              config_AM_lagrPartTrack_sample_horizontal_interp)
+      call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_global_dtParticle', config_AM_lagrPartTrack_global_dtParticle)
+
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_sample_temperature', config_AM_lagrPartTrack_sample_temperature)
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_sample_salinity', config_AM_lagrPartTrack_sample_salinity)
       call mpas_pool_get_config(ocnConfigs, 'config_use_ecosysTracers', config_use_ecosysTracers)
@@ -512,6 +516,10 @@ contains
         call mpas_get_timeInterval(timeStepESMF, dt=dtSim)
         LIGHT_DEBUG_WRITE('dtSim = ' COMMA dtSim)
 
+        ! adjust time step for consistency with integer number of steps
+        nSteps = ceiling(dtSim*config_AM_lagrPartTrack_global_dtParticle)
+        dt = dtSim/nSteps
+
         !{{{
         ! flip previous time level to back (switching memory pointers)
         call mpas_pool_shift_time_levels(lagrPartTrackFieldsPool)
@@ -570,7 +578,6 @@ contains
 
           call mpas_pool_get_array(particle % haloDataPool, 'verticalTreatment', verticalTreatment)
           call mpas_pool_get_array(particle % haloDataPool, 'indexLevel', indexLevel)
-          call mpas_pool_get_array(particle % haloDataPool, 'dtParticle', dtParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'buoyancyParticle', buoyancyParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'indexToParticleID', indexToParticleID)
           call mpas_pool_get_array(particle % haloDataPool, 'currentCell', iCell)
@@ -610,8 +617,9 @@ contains
           call mpas_timer_start("time_step_LPT")
 #endif
           ! adjust time step for consistency with integer number of steps
-          nSteps = ceiling(dtSim/dtParticle)
-          dt = dtSim/nSteps
+          ! MRP this was moved outside of loop
+! MRP extra          nSteps = ceiling(dtSim/dtParticle)
+! MRP extra          dt = dtSim/nSteps
 
           !!!!!!!!!! ASSIGN TEMPORAL INTEGRATION COEFFICIENTS !!!!!!!!!!
           ! kCoeff   is (3,subStepOrder+1)
@@ -2013,7 +2021,7 @@ contains
       real (kind=RKIND), dimension(5) :: kCoeffVert
       real (kind=RKIND), dimension(2) :: timeCoeff
       real (kind=RKIND) :: dt, dtSim, tSubStep
-      real (kind=RKIND), pointer :: dtParticle
+! MRP extra      real (kind=RKIND), pointer :: dtParticle
       real (kind=RKIND) :: zSubStep
       real (kind=RKIND) :: diffSubStepVert, diffParticlePositionVert, particleVelocityVert, verticalVelocityInterp
       real (kind=RKIND) :: buoyancyInterp
@@ -2163,7 +2171,7 @@ contains
 
           call mpas_pool_get_array(particle % haloDataPool, 'verticalTreatment', verticalTreatment)
           call mpas_pool_get_array(particle % haloDataPool, 'indexLevel', indexLevel)
-          call mpas_pool_get_array(particle % haloDataPool, 'dtParticle', dtParticle)
+! MRP extra          call mpas_pool_get_array(particle % haloDataPool, 'dtParticle', dtParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'buoyancyParticle', buoyancyParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'indexToParticleID', indexToParticleID)
 
