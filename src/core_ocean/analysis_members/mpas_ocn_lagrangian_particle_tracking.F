@@ -391,6 +391,7 @@ contains
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_sample_horizontal_interp', &
                                              config_AM_lagrPartTrack_sample_horizontal_interp)
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_global_dtParticle', config_AM_lagrPartTrack_global_dtParticle)
+      call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_global_verticalTreatment', verticalTreatment)
 
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_sample_temperature', config_AM_lagrPartTrack_sample_temperature)
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_sample_salinity', config_AM_lagrPartTrack_sample_salinity)
@@ -576,7 +577,7 @@ contains
 
           call mpas_pool_get_array(particle % haloDataPool, 'zLevelParticle', zLevelParticle)
 
-          call mpas_pool_get_array(particle % haloDataPool, 'verticalTreatment', verticalTreatment)
+! MRP moved out of particle loop call mpas_pool_get_array(particle % haloDataPool, 'verticalTreatment', verticalTreatment)
           call mpas_pool_get_array(particle % haloDataPool, 'indexLevel', indexLevel)
           call mpas_pool_get_array(particle % haloDataPool, 'buoyancyParticle', buoyancyParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'indexToParticleID', indexToParticleID)
@@ -2080,6 +2081,8 @@ contains
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_sample_Fe', config_AM_lagrPartTrack_sample_Fe)
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_sample_O2', config_AM_lagrPartTrack_sample_O2)
 
+      call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_global_verticalTreatment', verticalTreatment)
+
       dminfo = domain % dminfo
 
       block => domain % blocklist
@@ -2169,7 +2172,7 @@ contains
 
           call mpas_pool_get_array(particle % haloDataPool, 'zLevelParticle', zLevelParticle)
 
-          call mpas_pool_get_array(particle % haloDataPool, 'verticalTreatment', verticalTreatment)
+! MRP moved out of particle loop call mpas_pool_get_array(particle % haloDataPool, 'verticalTreatment', verticalTreatment)
           call mpas_pool_get_array(particle % haloDataPool, 'indexLevel', indexLevel)
 ! MRP extra          call mpas_pool_get_array(particle % haloDataPool, 'dtParticle', dtParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'buoyancyParticle', buoyancyParticle)

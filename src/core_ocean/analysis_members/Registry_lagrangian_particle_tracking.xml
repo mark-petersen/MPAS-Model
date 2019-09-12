@@ -31,6 +31,10 @@
 			description="Time step for particle advection, applied to all particles. Only used if config_AM_lagrPartTrack_enable_extra_variables=.false. Otherwise, dtParticle is set for each particle in the input file."
 			possible_values="timestamps of form 0000_00:00:00"
 		/>
+		<nml_option name="config_AM_lagrPartTrack_global_verticalTreatment" type="integer" default_value="4" units="unitless"
+			description="Type of vertical treatment to be used, with possible_values= 1 (indexLevel), 2 (fixedZLevel), 3 (passiveFloat), 4 (buoyancySurface), 5 (argoFloat ENUM)"
+			possible_values="1,2,3,4,5"
+		/>
 		<nml_option name="config_AM_lagrPartTrack_filter_number" type="integer" default_value="0" units="unitless"
 			description="Number of times to apply filtering operation."
 			possible_values="0, 1, 2, ..."
@@ -145,7 +149,6 @@
 			<var name="resetTime"/>
 			<var name="numTimesReset"/>
 			<var name="buoyancyParticle"/>
-			<var name="verticalTreatment"/>
 			<var name="indexLevel"/>
 			<var name="cellOwnerBlock"/>
 			<var name="transfered"/>
@@ -157,6 +160,7 @@
 			<var name="lonParticle"/>
 			<var name="latParticle"/>
 			<var name="dtParticle"/>
+			<var name="verticalTreatment"/>
 MRP COMMENT OUT EXTRA FIELDS END -->  
 		</stream>
 
@@ -189,12 +193,12 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 			<var name="resetTime"/>
 			<var name="numTimesReset"/>
 			<var name="buoyancyParticle"/>
-			<var name="verticalTreatment"/>
 			<var name="indexLevel"/>
 			<var name="transfered"/>
 			<var name="buoyancySurfaceValues"/>
 <!-- MRP COMMENT OUT EXTRA FIELDS 
 			<var name="dtParticle"/>
+			<var name="verticalTreatment"/>
 MRP COMMENT OUT EXTRA FIELDS END -->  
 		</stream>
 
@@ -220,12 +224,12 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 			<var name="currentCellReset"/>
 			<var name="resetTime"/>
 			<var name="buoyancyParticle"/>
-			<var name="verticalTreatment"/>
 			<var name="indexLevel"/>
 			<var name="transfered"/>
 			<var name="buoyancySurfaceValues"/>
 <!-- MRP COMMENT OUT EXTRA FIELDS 
 			<var name="dtParticle"/>
+			<var name="verticalTreatment"/>
 MRP COMMENT OUT EXTRA FIELDS END -->  
 		</stream>
 
@@ -360,15 +364,15 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 		<var name="numTimesReset" type ="integer" dimensions="nParticles Time" units="unitless"
 			 description="flag to specify how many times the particle was reset" default_value="0"
 		/>
-		<var name="verticalTreatment" type="integer" dimensions="nParticles Time" units="unitless"
-			 description="select type of vertical treatment to be used, with possible_values='indexLevel','fixedZLevel','passiveFloat','buoyancySurface','argoFloat' (ENUM)"
-		/>
 		<var name="indexLevel" type="integer" dimensions="nParticles Time" units="unitless"
 			 description="0 if particle is fixed, or index level if particle is free-floating"
 		/>
 <!-- MRP COMMENT OUT EXTRA FIELDS 
 		<var name="dtParticle" type="real" dimensions="nParticles Time" units="s"
 			 description="Any positive real value, but limited by CFL condition."
+		/>
+		<var name="verticalTreatment" type="integer" dimensions="nParticles Time" units="unitless"
+			 description="select type of vertical treatment to be used, with possible_values='indexLevel','fixedZLevel','passiveFloat','buoyancySurface','argoFloat' (ENUM)"
 		/>
 MRP COMMENT OUT EXTRA FIELDS END -->  
 		<var name="buoyancyParticle" type="real" dimensions="nParticles Time" units="kg m^{-3}"
