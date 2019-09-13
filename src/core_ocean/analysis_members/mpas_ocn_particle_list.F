@@ -4057,15 +4057,15 @@ end subroutine allocate_list_particlelists !}}}
      ! local variables
      type (mpas_pool_type), pointer :: lagrPartTrackCellsPool
      integer, dimension(:), pointer :: cellOwnerBlock
-     integer, pointer :: currentBlock, transfered
+     integer, pointer :: currentBlock !MRP, transfered
 
      call mpas_pool_get_subpool(block % structs, trim(poolname), lagrPartTrackCellsPool)
      call mpas_pool_get_array(lagrPartTrackCellsPool, 'cellOwnerBlock', cellOwnerBlock)
      call mpas_pool_get_array(particle % haloDataPool, 'currentBlock', currentBlock)
      if(cellOwnerBlock(iCell) /= currentBlock) then
        ! increment transfer counter
-       call mpas_pool_get_array(particle % haloDataPool, 'transfered', transfered)
-       transfered = transfered + 1
+!MRP       call mpas_pool_get_array(particle % haloDataPool, 'transfered', transfered)
+!MRP       transfered = transfered + 1
        ! set new current block
        currentBlock = cellOwnerBlock(iCell)
        ! reset cell_id to be brute force computed on new block after trasnfer

@@ -176,9 +176,9 @@ module ocn_lagrangian_particle_tracking_reset
      !-----------------------------------------------------------------
 
      type (mpas_pool_type), pointer :: lagrPartTrackScalarPool, lagrPartTrackRegionsPool
-     integer, pointer :: transfered !MRP, numTimesReset
+!MRP     integer, pointer :: transfered !MRP, numTimesReset
      integer, pointer :: currentBlock, currentBlockReset, currentCell, currentCellReset
-     real (kind=RKIND), pointer :: xParticleReset, yParticleReset, zParticleReset, zLevelParticleReset
+     real (kind=RKIND), pointer :: xParticleReset, yParticleReset, zParticleReset !MRP, zLevelParticleReset
      real (kind=RKIND), pointer :: xParticle, yParticle, zParticle, zLevelParticle
 !MRP     real (kind=RKIND), pointer :: timeSinceReset
 !     real (kind=RKIND), pointer :: sumU, sumV, sumUU, sumUV, sumVV
@@ -294,13 +294,13 @@ module ocn_lagrangian_particle_tracking_reset
        call mpas_pool_get_array(particle % haloDataPool, 'xParticleReset', xParticleReset)
        call mpas_pool_get_array(particle % haloDataPool, 'yParticleReset', yParticleReset)
        call mpas_pool_get_array(particle % haloDataPool, 'zParticleReset', zParticleReset)
-       call mpas_pool_get_array(particle % haloDataPool, 'zLevelParticleReset', zLevelParticleReset)
+!MRP       call mpas_pool_get_array(particle % haloDataPool, 'zLevelParticleReset', zLevelParticleReset)
        call mpas_pool_get_array(particle % haloDataPool, 'xParticle', xParticle)
        call mpas_pool_get_array(particle % haloDataPool, 'yParticle', yParticle)
        call mpas_pool_get_array(particle % haloDataPool, 'zParticle', zParticle)
        call mpas_pool_get_array(particle % haloDataPool, 'zLevelParticle', zLevelParticle)
 !MRP       call mpas_pool_get_array(particle % haloDataPool, 'numTimesReset', numTimesReset)
-       call mpas_pool_get_array(particle % haloDataPool, 'transfered', transfered)
+!MRP       call mpas_pool_get_array(particle % haloDataPool, 'transfered', transfered)
 !       call mpas_pool_get_array(particle % haloDataPool, 'sumU', sumU)
 !       call mpas_pool_get_array(particle % haloDataPool, 'sumV', sumV)
 !       call mpas_pool_get_array(particle % haloDataPool, 'sumUU', sumUU)
@@ -311,9 +311,9 @@ module ocn_lagrangian_particle_tracking_reset
 !MRP       timeSinceReset = 0.0_RKIND
 
        ! increment counters
-       if (currentBlock /= currentBlockReset) then
-         transfered = transfered + 1
-       end if
+!MRP       if (currentBlock /= currentBlockReset) then
+!MRP         transfered = transfered + 1
+!MRP       end if
  !MRP      numTimesReset = numTimesReset + 1
 
        ! reset the block and the current cell
@@ -326,7 +326,7 @@ module ocn_lagrangian_particle_tracking_reset
        xParticle = xParticleReset
        yParticle = yParticleReset
        zParticle = zParticleReset
-       zLevelParticle = zLevelParticleReset
+!mrp       zLevelParticle = zLevelParticleReset
 
 !       ! reset velocity sums
 !       sumU = 0.0_RKIND

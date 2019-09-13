@@ -144,11 +144,9 @@
 			<var name="xParticleReset"/>
 			<var name="yParticleReset"/>
 			<var name="zParticleReset"/>
-			<var name="zLevelParticleReset"/>
 			<var name="buoyancyParticle"/>
 			<var name="indexLevel"/>
 			<var name="cellOwnerBlock"/>
-			<var name="transfered"/>
 			<var name="buoyancySurfaceValues"/>
 			<var name="buoyancySurfaceVelocityMeridional"/>
 			<var name="buoyancySurfaceVelocityZonal"/>
@@ -161,6 +159,8 @@
 			<var name="timeSinceReset"/>
 			<var name="resetTime"/>
 			<var name="numTimesReset"/>
+			<var name="zLevelParticleReset"/>
+			<var name="transfered"/>
 MRP COMMENT OUT EXTRA FIELDS END -->  
 		</stream>
 
@@ -186,12 +186,10 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 			<var name="xParticleReset"/>
 			<var name="yParticleReset"/>
 			<var name="zParticleReset"/>
-			<var name="zLevelParticleReset"/>
 			<var name="currentBlockReset"/>
 			<var name="currentCellReset"/>
 			<var name="buoyancyParticle"/>
 			<var name="indexLevel"/>
-			<var name="transfered"/>
 			<var name="buoyancySurfaceValues"/>
 <!-- MRP COMMENT OUT EXTRA FIELDS 
 			<var name="dtParticle"/>
@@ -199,6 +197,8 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 			<var name="timeSinceReset"/>
 			<var name="resetTime"/>
 			<var name="numTimesReset"/>
+			<var name="zLevelParticleReset"/>
+			<var name="transfered"/>
 MRP COMMENT OUT EXTRA FIELDS END -->  
 		</stream>
 
@@ -219,17 +219,17 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 			<var name="xParticleReset"/>
 			<var name="yParticleReset"/>
 			<var name="zParticleReset"/>
-			<var name="zLevelParticleReset"/>
 			<var name="currentBlockReset"/>
 			<var name="currentCellReset"/>
 			<var name="buoyancyParticle"/>
 			<var name="indexLevel"/>
-			<var name="transfered"/>
 			<var name="buoyancySurfaceValues"/>
 <!-- MRP COMMENT OUT EXTRA FIELDS 
 			<var name="dtParticle"/>
 			<var name="verticalTreatment"/>
 			<var name="resetTime"/>
+			<var name="transfered"/>
+			<var name="zLevelParticleReset"/>
 MRP COMMENT OUT EXTRA FIELDS END -->  
 		</stream>
 
@@ -349,9 +349,6 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 		<var name="zParticleReset" type="real" dimensions="nParticles" units="m"
 			 description="reset z location of horizontal particle position"
 		/>
-		<var name="zLevelParticleReset" type="real" dimensions="nParticles" units="m"
-			 description="reset z-level for vertical elevation of particle position"
-		/>
 		<var name="currentBlockReset" type="integer" dimensions="nParticles" units="unitless"
 			 description="reset block for a particle"
 		/>
@@ -377,12 +374,15 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 		<var name="numTimesReset" type ="integer" dimensions="nParticles Time" units="unitless"
 			 description="flag to specify how many times the particle was reset" default_value="0"
 		/>
+		<var name="transfered" type ="integer" dimensions="nParticles Time" units="unitless"
+			 description="flag to monitor if the particle was transfered"
+		/>
+		<var name="zLevelParticleReset" type="real" dimensions="nParticles" units="m"
+			 description="reset z-level for vertical elevation of particle position"
+		/>
 MRP COMMENT OUT EXTRA FIELDS END -->  
 		<var name="buoyancyParticle" type="real" dimensions="nParticles Time" units="kg m^{-3}"
 			 description="buoyancy values for particle, currently proxy for density"
-		/>
-		<var name="transfered" type ="integer" dimensions="nParticles Time" units="unitless"
-			 description="flag to monitor if the particle was transfered"
 		/>
 <!-- TEMP FIELDS THAT NEED MOVED TO NonHalo below after verifying interpolation is correct -->
 		<var name="particleTemperature" type="real" dimensions="nParticles Time" units="degrees Celsius"

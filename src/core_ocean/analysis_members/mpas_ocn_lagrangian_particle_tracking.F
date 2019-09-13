@@ -257,7 +257,7 @@ contains
       type (mpas_pool_type), pointer :: lagrPartTrackFieldsPool, lagrPartTrackCellsPool, lagrPartTrackScratchPool
       type (mpas_pool_type), pointer :: lagrPartTrackScalarPool
       integer, dimension(:), pointer :: cellOwnerBlock
-      integer, pointer :: currentBlock, ioBlock, indexToParticleID, transfered, currentCellGlobalID
+      integer, pointer :: currentBlock, ioBlock, indexToParticleID, currentCellGlobalID
       type (mpas_particle_list_type), pointer :: particlelist
       type (mpas_particle_type), pointer :: particle
 
@@ -535,8 +535,6 @@ contains
         if (globalTimeSinceReset > globalResetTimeValue) then
           resetAllParticles = .true.
           globalTimeSinceReset = 0.0_RKIND
-          ! reset globalResetTimeValue
-          call ocn_setup_particle_reset_condition(domain, err)
         end if
 
         !{{{
@@ -2001,7 +1999,7 @@ contains
       type (mpas_pool_type), pointer :: diagnosticsPool
       type (mpas_pool_type), pointer :: lagrPartTrackFieldsPool, lagrPartTrackCellsPool, lagrPartTrackScratchPool
       integer, dimension(:), pointer :: cellOwnerBlock
-      integer, pointer :: currentBlock, ioBlock, indexToParticleID, transfered
+      integer, pointer :: currentBlock, ioBlock, indexToParticleID
       integer :: currentProc, ioProc
       type (mpas_particle_list_type), pointer :: particlelist
       type (mpas_particle_type), pointer :: particle
