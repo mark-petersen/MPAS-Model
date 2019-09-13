@@ -123,7 +123,7 @@ contains
       ! local variables
       !
       !-----------------------------------------------------------------
-      logical :: config_AM_lagrPartTrack_reset_particles
+!MRP      logical :: config_AM_lagrPartTrack_reset_particles ! this is not a namelist flag. That is confusing.
       character (len=StrKIND), pointer :: config_AM_lagrPartTrack_reset_criteria
 
       err = 0
@@ -255,6 +255,7 @@ contains
       type (mpas_pool_type), pointer :: diagnosticsPool
       type (mpas_pool_type), pointer :: tracersPool
       type (mpas_pool_type), pointer :: lagrPartTrackFieldsPool, lagrPartTrackCellsPool, lagrPartTrackScratchPool
+      type (mpas_pool_type), pointer :: lagrPartTrackScalarPool
       integer, dimension(:), pointer :: cellOwnerBlock
       integer, pointer :: currentBlock, ioBlock, indexToParticleID, transfered, currentCellGlobalID
       type (mpas_particle_list_type), pointer :: particlelist
@@ -286,7 +287,7 @@ contains
       integer, dimension(:,:), pointer :: cellsOnCell
       integer, dimension(:,:), pointer :: cellsOnVertex
       logical, pointer :: onSphere
-      logical :: config_AM_lagrPartTrack_reset_particles
+!MRP      logical :: config_AM_lagrPartTrack_reset_particles ! this is not a namelist flag. That is confusing.
       character (len=StrKIND), pointer :: config_AM_lagrPartTrack_reset_criteria, &
         config_AM_lagrPartTrack_compute_interval, config_AM_lagrPartTrack_output_stream
 
@@ -306,7 +307,9 @@ contains
       integer, pointer :: verticalTreatment, indexLevel, filterNum, timeIntegration
       character(len=StrKIND), pointer :: config_dt
       type (MPAS_timeInterval_type) :: timeStepESMF
-      logical :: resetParticle, resetParticleAny
+!MRP      logical :: resetParticle, resetParticleAny
+      real (kind=RKIND), pointer :: globalResetTimeValue, globalTimeSinceReset
+      logical :: resetAllParticles
       integer :: err_tmp
 
       ! sampling variables
@@ -405,11 +408,11 @@ contains
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_sample_Fe', config_AM_lagrPartTrack_sample_Fe)
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_sample_O2', config_AM_lagrPartTrack_sample_O2)
 
-      if (trim(config_AM_lagrPartTrack_reset_criteria) == 'none') then
-        config_AM_lagrPartTrack_reset_particles = .False.
-      else
-        config_AM_lagrPartTrack_reset_particles = .True.
-      end if
+!MRP      if (trim(config_AM_lagrPartTrack_reset_criteria) == 'none') then
+!MRP        config_AM_lagrPartTrack_reset_particles = .False.
+!MRP      else
+!MRP        config_AM_lagrPartTrack_reset_particles = .True.
+!MRP      end if
 
       ! get the most recent velocities on the potential density surfaces
 #ifdef MPAS_DEBUG
@@ -420,7 +423,7 @@ contains
       call mpas_timer_stop("velocity_pot_density_LPT")
 #endif
 
-      resetParticleAny = .False.
+!MRP      resetParticleAny = .False.
 
       block => domain % blocklist
       do while (associated(block)) !{{{
@@ -517,9 +520,24 @@ contains
         call mpas_get_timeInterval(timeStepESMF, dt=dtSim)
         LIGHT_DEBUG_WRITE('dtSim = ' COMMA dtSim)
 
+        ! MRP moved this outside of particle loop
         ! adjust time step for consistency with integer number of steps
         nSteps = ceiling(dtSim*config_AM_lagrPartTrack_global_dtParticle)
         dt = dtSim/nSteps
+
+        ! test if it is time to reset the particles
+        resetAllParticles = .false.
+        call mpas_pool_get_subpool(block % structs, 'lagrPartTrackScalars', lagrPartTrackScalarPool)
+        call mpas_pool_get_array(lagrPartTrackScalarPool, 'globalResetTimeValue', globalResetTimeValue)
+        call mpas_pool_get_array(lagrPartTrackScalarPool, 'globalTimeSinceReset', globalTimeSinceReset)
+        ! advance particle time
+        globalTimeSinceReset = globalTimeSinceReset + dt
+        if (globalTimeSinceReset > globalResetTimeValue) then
+          resetAllParticles = .true.
+          globalTimeSinceReset = 0.0_RKIND
+          ! reset globalResetTimeValue
+          call ocn_setup_particle_reset_condition(domain, err)
+        end if
 
         !{{{
         ! flip previous time level to back (switching memory pointers)
@@ -1125,15 +1143,17 @@ contains
           call mpas_timer_start("particleAssignments")
 #endif
 
-          resetParticle = .False.
-          if (config_AM_lagrPartTrack_reset_particles) then   ! need to link to currentBlockReset for communication
+!MRP          resetParticle = .False.
+!MRP          if (config_AM_lagrPartTrack_reset_particles) then   ! need to link to currentBlockReset for communication
+          if (resetAllParticles) then   ! need to link to currentBlockReset for communication
             ! determine if particles should be reset based on different criteria.  If so, reset them.
-            call ocn_evaluate_particle_reset_condition(domain, block, particle, dtSim, iCell, resetParticle, err)
-          end if
-          resetParticleAny = resetParticleAny .or. resetParticle
-
-          if (.not. resetParticle) then
+            call ocn_evaluate_particle_reset_condition(domain, block, particle, dtSim, iCell, err)
+!MRP          end if
+!MRP          resetParticleAny = resetParticleAny .or. resetParticle
+!MRP
+!MRP          if (.not. resetParticle) then
             ! update halo fields for particles moving from adjacent computational halos
+          else
             call mpas_particle_list_update_particle_block(domain, block, particle, 'lagrPartTrackCells', iCell)
           end if
 
@@ -1166,7 +1186,8 @@ contains
 #ifdef MPAS_DEBUG
       call mpas_timer_start("trans_from_block_to_blockLPT")
 #endif
-      if (config_AM_lagrPartTrack_reset_particles .and. resetParticleAny) then
+!MRP      if (config_AM_lagrPartTrack_reset_particles .and. resetParticleAny) then
+      if (resetAllParticles) then
          ! need to link to currentBlockReset for communication
          call mpas_particle_list_build_halos(domain, err, 'currentBlockReset', g_compProcNeighs)
          ! take the union of this halo with the particle computation halos to build complete computational halo

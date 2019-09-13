@@ -138,7 +138,7 @@ module ocn_lagrangian_particle_tracking_reset
 !>  Input:   domain, particle
 !>  Output:  boolean specifying whether the particles should be reset.
 !-----------------------------------------------------------------------
-  subroutine ocn_evaluate_particle_reset_condition(domain, block, particle, dt, iCell, resetParticle, err) !{{{
+  subroutine ocn_evaluate_particle_reset_condition(domain, block, particle, dt, iCell, err) !{{{
 
      implicit none
      !-----------------------------------------------------------------
@@ -166,7 +166,7 @@ module ocn_lagrangian_particle_tracking_reset
      !
      !-----------------------------------------------------------------
 
-     logical, intent(out) :: resetParticle
+!MRP     logical, intent(out) :: resetParticle
      integer, intent(out) :: err !< Output: error flag
 
      !-----------------------------------------------------------------
@@ -176,14 +176,14 @@ module ocn_lagrangian_particle_tracking_reset
      !-----------------------------------------------------------------
 
      type (mpas_pool_type), pointer :: lagrPartTrackScalarPool, lagrPartTrackRegionsPool
-     integer, pointer :: transfered, numTimesReset
+     integer, pointer :: transfered !MRP, numTimesReset
      integer, pointer :: currentBlock, currentBlockReset, currentCell, currentCellReset
      real (kind=RKIND), pointer :: xParticleReset, yParticleReset, zParticleReset, zLevelParticleReset
      real (kind=RKIND), pointer :: xParticle, yParticle, zParticle, zLevelParticle
-     real (kind=RKIND), pointer :: timeSinceReset
+!MRP     real (kind=RKIND), pointer :: timeSinceReset
 !     real (kind=RKIND), pointer :: sumU, sumV, sumUU, sumUV, sumVV
-     integer, pointer :: resetTime
-     real (kind=RKIND), pointer :: globalResetTimeValue
+!MRP     integer, pointer :: resetTime
+!MRP     real (kind=RKIND), pointer :: globalResetTimeValue
 
      character (len=StrKIND), pointer :: config_AM_lagrPartTrack_reset_criteria
      logical, pointer :: config_AM_lagrPartTrack_reset_if_outside_region
@@ -192,98 +192,98 @@ module ocn_lagrangian_particle_tracking_reset
 
      ! initialize outputs
      err = 0
-     resetParticle = .False.
-
-     ! get config options
-      call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_reset_criteria', &
-        config_AM_lagrPartTrack_reset_criteria)
-      call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_reset_if_outside_region', &
-        config_AM_lagrPartTrack_reset_if_outside_region)
-      call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_reset_if_inside_region', &
-        config_AM_lagrPartTrack_reset_if_inside_region)
-
-     ! get variables
-     call mpas_pool_get_array(particle % haloDataPool, 'timeSinceReset', timeSinceReset)
-     call mpas_pool_get_array(particle % haloDataPool, 'resetTime', resetTime)
-
-     call mpas_pool_get_subpool(block % structs, 'lagrPartTrackScalars', lagrPartTrackScalarPool)
-     call mpas_pool_get_array(lagrPartTrackScalarPool, 'globalResetTimeValue', globalResetTimeValue)
-
-     if (trim(config_AM_lagrPartTrack_reset_criteria) == 'region' .or. &
-         trim(config_AM_lagrPartTrack_reset_criteria) == 'all' &
-        ) then
-      call mpas_pool_get_subpool(block % structs, 'lagrPartTrackRegions', lagrPartTrackRegionsPool)
-      call mpas_pool_get_array(lagrPartTrackRegionsPool, 'resetInsideRegionMaskValue1', resetInsideRegionMaskValue1)
-      call mpas_pool_get_array(lagrPartTrackRegionsPool, 'resetOutsideRegionMaskValue1', resetOutsideRegionMaskValue1)
-    end if
-
-     ! advance particle time
-     timeSinceReset = timeSinceReset + dt
-
-     ! determine whether reset should occur depending upon type of reset condition
-     select case (trim(config_AM_lagrPartTrack_reset_criteria))
-
-       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-       ! time based
-       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  !{{{
-
-       case ('particle_time')
-         ! use particle's value for resetTime and timeSinceReset
-         if (timeSinceReset > resetTime) then
-           resetParticle = .True.
-         end if
-
-       case ('global_time')
-         if (timeSinceReset > globalResetTimeValue) then
-           resetParticle = .True.
-         end if
-
-       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! !}}}
-       ! region based
-       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! !{{{
-
-       case ('region')
-         ! outside region
-         if (config_AM_lagrPartTrack_reset_if_outside_region .and. &
-             resetOutsideRegionMaskValue1(iCell) == 0) then
-           resetParticle = .True.
-         end if
-         ! inside region
-         if (config_AM_lagrPartTrack_reset_if_inside_region .and. &
-             resetInsideRegionMaskValue1(iCell) == 1) then
-           resetParticle = .True.
-         end if
-
-       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! !}}}
-       ! all conditions
-       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! !{{{
-
-       case ('all')
-             ! particle time
-         if ((timeSinceReset > resetTime) .or. &
-             ! global time
-             (timeSinceReset > globalResetTimeValue) .or. &
-             ! outside region
-             (config_AM_lagrPartTrack_reset_if_outside_region .and. &
-              resetOutsideRegionMaskValue1(iCell) == 0) .or. &
-             ! inside region
-             (config_AM_lagrPartTrack_reset_if_inside_region .and. &
-              resetInsideRegionMaskValue1(iCell) == 1)) then
-           resetParticle = .True.
-         end if
-
-       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! !}}}
-       ! default
-       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-       case default
-         call mpas_log_write( 'WARNING: reset criteria in config_AM_lagrPartTrack_reset_criteria=' // &
-           trim(config_AM_lagrPartTrack_reset_criteria) // ' unknown! Cannot restart.')
-
-     end select
-
-     ! reset particle block, cell, and position to reset values
-     if (resetParticle) then
+!MRP     resetParticle = .False.
+!MRP
+!MRP     ! get config options
+!MRP      call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_reset_criteria', &
+!MRP        config_AM_lagrPartTrack_reset_criteria)
+!MRP      call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_reset_if_outside_region', &
+!MRP        config_AM_lagrPartTrack_reset_if_outside_region)
+!MRP      call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_reset_if_inside_region', &
+!MRP        config_AM_lagrPartTrack_reset_if_inside_region)
+!MRP
+!MRP     ! get variables
+!MRP     call mpas_pool_get_array(particle % haloDataPool, 'timeSinceReset', timeSinceReset)
+!MRP     call mpas_pool_get_array(particle % haloDataPool, 'resetTime', resetTime)
+!MRP
+!MRP     call mpas_pool_get_subpool(block % structs, 'lagrPartTrackScalars', lagrPartTrackScalarPool)
+!MRP     call mpas_pool_get_array(lagrPartTrackScalarPool, 'globalResetTimeValue', globalResetTimeValue)
+!MRP
+!MRP     if (trim(config_AM_lagrPartTrack_reset_criteria) == 'region' .or. &
+!MRP         trim(config_AM_lagrPartTrack_reset_criteria) == 'all' &
+!MRP        ) then
+!MRP      call mpas_pool_get_subpool(block % structs, 'lagrPartTrackRegions', lagrPartTrackRegionsPool)
+!MRP      call mpas_pool_get_array(lagrPartTrackRegionsPool, 'resetInsideRegionMaskValue1', resetInsideRegionMaskValue1)
+!MRP      call mpas_pool_get_array(lagrPartTrackRegionsPool, 'resetOutsideRegionMaskValue1', resetOutsideRegionMaskValue1)
+!MRP    end if
+!MRP
+!MRP     ! advance particle time
+!MRP     timeSinceReset = timeSinceReset + dt
+!MRP
+!MRP     ! determine whether reset should occur depending upon type of reset condition
+!MRP     select case (trim(config_AM_lagrPartTrack_reset_criteria))
+!MRP
+!MRP       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!MRP       ! time based
+!MRP       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  !{{{
+!MRP
+!MRP       case ('particle_time')
+!MRP         ! use particle's value for resetTime and timeSinceReset
+!MRP         if (timeSinceReset > resetTime) then
+!MRP           resetParticle = .True.
+!MRP         end if
+!MRP
+!MRP       case ('global_time')
+!MRP         if (timeSinceReset > globalResetTimeValue) then
+!MRP           resetParticle = .True.
+!MRP         end if
+!MRP
+!MRP       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! !}}}
+!MRP       ! region based
+!MRP       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! !{{{
+!MRP
+!MRP       case ('region')
+!MRP         ! outside region
+!MRP         if (config_AM_lagrPartTrack_reset_if_outside_region .and. &
+!MRP             resetOutsideRegionMaskValue1(iCell) == 0) then
+!MRP           resetParticle = .True.
+!MRP         end if
+!MRP         ! inside region
+!MRP         if (config_AM_lagrPartTrack_reset_if_inside_region .and. &
+!MRP             resetInsideRegionMaskValue1(iCell) == 1) then
+!MRP           resetParticle = .True.
+!MRP         end if
+!MRP
+!MRP       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! !}}}
+!MRP       ! all conditions
+!MRP       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! !{{{
+!MRP
+!MRP       case ('all')
+!MRP             ! particle time
+!MRP         if ((timeSinceReset > resetTime) .or. &
+!MRP             ! global time
+!MRP             (timeSinceReset > globalResetTimeValue) .or. &
+!MRP             ! outside region
+!MRP             (config_AM_lagrPartTrack_reset_if_outside_region .and. &
+!MRP              resetOutsideRegionMaskValue1(iCell) == 0) .or. &
+!MRP             ! inside region
+!MRP             (config_AM_lagrPartTrack_reset_if_inside_region .and. &
+!MRP              resetInsideRegionMaskValue1(iCell) == 1)) then
+!MRP           resetParticle = .True.
+!MRP         end if
+!MRP
+!MRP       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! !}}}
+!MRP       ! default
+!MRP       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!MRP
+!MRP       case default
+!MRP         call mpas_log_write( 'WARNING: reset criteria in config_AM_lagrPartTrack_reset_criteria=' // &
+!MRP           trim(config_AM_lagrPartTrack_reset_criteria) // ' unknown! Cannot restart.')
+!MRP
+!MRP     end select
+!MRP
+!MRP     ! reset particle block, cell, and position to reset values
+!MRP     if (resetParticle) then
 
        !call mpas_log_write( 'reseting particle')
 
@@ -299,7 +299,7 @@ module ocn_lagrangian_particle_tracking_reset
        call mpas_pool_get_array(particle % haloDataPool, 'yParticle', yParticle)
        call mpas_pool_get_array(particle % haloDataPool, 'zParticle', zParticle)
        call mpas_pool_get_array(particle % haloDataPool, 'zLevelParticle', zLevelParticle)
-       call mpas_pool_get_array(particle % haloDataPool, 'numTimesReset', numTimesReset)
+!MRP       call mpas_pool_get_array(particle % haloDataPool, 'numTimesReset', numTimesReset)
        call mpas_pool_get_array(particle % haloDataPool, 'transfered', transfered)
 !       call mpas_pool_get_array(particle % haloDataPool, 'sumU', sumU)
 !       call mpas_pool_get_array(particle % haloDataPool, 'sumV', sumV)
@@ -308,13 +308,13 @@ module ocn_lagrangian_particle_tracking_reset
 !       call mpas_pool_get_array(particle % haloDataPool, 'sumVV', sumVV)
 
        ! reset the time
-       timeSinceReset = 0.0_RKIND
+!MRP       timeSinceReset = 0.0_RKIND
 
        ! increment counters
        if (currentBlock /= currentBlockReset) then
          transfered = transfered + 1
        end if
-       numTimesReset = numTimesReset + 1
+ !MRP      numTimesReset = numTimesReset + 1
 
        ! reset the block and the current cell
        currentBlock = currentBlockReset
@@ -337,7 +337,7 @@ module ocn_lagrangian_particle_tracking_reset
 
        ! more variables may need to be reset in the future
 
-     end if
+!MRP     end if
 
    end subroutine ocn_evaluate_particle_reset_condition!}}}
 

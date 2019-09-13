@@ -222,7 +222,6 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 			<var name="zLevelParticleReset"/>
 			<var name="currentBlockReset"/>
 			<var name="currentCellReset"/>
-			<var name="resetTime"/>
 			<var name="buoyancyParticle"/>
 			<var name="indexLevel"/>
 			<var name="transfered"/>
@@ -230,6 +229,7 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 <!-- MRP COMMENT OUT EXTRA FIELDS 
 			<var name="dtParticle"/>
 			<var name="verticalTreatment"/>
+			<var name="resetTime"/>
 MRP COMMENT OUT EXTRA FIELDS END -->  
 		</stream>
 
@@ -256,6 +256,9 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 	<var_struct name="lagrPartTrackScalars" time_levs="1" packages="lagrPartTrackAMPKG">
 		<var name="globalResetTimeValue" type="real" dimensions="Time" units="s"
 			 description="Time in s for a global reset."
+		/>
+		<var name="globalTimeSinceReset" type="real" dimensions="Time" units="s"
+			 description="Time in s since last global reset."
 		/>
 	</var_struct>
 	<var_struct name="lagrPartTrackFields" time_levs="2" packages="lagrPartTrackAMPKG">
