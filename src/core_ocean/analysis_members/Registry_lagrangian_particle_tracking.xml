@@ -43,7 +43,7 @@
 			 description="type of temporal interpolation with possible_values='EE(1), RK2(2), RK4(4)' as ENUMs"
 			possible_values="1, 2, 4,..."
 		/>
-		<nml_option name="config_AM_lagrPartTrack_reset_criteria" type="character" default_value="none" units="unitless"
+		<nml_option name="config_AM_lagrPartTrack_reset_criteria" type="character" default_value="global_time" units="unitless"
 			description="Specify whether particles should not be reset ('none'), be reset on a timer for each particle ('particle_time'), be reset on config_AM_lagrPartTrack_reset_time_globally value ('global_time'), be reset based on regions ('region'), or be reset for all conditions ('all')."
 			possible_values="'none','particle_time','global_time', 'region','all'"
 		/>
@@ -145,9 +145,6 @@
 			<var name="yParticleReset"/>
 			<var name="zParticleReset"/>
 			<var name="zLevelParticleReset"/>
-			<var name="timeSinceReset"/>
-			<var name="resetTime"/>
-			<var name="numTimesReset"/>
 			<var name="buoyancyParticle"/>
 			<var name="indexLevel"/>
 			<var name="cellOwnerBlock"/>
@@ -161,6 +158,9 @@
 			<var name="latParticle"/>
 			<var name="dtParticle"/>
 			<var name="verticalTreatment"/>
+			<var name="timeSinceReset"/>
+			<var name="resetTime"/>
+			<var name="numTimesReset"/>
 MRP COMMENT OUT EXTRA FIELDS END -->  
 		</stream>
 
@@ -189,9 +189,6 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 			<var name="zLevelParticleReset"/>
 			<var name="currentBlockReset"/>
 			<var name="currentCellReset"/>
-			<var name="timeSinceReset"/>
-			<var name="resetTime"/>
-			<var name="numTimesReset"/>
 			<var name="buoyancyParticle"/>
 			<var name="indexLevel"/>
 			<var name="transfered"/>
@@ -199,6 +196,9 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 <!-- MRP COMMENT OUT EXTRA FIELDS 
 			<var name="dtParticle"/>
 			<var name="verticalTreatment"/>
+			<var name="timeSinceReset"/>
+			<var name="resetTime"/>
+			<var name="numTimesReset"/>
 MRP COMMENT OUT EXTRA FIELDS END -->  
 		</stream>
 
@@ -355,15 +355,6 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 		<var name="currentCellReset" type="integer" dimensions="nParticles" units="unitless"
 			 description="reset cell for a particle"
 		/>
-		<var name="timeSinceReset" type="real" dimensions="nParticles" units="m"
-			 description="time (in seconds) since last particle reset" default_value="0.0"
-		/>
-		<var name="resetTime" type="integer" dimensions="nParticles" units="m"
-			 description="reset timer (in seconds) for particles"
-		/>
-		<var name="numTimesReset" type ="integer" dimensions="nParticles Time" units="unitless"
-			 description="flag to specify how many times the particle was reset" default_value="0"
-		/>
 		<var name="indexLevel" type="integer" dimensions="nParticles Time" units="unitless"
 			 description="0 if particle is fixed, or index level if particle is free-floating"
 		/>
@@ -373,6 +364,15 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 		/>
 		<var name="verticalTreatment" type="integer" dimensions="nParticles Time" units="unitless"
 			 description="select type of vertical treatment to be used, with possible_values='indexLevel','fixedZLevel','passiveFloat','buoyancySurface','argoFloat' (ENUM)"
+		/>
+		<var name="timeSinceReset" type="real" dimensions="nParticles" units="m"
+			 description="time (in seconds) since last particle reset" default_value="0.0"
+		/>
+		<var name="resetTime" type="integer" dimensions="nParticles" units="m"
+			 description="reset timer (in seconds) for particles"
+		/>
+		<var name="numTimesReset" type ="integer" dimensions="nParticles Time" units="unitless"
+			 description="flag to specify how many times the particle was reset" default_value="0"
 		/>
 MRP COMMENT OUT EXTRA FIELDS END -->  
 		<var name="buoyancyParticle" type="real" dimensions="nParticles Time" units="kg m^{-3}"
