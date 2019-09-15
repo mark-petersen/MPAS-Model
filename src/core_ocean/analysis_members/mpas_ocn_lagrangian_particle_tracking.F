@@ -522,7 +522,7 @@ contains
 
         ! MRP moved this outside of particle loop
         ! adjust time step for consistency with integer number of steps
-        nSteps = ceiling(dtSim*config_AM_lagrPartTrack_global_dtParticle)
+        nSteps = ceiling(dtSim/config_AM_lagrPartTrack_global_dtParticle)
         dt = dtSim/nSteps
 
         ! test if it is time to reset the particles
@@ -532,6 +532,7 @@ contains
         call mpas_pool_get_array(lagrPartTrackScalarPool, 'globalTimeSinceReset', globalTimeSinceReset)
         ! advance particle time
         globalTimeSinceReset = globalTimeSinceReset + dt
+print *, '535 globalResetTimeValue, globalTimeSinceReset, dt, nSteps, dtSim',globalResetTimeValue, globalTimeSinceReset, dt, nSteps, dtSim
         if (globalTimeSinceReset > globalResetTimeValue) then
           resetAllParticles = .true.
           globalTimeSinceReset = 0.0_RKIND
@@ -749,18 +750,19 @@ contains
               call mpas_timer_stop("get_validated_cell_idLPT")
 #endif
 
-              if(verticalTreatment /= 4) then
-                ! other cases using zSubStep for iLevel and vertical interpolation
-#ifdef MPAS_DEBUG
-                call mpas_timer_start("mpas_get_vertical_idLPT")
-#endif
-                ! must have inputs into mpas_get_vertical_id be positive to get right top/bottom
-                iLevel = mpas_get_vertical_id(maxLevelCell(iCell), -zSubStep, -zMid(:,iCell))
-#ifdef MPAS_DEBUG
-                call mpas_timer_stop("mpas_get_vertical_idLPT")
-#endif
-                LIGHT_DEBUG_WRITE('iLevel=' COMMA iLevel)
-              end if
+!mrp only verticalTreatment=4 (density surfaces) is allowed for this simulation
+!mrp              if(verticalTreatment /= 4) then
+!mrp                ! other cases using zSubStep for iLevel and vertical interpolation
+!mrp#ifdef MPAS_DEBUG
+!mrp                call mpas_timer_start("mpas_get_vertical_idLPT")
+!mrp#endif
+!mrp                ! must have inputs into mpas_get_vertical_id be positive to get right top/bottom
+!mrp                iLevel = mpas_get_vertical_id(maxLevelCell(iCell), -zSubStep, -zMid(:,iCell))
+!mrp#ifdef MPAS_DEBUG
+!mrp                call mpas_timer_stop("mpas_get_vertical_idLPT")
+!mrp#endif
+!mrp                LIGHT_DEBUG_WRITE('iLevel=' COMMA iLevel)
+!mrp              end if
 
               !!!!!!!!!! TEMPORALLY INTERPOLATE TIME FIELD !!!!!!!!!!
               ! use these coefficients to just get the velocity at n
