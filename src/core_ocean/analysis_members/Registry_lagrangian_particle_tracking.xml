@@ -145,7 +145,6 @@
 			<var name="yParticleReset"/>
 			<var name="zParticleReset"/>
 			<var name="buoyancyParticle"/>
-			<var name="indexLevel"/>
 			<var name="cellOwnerBlock"/>
 			<var name="buoyancySurfaceValues"/>
 			<var name="buoyancySurfaceVelocityMeridional"/>
@@ -161,6 +160,7 @@
 			<var name="numTimesReset"/>
 			<var name="zLevelParticleReset"/>
 			<var name="transfered"/>
+			<var name="indexLevel"/>
 MRP COMMENT OUT EXTRA FIELDS END -->  
 		</stream>
 
@@ -189,7 +189,6 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 			<var name="currentBlockReset"/>
 			<var name="currentCellReset"/>
 			<var name="buoyancyParticle"/>
-			<var name="indexLevel"/>
 			<var name="buoyancySurfaceValues"/>
 <!-- MRP COMMENT OUT EXTRA FIELDS 
 			<var name="dtParticle"/>
@@ -199,6 +198,7 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 			<var name="numTimesReset"/>
 			<var name="zLevelParticleReset"/>
 			<var name="transfered"/>
+			<var name="indexLevel"/>
 MRP COMMENT OUT EXTRA FIELDS END -->  
 		</stream>
 
@@ -222,7 +222,6 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 			<var name="currentBlockReset"/>
 			<var name="currentCellReset"/>
 			<var name="buoyancyParticle"/>
-			<var name="indexLevel"/>
 			<var name="buoyancySurfaceValues"/>
 <!-- MRP COMMENT OUT EXTRA FIELDS 
 			<var name="dtParticle"/>
@@ -230,6 +229,7 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 			<var name="resetTime"/>
 			<var name="transfered"/>
 			<var name="zLevelParticleReset"/>
+			<var name="indexLevel"/>
 MRP COMMENT OUT EXTRA FIELDS END -->  
 		</stream>
 
@@ -357,9 +357,6 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 		<var name="currentCellReset" type="integer" dimensions="nParticles" units="unitless"
 			 description="reset cell for a particle"
 		/>
-		<var name="indexLevel" type="integer" dimensions="nParticles Time" units="unitless"
-			 description="0 if particle is fixed, or index level if particle is free-floating"
-		/>
 <!-- MRP COMMENT OUT EXTRA FIELDS 
 		<var name="dtParticle" type="real" dimensions="nParticles Time" units="s"
 			 description="Any positive real value, but limited by CFL condition."
@@ -381,6 +378,9 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 		/>
 		<var name="zLevelParticleReset" type="real" dimensions="nParticles" units="m"
 			 description="reset z-level for vertical elevation of particle position"
+		/>
+		<var name="indexLevel" type="integer" dimensions="nParticles Time" units="unitless"
+			 description="0 if particle is fixed, or index level if particle is free-floating"
 		/>
 MRP COMMENT OUT EXTRA FIELDS END -->  
 		<var name="buoyancyParticle" type="real" dimensions="nParticles Time" units="kg m^{-3}"

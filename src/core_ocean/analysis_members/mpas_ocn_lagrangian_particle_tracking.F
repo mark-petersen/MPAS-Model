@@ -264,7 +264,7 @@ contains
       real (kind=RKIND), dimension(3) :: particlePosition, particleVelocity
       real (kind=RKIND), pointer :: xParticle, yParticle, zParticle, buoyancyParticle !, &
 !        lonVel, latVel, sumU, sumV, sumUU, sumUV, sumVV
-! MRP extra      real (kind=RKIND), pointer :: lonParticle, latParticle
+!mrp      real (kind=RKIND), pointer :: lonParticle, latParticle
       real (kind=RKIND), dimension(3) :: xSubStep, diffSubStep, diffParticlePosition
       real (kind=RKIND), pointer :: zLevelParticle
       real (kind=RKIND), dimension(:,:), pointer :: zTop, vertVelocityTop, zMid, areaBArray
@@ -299,12 +299,13 @@ contains
       real (kind=RKIND), dimension(5) :: kCoeffVert
       real (kind=RKIND), dimension(2) :: timeCoeff
       real (kind=RKIND) :: dt, dtSim, tSubStep
-! MRP extra      real (kind=RKIND), pointer :: dtParticle
+!mrp      real (kind=RKIND), pointer :: dtParticle
       real (kind=RKIND) :: zSubStep
       real (kind=RKIND) :: diffSubStepVert, diffParticlePositionVert, particleVelocityVert, verticalVelocityInterp
       real (kind=RKIND) :: buoyancyInterp
       real (kind=RKIND), pointer :: sphereRadius
-      integer, pointer :: verticalTreatment, indexLevel, filterNum, timeIntegration
+      integer, pointer :: verticalTreatment, filterNum, timeIntegration
+      integer :: indexLevel
       character(len=StrKIND), pointer :: config_dt
       type (MPAS_timeInterval_type) :: timeStepESMF
 !MRP      logical :: resetParticle, resetParticleAny
@@ -582,11 +583,11 @@ print *, '535 globalResetTimeValue, globalTimeSinceReset, dt, nSteps, dtSim',glo
           call mpas_pool_get_array(particle % haloDataPool, 'xParticle', xParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'yParticle', yParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'zParticle', zParticle)
-! MRP extra          call mpas_pool_get_array(particle % haloDataPool, 'lonParticle', lonParticle)
-! MRP extra          call mpas_pool_get_array(particle % haloDataPool, 'latParticle', latParticle)
+!mrp          call mpas_pool_get_array(particle % haloDataPool, 'lonParticle', lonParticle)
+!mrp          call mpas_pool_get_array(particle % haloDataPool, 'latParticle', latParticle)
 
           ! compute particle lat/lon position
-! MRP extra          call convert_latlon_from_xyz(latParticle, lonParticle, xParticle, yParticle, zParticle)
+!mrp          call convert_latlon_from_xyz(latParticle, lonParticle, xParticle, yParticle, zParticle)
 
           particlePosition(1) = xParticle
           particlePosition(2) = yParticle
@@ -595,7 +596,8 @@ print *, '535 globalResetTimeValue, globalTimeSinceReset, dt, nSteps, dtSim',glo
           call mpas_pool_get_array(particle % haloDataPool, 'zLevelParticle', zLevelParticle)
 
 ! MRP moved out of particle loop call mpas_pool_get_array(particle % haloDataPool, 'verticalTreatment', verticalTreatment)
-          call mpas_pool_get_array(particle % haloDataPool, 'indexLevel', indexLevel)
+!mrp          call mpas_pool_get_array(particle % haloDataPool, 'indexLevel', indexLevel)
+          indexLevel = -99 !mrp indexLevel is not used for buoyancy surfaces.
           call mpas_pool_get_array(particle % haloDataPool, 'buoyancyParticle', buoyancyParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'indexToParticleID', indexToParticleID)
           call mpas_pool_get_array(particle % haloDataPool, 'currentCell', iCell)
@@ -636,8 +638,8 @@ print *, '535 globalResetTimeValue, globalTimeSinceReset, dt, nSteps, dtSim',glo
 #endif
           ! adjust time step for consistency with integer number of steps
           ! MRP this was moved outside of loop
-! MRP extra          nSteps = ceiling(dtSim/dtParticle)
-! MRP extra          dt = dtSim/nSteps
+!mrp          nSteps = ceiling(dtSim/dtParticle)
+!mrp          dt = dtSim/nSteps
 
           !!!!!!!!!! ASSIGN TEMPORAL INTEGRATION COEFFICIENTS !!!!!!!!!!
           ! kCoeff   is (3,subStepOrder+1)
@@ -1129,7 +1131,7 @@ print *, '535 globalResetTimeValue, globalTimeSinceReset, dt, nSteps, dtSim',glo
           zParticle = particlePosition(3)
 
           ! compute particle lat/lon position
-! MRP extra          call convert_latlon_from_xyz(latParticle, lonParticle, xParticle, yParticle, zParticle)
+!mrp          call convert_latlon_from_xyz(latParticle, lonParticle, xParticle, yParticle, zParticle)
 
           !!!!!!!!!! PASS PARTICLES FROM PROCESSOR TO PROCESSOR !!!!!!!!!!
           ! note, assumes that integration above didn't move particle past halo
@@ -2013,7 +2015,7 @@ print *, '535 globalResetTimeValue, globalTimeSinceReset, dt, nSteps, dtSim',glo
       real (kind=RKIND), dimension(3) :: particlePosition, particleVelocity
       real (kind=RKIND), pointer :: xParticle, yParticle, zParticle, lonVel, latVel, buoyancyParticle !, &
 !        lonVel, latVel, sumU, sumV, sumUU, sumUV, sumVV
-! MRP extra      real (kind=RKIND), pointer :: lonParticle, latParticle
+!mrp      real (kind=RKIND), pointer :: lonParticle, latParticle
       real (kind=RKIND), dimension(3) :: xSubStep, diffSubStep, diffParticlePosition
       real (kind=RKIND), pointer :: zLevelParticle
       real (kind=RKIND), dimension(:,:), pointer :: zTop, vertVelocityTop, zMid, areaBArray
@@ -2047,12 +2049,13 @@ print *, '535 globalResetTimeValue, globalTimeSinceReset, dt, nSteps, dtSim',glo
       real (kind=RKIND), dimension(5) :: kCoeffVert
       real (kind=RKIND), dimension(2) :: timeCoeff
       real (kind=RKIND) :: dt, dtSim, tSubStep
-! MRP extra      real (kind=RKIND), pointer :: dtParticle
+!mrp      real (kind=RKIND), pointer :: dtParticle
       real (kind=RKIND) :: zSubStep
       real (kind=RKIND) :: diffSubStepVert, diffParticlePositionVert, particleVelocityVert, verticalVelocityInterp
       real (kind=RKIND) :: buoyancyInterp
       real (kind=RKIND), pointer :: sphereRadius
-      integer, pointer :: verticalTreatment, indexLevel, filterNum, iCell, currentCellGlobalID
+      integer, pointer :: verticalTreatment, filterNum, iCell, currentCellGlobalID
+      integer :: indexLevel
 
       type (mpas_pool_type), pointer :: tracersPool
       real (kind=RKIND), dimension(:,:,:), pointer :: activeTracers
@@ -2182,8 +2185,8 @@ print *, '535 globalResetTimeValue, globalTimeSinceReset, dt, nSteps, dtSim',glo
           call mpas_pool_get_array(particle % haloDataPool, 'xParticle', xParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'yParticle', yParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'zParticle', zParticle)
-! MRP extra          call mpas_pool_get_array(particle % haloDataPool, 'lonParticle', lonParticle)
-! MRP extra          call mpas_pool_get_array(particle % haloDataPool, 'latParticle', latParticle)
+!mrp          call mpas_pool_get_array(particle % haloDataPool, 'lonParticle', lonParticle)
+!mrp          call mpas_pool_get_array(particle % haloDataPool, 'latParticle', latParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'currentCell', iCell)
           call mpas_pool_get_array(particle % haloDataPool, 'currentCellGlobalID', currentCellGlobalID)
           iCell = -1
@@ -2193,13 +2196,14 @@ print *, '535 globalResetTimeValue, globalTimeSinceReset, dt, nSteps, dtSim',glo
           particlePosition(3) = zParticle
 
           ! compute particle lat/lon position
-! MRP extra          call convert_latlon_from_xyz(latParticle, lonParticle, xParticle, yParticle, zParticle)
+!mrp          call convert_latlon_from_xyz(latParticle, lonParticle, xParticle, yParticle, zParticle)
 
           call mpas_pool_get_array(particle % haloDataPool, 'zLevelParticle', zLevelParticle)
 
 ! MRP moved out of particle loop call mpas_pool_get_array(particle % haloDataPool, 'verticalTreatment', verticalTreatment)
-          call mpas_pool_get_array(particle % haloDataPool, 'indexLevel', indexLevel)
-! MRP extra          call mpas_pool_get_array(particle % haloDataPool, 'dtParticle', dtParticle)
+!mrp          call mpas_pool_get_array(particle % haloDataPool, 'indexLevel', indexLevel)
+          indexLevel = -99 !mrp indexLevel is not used for buoyancy surfaces.
+!mrp          call mpas_pool_get_array(particle % haloDataPool, 'dtParticle', dtParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'buoyancyParticle', buoyancyParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'indexToParticleID', indexToParticleID)
 
@@ -2672,7 +2676,7 @@ print *, '535 globalResetTimeValue, globalTimeSinceReset, dt, nSteps, dtSim',glo
     integer, intent(in) :: iCell
     integer, dimension(:), intent(in) :: maxLevelCell
     integer, intent(in) :: verticalTreatment
-    integer, pointer, intent(in) :: indexLevel
+    integer, intent(in) :: indexLevel
     integer, intent(in) :: nCellVertices
     integer, dimension(:,:), intent(in) :: verticesOnCell
     integer, dimension(:,:), intent(in) :: boundaryVertex
