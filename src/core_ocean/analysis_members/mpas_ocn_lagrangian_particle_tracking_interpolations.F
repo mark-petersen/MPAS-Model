@@ -104,7 +104,7 @@ module ocn_lagrangian_particle_tracking_interpolations
     type (field2DReal), pointer :: &
       ucReconstructX, ucReconstructY, ucReconstructZ, ucReconstructZonal, ucReconstructMeridional ! cell center values
 !mrp    type (field2DReal), pointer :: ucStore, vcStore, wcStore
-    type (field2DInteger), pointer :: boundaryVertex, boundaryCell, boundaryCellGlobal, boundaryVertexGlobal
+    type (field2DInteger), pointer :: boundaryVertex, boundaryCell, boundaryVertexGlobal
 
     ! get pointers
     call mpas_pool_get_field(scratchPool, 'ucReconstructX', ucReconstructX)

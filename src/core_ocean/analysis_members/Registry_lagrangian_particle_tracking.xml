@@ -464,7 +464,9 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 		<var name="boundaryVertexGlobal" type="integer" dimensions="nVertLevels nVertices" units="unitless"
 			 description="Mask for determining boundary vertices, but global. A boundary vertex has at least one inactive cell neighboring it."
 		/>
+<!-- MRP COMMENT OUT EXTRA FIELDS 
 		<var name="boundaryCellGlobal" type="integer" dimensions="nVertLevels nCells" units="unitless"
 			 description="Mask for determining boundary cells, but global. A boundary cell has at least one inactive cell neighboring it."
 		/>
+MRP COMMENT OUT EXTRA FIELDS END -->  
 	</var_struct>
