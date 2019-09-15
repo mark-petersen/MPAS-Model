@@ -1649,6 +1649,10 @@ print *, '535 globalResetTimeValue, globalTimeSinceReset, dt, nSteps, dtSim',glo
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_filter_number', filterNum)
 
       err = 0
+      !mrp require that no filter is applied, because I removed variables.
+      if (filterNum.ne.0) then
+          call mpas_log_write('config_AM_lagrPartTrack_filter_number must be 0. Exiting...', MPAS_LOG_CRIT)
+      endif
 
       block => domain % blocklist
       do while (associated(block))

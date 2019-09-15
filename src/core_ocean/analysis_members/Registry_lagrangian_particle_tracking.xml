@@ -279,6 +279,7 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 		<var name="cellOwnerBlock" type="integer" dimensions="nCells" units="unitless"
 			 description="designates ownership of cell in terms of computational block"
 		/>
+<!-- MRP COMMENT OUT EXTRA FIELDS 
 		<var name="filteredVelocityW" type="real" dimensions="nVertLevels nCells Time" units="m s^{-1}"
 			 description="filtered u horizontal velocity at cells"
 		/>
@@ -288,6 +289,7 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 		<var name="filteredVelocityU" type="real" dimensions="nVertLevels nCells Time" units="m s^{-1}"
 			 description="filtered w horizontal velocity at cells"
 		/>
+MRP COMMENT OUT EXTRA FIELDS END -->  
 		<var name="buoyancySurfaceVelocityZonal" type="real" dimensions="nBuoyancySurfaces nCells Time" units="m s^{-1}"
 			 description="horizontal zonal velocity on buoyancy surface"
 		/>
