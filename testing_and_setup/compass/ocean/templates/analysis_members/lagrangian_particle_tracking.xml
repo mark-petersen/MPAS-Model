@@ -35,18 +35,9 @@
 				<member name="yParticle" type="var"/>
 				<member name="zParticle" type="var"/>
 				<member name="zLevelParticle" type="var"/>
-				<member name="xParticleReset" type="var"/>
-				<member name="yParticleReset" type="var"/>
-				<member name="zParticleReset" type="var"/>
-				<member name="currentCellReset" type="var"/>
-				<member name="currentBlockReset" type="var"/>
-				<member name="buoyancyParticle" type="var"/>
 				<member name="uVertexVelocity" type="var"/>
 				<member name="vVertexVelocity" type="var"/>
 				<member name="wVertexVelocity" type="var"/>
-				<member name="filteredVelocityU" type="var"/>
-				<member name="filteredVelocityV" type="var"/>
-				<member name="filteredVelocityW" type="var"/>
 				<member name="cellOwnerBlock" type="var"/>
 			</add_contents>
 		</stream>
@@ -95,25 +86,12 @@
 				<member name="xParticle" type="var"/>
 				<member name="yParticle" type="var"/>
 				<member name="zParticle" type="var"/>
-				<member name="zLevelParticle" type="var"/>
 				<member name="xParticleReset" type="var"/>
 				<member name="yParticleReset" type="var"/>
 				<member name="zParticleReset" type="var"/>
 				<member name="currentCellReset" type="var"/>
 				<member name="currentBlockReset" type="var"/>
 				<member name="buoyancyParticle" type="var"/>
-				<member name="verticalTreatment" type="var"/>
-			</add_contents>
-		</stream>
-		<stream name="lagrPartTrackRegions">
-			<attribute name="type">none</attribute>
-			<attribute name="filename_template">particle_regions.nc</attribute>
-			<attribute name="name">lagrPartTrackRegions</attribute>
-			<attribute name="input_interval">initial_only</attribute>
-			<attribute name="packages">lagrPartTrackAMPKG</attribute>
-			<add_contents>
-				<var name="resetOutsideRegionMaskValue1"/>
-				<var name="resetInsideRegionMaskValue1"/>
 			</add_contents>
 		</stream>
 	</streams>
