@@ -264,7 +264,7 @@ contains
       real (kind=RKIND), dimension(3) :: particlePosition, particleVelocity
       real (kind=RKIND), pointer :: xParticle, yParticle, zParticle, buoyancyParticle !, &
 !        lonVel, latVel, sumU, sumV, sumUU, sumUV, sumVV
-!mrp      real (kind=RKIND), pointer :: lonParticle, latParticle
+      real (kind=RKIND), pointer :: lonParticle, latParticle
       real (kind=RKIND), dimension(3) :: xSubStep, diffSubStep, diffParticlePosition
       real (kind=RKIND), pointer :: zLevelParticle
       real (kind=RKIND), dimension(:,:), pointer :: zTop, vertVelocityTop, zMid, areaBArray
@@ -583,10 +583,11 @@ print *, '535 globalResetTimeValue, globalTimeSinceReset, dt, nSteps, dtSim',glo
           call mpas_pool_get_array(particle % haloDataPool, 'xParticle', xParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'yParticle', yParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'zParticle', zParticle)
-!mrp          call mpas_pool_get_array(particle % haloDataPool, 'lonParticle', lonParticle)
-!mrp          call mpas_pool_get_array(particle % haloDataPool, 'latParticle', latParticle)
+          call mpas_pool_get_array(particle % haloDataPool, 'lonParticle', lonParticle)
+          call mpas_pool_get_array(particle % haloDataPool, 'latParticle', latParticle)
 
           ! compute particle lat/lon position
+!mrp only compute lat/lon particles at end
 !mrp          call convert_latlon_from_xyz(latParticle, lonParticle, xParticle, yParticle, zParticle)
 
           particlePosition(1) = xParticle
@@ -1131,7 +1132,7 @@ print *, '535 globalResetTimeValue, globalTimeSinceReset, dt, nSteps, dtSim',glo
           zParticle = particlePosition(3)
 
           ! compute particle lat/lon position
-!mrp          call convert_latlon_from_xyz(latParticle, lonParticle, xParticle, yParticle, zParticle)
+          call convert_latlon_from_xyz(latParticle, lonParticle, xParticle, yParticle, zParticle)
 
           !!!!!!!!!! PASS PARTICLES FROM PROCESSOR TO PROCESSOR !!!!!!!!!!
           ! note, assumes that integration above didn't move particle past halo
@@ -2015,7 +2016,7 @@ print *, '535 globalResetTimeValue, globalTimeSinceReset, dt, nSteps, dtSim',glo
       real (kind=RKIND), dimension(3) :: particlePosition, particleVelocity
       real (kind=RKIND), pointer :: xParticle, yParticle, zParticle, lonVel, latVel, buoyancyParticle !, &
 !        lonVel, latVel, sumU, sumV, sumUU, sumUV, sumVV
-!mrp      real (kind=RKIND), pointer :: lonParticle, latParticle
+      real (kind=RKIND), pointer :: lonParticle, latParticle
       real (kind=RKIND), dimension(3) :: xSubStep, diffSubStep, diffParticlePosition
       real (kind=RKIND), pointer :: zLevelParticle
       real (kind=RKIND), dimension(:,:), pointer :: zTop, vertVelocityTop, zMid, areaBArray
@@ -2185,8 +2186,8 @@ print *, '535 globalResetTimeValue, globalTimeSinceReset, dt, nSteps, dtSim',glo
           call mpas_pool_get_array(particle % haloDataPool, 'xParticle', xParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'yParticle', yParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'zParticle', zParticle)
-!mrp          call mpas_pool_get_array(particle % haloDataPool, 'lonParticle', lonParticle)
-!mrp          call mpas_pool_get_array(particle % haloDataPool, 'latParticle', latParticle)
+          call mpas_pool_get_array(particle % haloDataPool, 'lonParticle', lonParticle)
+          call mpas_pool_get_array(particle % haloDataPool, 'latParticle', latParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'currentCell', iCell)
           call mpas_pool_get_array(particle % haloDataPool, 'currentCellGlobalID', currentCellGlobalID)
           iCell = -1
@@ -2196,7 +2197,7 @@ print *, '535 globalResetTimeValue, globalTimeSinceReset, dt, nSteps, dtSim',glo
           particlePosition(3) = zParticle
 
           ! compute particle lat/lon position
-!mrp          call convert_latlon_from_xyz(latParticle, lonParticle, xParticle, yParticle, zParticle)
+          call convert_latlon_from_xyz(latParticle, lonParticle, xParticle, yParticle, zParticle)
 
           call mpas_pool_get_array(particle % haloDataPool, 'zLevelParticle', zLevelParticle)
 
