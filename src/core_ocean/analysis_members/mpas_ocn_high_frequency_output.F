@@ -258,12 +258,14 @@ contains
          call mpas_pool_get_array(diagnosticsPool, 'relativeVorticity', relativeVorticity, timeLevel)
          call mpas_pool_get_array(diagnosticsPool, 'divergence', divergence, timeLevel)
          call mpas_pool_get_array(tracersPool, 'activeTracers', activeTracers, timeLevel)
-         call mpas_pool_get_array(diagnosticsPool, 'vertGMBolusVelocityTop', vertGMBolusVelocityTop)
+!mrp turn off GM for high res. runs - hard wired!!!!!!
+!mrp         call mpas_pool_get_array(diagnosticsPool, 'vertGMBolusVelocityTop', vertGMBolusVelocityTop)
          call mpas_pool_get_array(diagnosticsPool, 'vertTransportVelocityTop', vertTransportVelocityTop)
          call mpas_pool_get_array(diagnosticsPool, 'vertVelocityTop', vertVelocityTop)
          call mpas_pool_get_array(diagnosticsPool, 'tangentialVelocity', tangentialVelocity)
          call mpas_pool_get_array(diagnosticsPool, 'BruntVaisalaFreqTop', BruntVaisalaFreqTop)
-         call mpas_pool_get_array(diagnosticsPool, 'normalGMBolusVelocity', normalGMBolusVelocity)
+!mrp turn off GM for high res. runs - hard wired!!!!!!
+!mrp         call mpas_pool_get_array(diagnosticsPool, 'normalGMBolusVelocity', normalGMBolusVelocity)
 
          ! get arrays that can be written to output at high freqency
          call mpas_pool_get_array(highFrequencyOutputAMPool, 'kineticEnergyAt250m', kineticEnergyAt250m)
@@ -282,7 +284,8 @@ contains
          call mpas_pool_get_array(highFrequencyOutputAMPool, 'activeTracersAvg0250to0700', activeTracersAvg0250to0700)
          call mpas_pool_get_array(highFrequencyOutputAMPool, 'activeTracersAvg0700to2000', activeTracersAvg0700to2000)
          call mpas_pool_get_array(highFrequencyOutputAMPool, 'activeTracersAvg2000toBottom', activeTracersAvg2000toBottom)
-         call mpas_pool_get_array(highFrequencyOutputAMPool, 'vertGMvelocitySFC', vertGMvelocitySFC)
+!mrp turn off GM for high res. runs - hard wired!!!!!!
+!mrp         call mpas_pool_get_array(highFrequencyOutputAMPool, 'vertGMvelocitySFC', vertGMvelocitySFC)
          call mpas_pool_get_array(highFrequencyOutputAMPool, 'vertTransportVelocitySFC', vertTransportVelocitySFC)
          call mpas_pool_get_array(highFrequencyOutputAMPool, 'vertVelAt250m', vertVelAt250m)
 
@@ -331,21 +334,22 @@ contains
          call mpas_pool_get_array(highFrequencyOutputAMPool, 'meridionalBaroclinicVelAt250m', meridionalBaroclinicVelAt250m)
          call mpas_pool_get_array(highFrequencyOutputAMPool, 'meridionalBaroclinicVelAtBottom', meridionalBaroclinicVelAtBottom)
 
-         call mpas_pool_get_array(highFrequencyOutputAMPool, 'normalGMBolusVelAtSFC', normalGMBolusVelAtSFC)
-         call mpas_pool_get_array(highFrequencyOutputAMPool, 'normalGMBolusVelAt250m', normalGMBolusVelAt250m)
-         call mpas_pool_get_array(highFrequencyOutputAMPool, 'normalGMBolusVelAtBottom', normalGMBolusVelAtBottom)
-
-         call mpas_pool_get_array(highFrequencyOutputAMPool, 'tangentialGMBolusVelAtSFC', tangentialGMBolusVelAtSFC)
-         call mpas_pool_get_array(highFrequencyOutputAMPool, 'tangentialGMBolusVelAt250m', tangentialGMBolusVelAt250m)
-         call mpas_pool_get_array(highFrequencyOutputAMPool, 'tangentialGMBolusVelAtBottom', tangentialGMBolusVelAtBottom)
-
-         call mpas_pool_get_array(highFrequencyOutputAMPool, 'zonalGMBolusVelAtSFC', zonalGMBolusVelAtSFC)
-         call mpas_pool_get_array(highFrequencyOutputAMPool, 'zonalGMBolusVelAt250m', zonalGMBolusVelAt250m)
-         call mpas_pool_get_array(highFrequencyOutputAMPool, 'zonalGMBolusVelAtBottom', zonalGMBolusVelAtBottom)
-
-         call mpas_pool_get_array(highFrequencyOutputAMPool, 'meridionalGMBolusVelAtSFC', meridionalGMBolusVelAtSFC)
-         call mpas_pool_get_array(highFrequencyOutputAMPool, 'meridionalGMBolusVelAt250m', meridionalGMBolusVelAt250m)
-         call mpas_pool_get_array(highFrequencyOutputAMPool, 'meridionalGMBolusVelAtBottom', meridionalGMBolusVelAtBottom)
+!mrp turn off GM for high res. runs - hard wired!!!!!!
+!mrp         call mpas_pool_get_array(highFrequencyOutputAMPool, 'normalGMBolusVelAtSFC', normalGMBolusVelAtSFC)
+!mrp         call mpas_pool_get_array(highFrequencyOutputAMPool, 'normalGMBolusVelAt250m', normalGMBolusVelAt250m)
+!mrp         call mpas_pool_get_array(highFrequencyOutputAMPool, 'normalGMBolusVelAtBottom', normalGMBolusVelAtBottom)
+!mrp
+!mrp         call mpas_pool_get_array(highFrequencyOutputAMPool, 'tangentialGMBolusVelAtSFC', tangentialGMBolusVelAtSFC)
+!mrp         call mpas_pool_get_array(highFrequencyOutputAMPool, 'tangentialGMBolusVelAt250m', tangentialGMBolusVelAt250m)
+!mrp         call mpas_pool_get_array(highFrequencyOutputAMPool, 'tangentialGMBolusVelAtBottom', tangentialGMBolusVelAtBottom)
+!mrp
+!mrp         call mpas_pool_get_array(highFrequencyOutputAMPool, 'zonalGMBolusVelAtSFC', zonalGMBolusVelAtSFC)
+!mrp         call mpas_pool_get_array(highFrequencyOutputAMPool, 'zonalGMBolusVelAt250m', zonalGMBolusVelAt250m)
+!mrp         call mpas_pool_get_array(highFrequencyOutputAMPool, 'zonalGMBolusVelAtBottom', zonalGMBolusVelAtBottom)
+!mrp
+!mrp         call mpas_pool_get_array(highFrequencyOutputAMPool, 'meridionalGMBolusVelAtSFC', meridionalGMBolusVelAtSFC)
+!mrp         call mpas_pool_get_array(highFrequencyOutputAMPool, 'meridionalGMBolusVelAt250m', meridionalGMBolusVelAt250m)
+!mrp         call mpas_pool_get_array(highFrequencyOutputAMPool, 'meridionalGMBolusVelAtBottom', meridionalGMBolusVelAtBottom)
 
          call mpas_pool_get_array(highFrequencyOutputAMPool, 'BruntVaisalaFreqTopAtSFC', BruntVaisalaFreqTopAtSFC)
          call mpas_pool_get_array(highFrequencyOutputAMPool, 'BruntVaisalaFreqTopAt250m', BruntVaisalaFreqTopAt250m)
@@ -426,17 +430,20 @@ contains
          activeTracersAtSurface(2,:) = activeTracers(2,1,:)
          activeTracersAt250m(1,:) = activeTracers(1,iLevel0250,:)
          activeTracersAt250m(2,:) = activeTracers(2,iLevel0250,:)
-         vertGMvelocitySFC(:) = vertGMBolusVelocityTop(1,:)
+!mrp turn off GM for high res. runs - hard wired!!!!!!
+!mrp         vertGMvelocitySFC(:) = vertGMBolusVelocityTop(1,:)
          vertTransportVelocitySFC(:) = vertTransportVelocityTop(1,:)
          vertVelSFC(:) = vertVelocityTop(1,:)
-         vertGMvelocityAt250m(:) = vertGMBolusVelocityTop(iLevel0250,:)
+!mrp turn off GM for high res. runs - hard wired!!!!!!
+!mrp         vertGMvelocityAt250m(:) = vertGMBolusVelocityTop(iLevel0250,:)
          vertTransportVelocityAt250m(:) = vertTransportVelocityTop(iLevel0250,:)
          vertVelAt250m(:) = vertVelocityTop(iLevel0250,:)
 
          do iEdge = 1, nEdges
-           normalGMBolusVelAtSFC(iEdge) = normalGMBolusVelocity(1,iEdge)
-           normalGMBolusVelAt250m(iEdge) = normalGMBolusVelocity(iLevel0250,iEdge)
-           normalGMBolusVelAtBottom(iEdge) = normalGMBolusVelocity(maxLevelEdgeBot(iEdge),iEdge)
+!mrp turn off GM for high res. runs - hard wired!!!!!!
+!mrp           normalGMBolusVelAtSFC(iEdge) = normalGMBolusVelocity(1,iEdge)
+!mrp           normalGMBolusVelAt250m(iEdge) = normalGMBolusVelocity(iLevel0250,iEdge)
+!mrp           normalGMBolusVelAtBottom(iEdge) = normalGMBolusVelocity(maxLevelEdgeBot(iEdge),iEdge)
 
            tangentialVelAtSFC(iEdge) = tangentialVelocity(1,iEdge)
            tangentialVelAt250m(iEdge) = tangentialVelocity(iLevel0250,iEdge)
@@ -462,32 +469,33 @@ contains
                                        + tangentialVelAtBottom(iEdge)*cos(angleEdge(iEdge))
          end do
 
-         do iEdge = 1, nEdges
-           tangentialGMBolusVelAtSFC(iEdge) = 0.0_RKIND
-           tangentialGMBolusVelAt250m(iEdge) = 0.0_RKIND
-           tangentialGMBolusVelAtBottom(iEdge) = 0.0_RKIND
-           do i = 1, nEdgesOnEdge(iEdge)
-             eoe = edgesOnEdge(i,iEdge)
-             tangentialGMBolusVelAtSFC(iEdge) = tangentialGMBolusVelAtSFC(iEdge) + weightsOnEdge(i,iEdge) * normalGMBolusVelAtSFC(eoe)
-             tangentialGMBolusVelAt250m(iEdge) = tangentialGMBolusVelAt250m(iEdge) + weightsOnEdge(i,iEdge) * normalGMBolusVelAt250m(eoe)
-             tangentialGMBolusVelAtBottom(iEdge) = tangentialGMBolusVelAtBottom(iEdge) + weightsOnEdge(i,iEdge) * normalGMBolusVelAtBottom(eoe)
-           end do
-
-           zonalGMBolusVelAtSFC(iEdge) = normalGMBolusVelAtSFC(iEdge)*cos(angleEdge(iEdge)) &
-             - tangentialGMBolusVelAtSFC(iEdge)*sin(angleEdge(iEdge))
-           meridionalGMBolusVelAtSFC(iEdge) = normalGMBolusVelAtSFC(iEdge)*sin(angleEdge(iEdge)) &
-             + tangentialGMBolusVelAtSFC(iEdge)*cos(angleEdge(iEdge))
-
-           zonalGMBolusVelAt250m(iEdge) = normalGMBolusVelAt250m(iEdge)*cos(angleEdge(iEdge)) &
-             - tangentialGMBolusVelAt250m(iEdge)*sin(angleEdge(iEdge))
-           meridionalGMBolusVelAt250m(iEdge) = normalGMBolusVelAt250m(iEdge)*sin(angleEdge(iEdge)) &
-             + tangentialGMBolusVelAt250m(iEdge)*cos(angleEdge(iEdge))
-
-           zonalGMBolusVelAtBottom(iEdge) = normalGMBolusVelAtBottom(iEdge)*cos(angleEdge(iEdge)) &
-             - tangentialGMBolusVelAtBottom(iEdge)*sin(angleEdge(iEdge))
-           meridionalGMBolusVelAtBottom(iEdge) = normalGMBolusVelAtBottom(iEdge)*sin(angleEdge(iEdge)) &
-             + tangentialGMBolusVelAtBottom(iEdge)*cos(angleEdge(iEdge))
-         end do
+!mrp turn off GM for high res. runs - hard wired!!!!!!
+!mrp         do iEdge = 1, nEdges
+!mrp           tangentialGMBolusVelAtSFC(iEdge) = 0.0_RKIND
+!mrp           tangentialGMBolusVelAt250m(iEdge) = 0.0_RKIND
+!mrp           tangentialGMBolusVelAtBottom(iEdge) = 0.0_RKIND
+!mrp           do i = 1, nEdgesOnEdge(iEdge)
+!mrp             eoe = edgesOnEdge(i,iEdge)
+!mrp             tangentialGMBolusVelAtSFC(iEdge) = tangentialGMBolusVelAtSFC(iEdge) + weightsOnEdge(i,iEdge) * normalGMBolusVelAtSFC(eoe)
+!mrp             tangentialGMBolusVelAt250m(iEdge) = tangentialGMBolusVelAt250m(iEdge) + weightsOnEdge(i,iEdge) * normalGMBolusVelAt250m(eoe)
+!mrp             tangentialGMBolusVelAtBottom(iEdge) = tangentialGMBolusVelAtBottom(iEdge) + weightsOnEdge(i,iEdge) * normalGMBolusVelAtBottom(eoe)
+!mrp           end do
+!mrp
+!mrp           zonalGMBolusVelAtSFC(iEdge) = normalGMBolusVelAtSFC(iEdge)*cos(angleEdge(iEdge)) &
+!mrp             - tangentialGMBolusVelAtSFC(iEdge)*sin(angleEdge(iEdge))
+!mrp           meridionalGMBolusVelAtSFC(iEdge) = normalGMBolusVelAtSFC(iEdge)*sin(angleEdge(iEdge)) &
+!mrp             + tangentialGMBolusVelAtSFC(iEdge)*cos(angleEdge(iEdge))
+!mrp
+!mrp           zonalGMBolusVelAt250m(iEdge) = normalGMBolusVelAt250m(iEdge)*cos(angleEdge(iEdge)) &
+!mrp             - tangentialGMBolusVelAt250m(iEdge)*sin(angleEdge(iEdge))
+!mrp           meridionalGMBolusVelAt250m(iEdge) = normalGMBolusVelAt250m(iEdge)*sin(angleEdge(iEdge)) &
+!mrp             + tangentialGMBolusVelAt250m(iEdge)*cos(angleEdge(iEdge))
+!mrp
+!mrp           zonalGMBolusVelAtBottom(iEdge) = normalGMBolusVelAtBottom(iEdge)*cos(angleEdge(iEdge)) &
+!mrp             - tangentialGMBolusVelAtBottom(iEdge)*sin(angleEdge(iEdge))
+!mrp           meridionalGMBolusVelAtBottom(iEdge) = normalGMBolusVelAtBottom(iEdge)*sin(angleEdge(iEdge)) &
+!mrp             + tangentialGMBolusVelAtBottom(iEdge)*cos(angleEdge(iEdge))
+!mrp         end do
 
          do iCell=1,nCells
            relativeVorticityAtBottom(iCell) = relativeVorticityCell(maxLevelCell(iCell),iCell)
