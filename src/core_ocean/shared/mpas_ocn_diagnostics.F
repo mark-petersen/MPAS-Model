@@ -190,7 +190,7 @@ contains
       call mpas_pool_get_array(diagnosticsPool, 'zMid', zMid)
       call mpas_pool_get_array(diagnosticsPool, 'zTop', zTop)
       call mpas_pool_get_array(diagnosticsPool, 'divergence', divergence)
-      call mpas_pool_get_array(diagnosticsPool, 'circulation', circulation)
+!mrp      call mpas_pool_get_array(diagnosticsPool, 'circulation', circulation)
       call mpas_pool_get_array(diagnosticsPool, 'relativeVorticity', relativeVorticity)
       call mpas_pool_get_array(diagnosticsPool, 'relativeVorticityCell', relativeVorticityCell)
       call mpas_pool_get_array(diagnosticsPool, 'normalizedPlanetaryVorticityEdge', normalizedPlanetaryVorticityEdge)

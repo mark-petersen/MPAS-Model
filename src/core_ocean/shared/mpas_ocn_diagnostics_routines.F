@@ -122,7 +122,7 @@ contains
 
       !$omp do schedule(runtime) private(invAreaTri1, i, iEdge, k, r_tmp)
       do iVertex = 1, nVertices
-         circulation(:, iVertex) = 0.0_RKIND
+!mrp         circulation(:, iVertex) = 0.0_RKIND
          relativeVorticity(:, iVertex) = 0.0_RKIND
          invAreaTri1 = 1.0_RKIND / areaTriangle(iVertex)
          do i = 1, vertexDegree
@@ -130,7 +130,7 @@ contains
             do k = 1, maxLevelVertexBot(iVertex)
               r_tmp = dcEdge(iEdge) * normalVelocity(k, iEdge)
 
-              circulation(k, iVertex) = circulation(k, iVertex) + edgeSignOnVertex(i, iVertex) * r_tmp
+!mrp              circulation(k, iVertex) = circulation(k, iVertex) + edgeSignOnVertex(i, iVertex) * r_tmp
               relativeVorticity(k, iVertex) = relativeVorticity(k, iVertex) + edgeSignOnVertex(i, iVertex) * r_tmp * invAreaTri1
             end do
          end do
