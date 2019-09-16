@@ -146,10 +146,6 @@
 			<var name="zParticleReset"/>
 			<var name="buoyancyParticle"/>
 			<var name="cellOwnerBlock"/>
-			<var name="buoyancySurfaceValues"/>
-			<var name="buoyancySurfaceVelocityMeridional"/>
-			<var name="buoyancySurfaceVelocityZonal"/>
-			<var name="buoyancySurfaceDepth"/>
 <!-- MRP COMMENT OUT EXTRA FIELDS 
 			<var name="lonParticle"/>
 			<var name="latParticle"/>
@@ -161,6 +157,10 @@
 			<var name="zLevelParticleReset"/>
 			<var name="transfered"/>
 			<var name="indexLevel"/>
+			<var name="buoyancySurfaceValues"/>
+			<var name="buoyancySurfaceVelocityMeridional"/>
+			<var name="buoyancySurfaceVelocityZonal"/>
+			<var name="buoyancySurfaceDepth"/>
 MRP COMMENT OUT EXTRA FIELDS END -->  
 		</stream>
 
@@ -189,7 +189,6 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 			<var name="currentBlockReset"/>
 			<var name="currentCellReset"/>
 			<var name="buoyancyParticle"/>
-			<var name="buoyancySurfaceValues"/>
 <!-- MRP COMMENT OUT EXTRA FIELDS 
 			<var name="dtParticle"/>
 			<var name="verticalTreatment"/>
@@ -199,6 +198,7 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 			<var name="zLevelParticleReset"/>
 			<var name="transfered"/>
 			<var name="indexLevel"/>
+			<var name="buoyancySurfaceValues"/>
 MRP COMMENT OUT EXTRA FIELDS END -->  
 		</stream>
 
@@ -222,7 +222,6 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 			<var name="currentBlockReset"/>
 			<var name="currentCellReset"/>
 			<var name="buoyancyParticle"/>
-			<var name="buoyancySurfaceValues"/>
 <!-- MRP COMMENT OUT EXTRA FIELDS 
 			<var name="dtParticle"/>
 			<var name="verticalTreatment"/>
@@ -230,6 +229,7 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 			<var name="transfered"/>
 			<var name="zLevelParticleReset"/>
 			<var name="indexLevel"/>
+			<var name="buoyancySurfaceValues"/>
 MRP COMMENT OUT EXTRA FIELDS END -->  
 		</stream>
 
@@ -289,7 +289,6 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 		<var name="filteredVelocityU" type="real" dimensions="nVertLevels nCells Time" units="m s^{-1}"
 			 description="filtered w horizontal velocity at cells"
 		/>
-MRP COMMENT OUT EXTRA FIELDS END -->  
 		<var name="buoyancySurfaceVelocityZonal" type="real" dimensions="nBuoyancySurfaces nCells Time" units="m s^{-1}"
 			 description="horizontal zonal velocity on buoyancy surface"
 		/>
@@ -302,6 +301,7 @@ MRP COMMENT OUT EXTRA FIELDS END -->
 		<var name="buoyancySurfaceValues" type="real" dimensions="nBuoyancySurfaces" units="kg m^{-3}"
 			 description="definition of buoyancy surfaces in terms of potential density"
 		/>
+MRP COMMENT OUT EXTRA FIELDS END -->  
 		<var name="wachspressAreaB" type="real" dimensions="nCells maxEdges" units="m^2"
 			 description="cached polygon subarea B_i used in Wachspess calculation"
 		/>

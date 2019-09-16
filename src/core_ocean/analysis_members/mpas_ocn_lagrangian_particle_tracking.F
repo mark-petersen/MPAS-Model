@@ -186,8 +186,8 @@ contains
       ! previous compute startup calls
       call intialize_wachspress_coefficients(domain, err)
       call initalize_fields(domain, err)
-      call compute_velocity_on_potentialdensity_surface(domain,err,1)
-      call compute_velocity_on_potentialdensity_surface(domain,err,2)
+!mrp      call compute_velocity_on_potentialdensity_surface(domain,err,1)
+!mrp      call compute_velocity_on_potentialdensity_surface(domain,err,2)
       call initialize_particle_properties(domain,2,err)
       call write_lagrangian_particle_tracking(domain, err)
 
@@ -419,7 +419,7 @@ contains
 #ifdef MPAS_DEBUG
       call mpas_timer_start("velocity_pot_density_LPT")
 #endif
-      call compute_velocity_on_potentialdensity_surface(domain,err,2)
+!mrp      call compute_velocity_on_potentialdensity_surface(domain,err,2)
 #ifdef MPAS_DEBUG
       call mpas_timer_stop("velocity_pot_density_LPT")
 #endif
@@ -1885,14 +1885,14 @@ print *, '535 globalResetTimeValue, globalTimeSinceReset, dt, nSteps, dtSim',glo
         ! connect variables to pointer array
         call mpas_pool_get_array(diagnosticsPool, 'velocityMeridional', normalVelocityMer)
         call mpas_pool_get_array(diagnosticsPool, 'velocityZonal', normalVelocityZon)
-        call mpas_pool_get_array(lagrPartTrackCellsPool, 'buoyancySurfaceVelocityZonal', zonVel)
-        call mpas_pool_get_array(lagrPartTrackCellsPool, 'buoyancySurfaceVelocityMeridional', merVel)
-        call mpas_pool_get_array(lagrPartTrackCellsPool, 'buoyancySurfaceDepth', depth)
+!mrp        call mpas_pool_get_array(lagrPartTrackCellsPool, 'buoyancySurfaceVelocityZonal', zonVel)
+!mrp        call mpas_pool_get_array(lagrPartTrackCellsPool, 'buoyancySurfaceVelocityMeridional', merVel)
+!mrp        call mpas_pool_get_array(lagrPartTrackCellsPool, 'buoyancySurfaceDepth', depth)
         call mpas_pool_get_array(diagnosticsPool, 'potentialDensity', buoyancy)
         call mpas_pool_get_array(diagnosticsPool, 'zMid', zMid)
         call mpas_pool_get_dimension(meshPool, 'nCells', nCells)
-        call mpas_pool_get_dimension(meshPool, 'nBuoyancySurfaces', nBuoyancySurfaces)
-        call mpas_pool_get_array(lagrPartTrackCellsPool,'buoyancySurfaceValues', buoyancySurfaceValues)
+!mrp        call mpas_pool_get_dimension(meshPool, 'nBuoyancySurfaces', nBuoyancySurfaces)
+!mrp        call mpas_pool_get_array(lagrPartTrackCellsPool,'buoyancySurfaceValues', buoyancySurfaceValues)
         call mpas_pool_get_array(meshPool, 'maxLevelCell', maxLevelCell)
 
         LIGHT_DEBUG_ALL_WRITE('nBuoyancySurfaces  =' COMMA nBuoyancySurfaces)

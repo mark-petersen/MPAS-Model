@@ -48,11 +48,6 @@
 				<member name="filteredVelocityV" type="var"/>
 				<member name="filteredVelocityW" type="var"/>
 				<member name="cellOwnerBlock" type="var"/>
-				<member name="transfered" type="var"/>
-				<member name="buoyancySurfaceValues" type="var"/>
-				<member name="buoyancySurfaceVelocityMeridional" type="var"/>
-				<member name="buoyancySurfaceVelocityZonal" type="var"/>
-				<member name="buoyancySurfaceDepth" type="var"/>
 			</add_contents>
 		</stream>
 	</streams>
@@ -82,7 +77,6 @@
 				<member name="currentCellReset" type="var"/>
 				<member name="currentBlockReset" type="var"/>
 				<member name="buoyancyParticle" type="var"/>
-				<member name="buoyancySurfaceValues" type="var"/>
 			</add_contents>
 		</stream>
 	</streams>
@@ -109,7 +103,6 @@
 				<member name="currentBlockReset" type="var"/>
 				<member name="buoyancyParticle" type="var"/>
 				<member name="verticalTreatment" type="var"/>
-				<member name="buoyancySurfaceValues" type="var"/>
 			</add_contents>
 		</stream>
 		<stream name="lagrPartTrackRegions">
