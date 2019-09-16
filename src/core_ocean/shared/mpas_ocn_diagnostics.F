@@ -199,7 +199,7 @@ contains
       call mpas_pool_get_array(diagnosticsPool, 'density', density)
       call mpas_pool_get_array(diagnosticsPool, 'displacedDensity', displacedDensity)
       call mpas_pool_get_array(diagnosticsPool, 'potentialDensity', potentialDensity)
-      call mpas_pool_get_array(diagnosticsPool, 'montgomeryPotential', montgomeryPotential)
+!mrp      call mpas_pool_get_array(diagnosticsPool, 'montgomeryPotential', montgomeryPotential)
       call mpas_pool_get_array(diagnosticsPool, 'pressure', pressure)
       call mpas_pool_get_array(diagnosticsPool, 'BruntVaisalaFreqTop', BruntVaisalaFreqTop)
       call mpas_pool_get_array(diagnosticsPool, 'tangentialVelocity', tangentialVelocity)
@@ -648,28 +648,28 @@ contains
         ! However, one may use 'pressure_and_zmid' when layers are isopycnal as well.
         ! Compute pressure at top of each layer, and then Montgomery Potential.
 
-        allocate(pTop(nVertLevels))
-
-        !$omp do schedule(runtime)
-        do iCell = 1, nCells
-
-           ! assume atmospheric pressure at the surface is zero for now.
-           pTop(1) = 0.0_RKIND
-           ! At top layer it is g*SSH, where SSH may be off by a
-           ! constant (ie, bottomDepth can be relative to top or bottom)
-           montgomeryPotential(1,iCell) = gravity &
-              * (bottomDepth(iCell) + sum(layerThickness(1:nVertLevels,iCell)))
-
-           do k = 2, nVertLevels
-              pTop(k) = pTop(k-1) + density(k-1,iCell)*gravity* layerThickness(k-1,iCell)
-
-              ! from delta M = p delta / density
-              montgomeryPotential(k,iCell) = montgomeryPotential(k-1,iCell) &
-                 + pTop(k)*(1.0_RKIND/density(k,iCell) - 1.0_RKIND/density(k-1,iCell))
-           end do
-
-        end do
-        !$omp end do
+!mrp        allocate(pTop(nVertLevels))
+!mrp
+!mrp        !$omp do schedule(runtime)
+!mrp        do iCell = 1, nCells
+!mrp
+!mrp           ! assume atmospheric pressure at the surface is zero for now.
+!mrp           pTop(1) = 0.0_RKIND
+!mrp           ! At top layer it is g*SSH, where SSH may be off by a
+!mrp           ! constant (ie, bottomDepth can be relative to top or bottom)
+!mrp           montgomeryPotential(1,iCell) = gravity &
+!mrp              * (bottomDepth(iCell) + sum(layerThickness(1:nVertLevels,iCell)))
+!mrp
+!mrp           do k = 2, nVertLevels
+!mrp              pTop(k) = pTop(k-1) + density(k-1,iCell)*gravity* layerThickness(k-1,iCell)
+!mrp
+!mrp              ! from delta M = p delta / density
+!mrp              montgomeryPotential(k,iCell) = montgomeryPotential(k-1,iCell) &
+!mrp                 + pTop(k)*(1.0_RKIND/density(k,iCell) - 1.0_RKIND/density(k-1,iCell))
+!mrp           end do
+!mrp
+!mrp        end do
+!mrp        !$omp end do
 
         deallocate(pTop)
 

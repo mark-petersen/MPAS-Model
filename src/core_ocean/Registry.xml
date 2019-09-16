@@ -2511,10 +2511,12 @@
 			 description="Brunt Vaisala frequency defined at the center (horizontally) and top (vertically) of cell"
 			 packages="forwardMode;analysisMode"
 		/>
+<!-- MRP COMMENT OUT EXTRA FIELDS
 		<var name="montgomeryPotential" type="real" dimensions="nVertLevels nCells Time" units="m^2 s^{-2}"
 			 description="Montgomery potential, may be used as the pressure for isopycnal coordinates."
 			 packages="forwardMode;analysisMode"
 		/>
+MRP COMMENT OUT EXTRA FIELDS END -->
 		<var name="pressure" type="real" dimensions="nVertLevels nCells Time" units="N m^{-2}"
 			 description="pressure used in the momentum equation"
 		/>
@@ -2526,10 +2528,12 @@
 			 description="horizontal velocity used to transport mass and tracers"
 			 packages="forwardMode;analysisMode"
 		/>
+<!-- MRP COMMENT OUT EXTRA FIELDS
 		<var name="wettingVelocity" type="real" dimensions="nVertLevels nEdges Time" units="m s^{-1}"
 			 description="Velocity to prevent drying of cell."
 			 packages="forwardMode"
 		/>
+MRP COMMENT OUT EXTRA FIELDS END -->
 		<var name="vertAleTransportTop" type="real" dimensions="nVertLevelsP1 nCells Time" units="m s^{-1}"
 			 description="vertical transport through the layer interface at the top of the cell"
 			 packages="forwardMode;analysisMode"

@@ -135,7 +135,7 @@ contains
             write (fileID,'(i5,a)') i,'. normalizedAbsoluteVorticity = (relative vorticity + planetary vorticity)/layer ' &
                                    // 'thickness'; i=i+1
             write (fileID,'(i5,a)') i,'. pressure'; i=i+1
-            write (fileID,'(i5,a)') i,'. montgomeryPotential'; i=i+1
+!mrp            write (fileID,'(i5,a)') i,'. montgomeryPotential'; i=i+1
             write (fileID,'(i5,a)') i,'. vertVelocityTop vertical velocity'; i=i+1
             write (fileID,'(i5,a)') i,'. vertAleTransportTop vertical transport'; i=i+1
             write (fileID,'(i5,a)') i,'. lowFreqDivergence'; i=i+1
@@ -366,7 +366,7 @@ contains
          end if
 
          call mpas_pool_get_array(diagnosticsPool, 'density', density)
-         call mpas_pool_get_array(diagnosticsPool, 'montgomeryPotential', montgomeryPotential)
+!mrp         call mpas_pool_get_array(diagnosticsPool, 'montgomeryPotential', montgomeryPotential)
          call mpas_pool_get_array(diagnosticsPool, 'pressure', pressure)
          call mpas_pool_get_array(diagnosticsPool, 'relativeVorticity', relativeVorticity)
          call mpas_pool_get_array(diagnosticsPool, 'normalizedRelativeVorticityEdge', normalizedRelativeVorticityEdge)
@@ -571,20 +571,20 @@ contains
 
          ! montgomeryPotential
          variableIndex = variableIndex + 1
-         call ocn_compute_field_volume_weighted_local_stats_max_level(dminfo, nVertLevels, nCellsSolve, &
-                              maxLevelCell(1:nCellsSolve), areaCell(1:nCellsSolve), &
-                              layerThickness(:,1:nCellsSolve), &
-                              montgomeryPotential(:,1:nCellsSolve), &
-                              sums_tmp(variableIndex), sumSquares_tmp(variableIndex), &
-                              mins_tmp(variableIndex), maxes_tmp(variableIndex), &
-                              verticalSumMins_tmp(variableIndex), &
-                              verticalSumMaxes_tmp(variableIndex))
-         sums(variableIndex) = sums(variableIndex) + sums_tmp(variableIndex)
-         sumSquares(variableIndex) = sumSquares(variableIndex) + sumSquares_tmp(variableIndex)
-         mins(variableIndex) = min(mins(variableIndex), mins_tmp(variableIndex))
-         maxes(variableIndex) = max(maxes(variableIndex), maxes_tmp(variableIndex))
-         verticalSumMins(variableIndex) = min(verticalSumMins(variableIndex), verticalSumMins_tmp(variableIndex))
-         verticalSumMaxes(variableIndex) = max(verticalSumMaxes(variableIndex), verticalSumMaxes_tmp(variableIndex))
+!mrp         call ocn_compute_field_volume_weighted_local_stats_max_level(dminfo, nVertLevels, nCellsSolve, &
+!mrp                              maxLevelCell(1:nCellsSolve), areaCell(1:nCellsSolve), &
+!mrp                              layerThickness(:,1:nCellsSolve), &
+!mrp                              montgomeryPotential(:,1:nCellsSolve), &
+!mrp                              sums_tmp(variableIndex), sumSquares_tmp(variableIndex), &
+!mrp                              mins_tmp(variableIndex), maxes_tmp(variableIndex), &
+!mrp                              verticalSumMins_tmp(variableIndex), &
+!mrp                              verticalSumMaxes_tmp(variableIndex))
+!mrp         sums(variableIndex) = sums(variableIndex) + sums_tmp(variableIndex)
+!mrp         sumSquares(variableIndex) = sumSquares(variableIndex) + sumSquares_tmp(variableIndex)
+!mrp         mins(variableIndex) = min(mins(variableIndex), mins_tmp(variableIndex))
+!mrp         maxes(variableIndex) = max(maxes(variableIndex), maxes_tmp(variableIndex))
+!mrp         verticalSumMins(variableIndex) = min(verticalSumMins(variableIndex), verticalSumMins_tmp(variableIndex))
+!mrp         verticalSumMaxes(variableIndex) = max(verticalSumMaxes(variableIndex), verticalSumMaxes_tmp(variableIndex))
 
          ! vertVelocityTop vertical velocity
          variableIndex = variableIndex + 1
@@ -1184,8 +1184,8 @@ contains
 
       ! montgomeryPotential
       variableIndex = variableIndex + 1
-      averages(variableIndex) = sums(variableIndex)/volumeCellGlobal
-      rms(variableIndex) = sqrt(sumSquares(variableIndex)/volumeCellGlobal)
+!mrp      averages(variableIndex) = sums(variableIndex)/volumeCellGlobal
+!mrp      rms(variableIndex) = sqrt(sumSquares(variableIndex)/volumeCellGlobal)
 
       ! vertVelocityTop vertical velocity
       variableIndex = variableIndex + 1
