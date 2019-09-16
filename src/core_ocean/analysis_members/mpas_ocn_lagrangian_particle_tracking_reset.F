@@ -88,8 +88,8 @@ module ocn_lagrangian_particle_tracking_reset
      character (len=StrKIND), pointer :: config_AM_lagrPartTrack_reset_global_timestamp
      character (len=StrKIND), pointer :: config_AM_lagrPartTrack_region_stream
      character (len=StrKIND), pointer :: config_AM_lagrPartTrack_reset_criteria
-     type (field1DInteger), pointer :: resetInsideRegionMaskValue1Field, resetOutsideRegionMaskValue1Field
-     integer, dimension(:), pointer :: resetInsideRegionMaskValue1, resetOutsideRegionMaskValue1
+!MRP     type (field1DInteger), pointer :: resetInsideRegionMaskValue1Field, resetOutsideRegionMaskValue1Field
+!MRP     integer, dimension(:), pointer :: resetInsideRegionMaskValue1, resetOutsideRegionMaskValue1
 
      err = 0
 
@@ -326,7 +326,7 @@ module ocn_lagrangian_particle_tracking_reset
        xParticle = xParticleReset
        yParticle = yParticleReset
        zParticle = zParticleReset
-!mrp       zLevelParticle = zLevelParticleReset
+!MRP       zLevelParticle = zLevelParticleReset
 
 !       ! reset velocity sums
 !       sumU = 0.0_RKIND
