@@ -2774,43 +2774,43 @@
 		/>
 		<var name="relativeSlopeTopOfEdge" type="real" dimensions="nVertLevelsP1 nEdges Time" units="non-dimensional"
 			 description="Slope of isopycnal surface relative to constant coordinate surface"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="relativeSlopeTopOfCell" type="real" dimensions="nVertLevelsP1 nCells Time" units="non-dimensional"
 			 description="Magnitude of slope of isopycnal surface relative to constant coordinate surface averaged to cell centers"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="relativeSlopeTapering" type="real" dimensions="nVertLevelsP1 nEdges Time" units="non-dimensional"
 			 description="scalar tapering function applied to limit magnitude of isopycnal mixing in regions where relativeSlopeTopOfCell is greater than config_gm_max_slope"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="relativeSlopeTaperingCell" type="real" dimensions="nVertLevelsP1 nCells Time" units="non-dimensional"
 			 description="averaging of relativeSlopeTapering function to cell centers"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="relativeSlopeTopOfCellX" type="real" dimensions="nVertLevelsP1 nCells Time" units="unitless"
 			 description="Slope of isopycnal surface relative to constant coordinate surface"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="relativeSlopeTopOfCellY" type="real" dimensions="nVertLevelsP1 nCells Time" units="unitless"
 			 description="Slope of isopycnal surface relative to constant coordinate surface"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="relativeSlopeTopOfCellZ" type="real" dimensions="nVertLevelsP1 nCells Time" units="unitless"
 			 description="Slope of isopycnal surface relative to constant coordinate surface"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="relativeSlopeTopOfCellZonal" type="real" dimensions="nVertLevelsP1 nCells Time" units="unitless"
 			 description="Slope of isopycnal surface relative to constant coordinate surface"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="relativeSlopeTopOfCellMeridional" type="real" dimensions="nVertLevelsP1 nCells Time" units="unitless"
 			 description="Slope of isopycnal surface relative to constant coordinate surface"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="k33" type="real" dimensions="nVertLevelsP1 nCells Time" units="m^2 s^{-1}"
 			 description="The (3,3) entry of the Redi diffusion tensor. Added to the model vertical diffusion."
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="gmStreamFuncTopOfEdge" type="real" dimensions="nVertLevelsP1 nEdges Time" units="m^2 s^{-1}"
 			 description="GM stream function"
