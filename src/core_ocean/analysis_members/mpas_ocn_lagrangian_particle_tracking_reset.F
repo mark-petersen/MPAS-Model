@@ -122,6 +122,8 @@ module ocn_lagrangian_particle_tracking_reset
        ! convert config_AM_lagrPartTrack_reset_global_timestamp into seconds and store in globalResetTimeValue
        call mpas_set_timeInterval(timeInterval, timeString=trim(config_AM_lagrPartTrack_reset_global_timestamp))
        call mpas_get_timeInterval(timeInterval, StartTimeIn=current_time, dt=globalResetTimeValue)
+       call mpas_log_write('within ocn_setup_particle_reset_condition. New globalResetTimeValue (in s)=$r', &
+          realArgs=(/globalResetTimeValue/) )
 
        !print *,  'resetTimeValue = ', globalResetTimeValue
 

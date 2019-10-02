@@ -533,10 +533,13 @@ contains
         call mpas_pool_get_array(lagrPartTrackScalarPool, 'globalTimeSinceReset', globalTimeSinceReset)
         ! advance particle time
         globalTimeSinceReset = globalTimeSinceReset + dt
-print *, '535 globalResetTimeValue, globalTimeSinceReset, dt, nSteps, dtSim',globalResetTimeValue, globalTimeSinceReset, dt, nSteps, dtSim
         if (globalTimeSinceReset > globalResetTimeValue) then
           resetAllParticles = .true.
           globalTimeSinceReset = 0.0_RKIND
+          ! set up particle reset condition
+          call ocn_setup_particle_reset_condition(domain, err)
+          call mpas_log_write('called ocn_setup_particle_reset_condition. New globalResetTimeValue (in s)=$r', &
+             realArgs=(/globalResetTimeValue/) )
         end if
 
         !{{{
