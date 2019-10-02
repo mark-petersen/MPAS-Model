@@ -88,6 +88,7 @@ module ocn_lagrangian_particle_tracking_reset
      character (len=StrKIND), pointer :: config_AM_lagrPartTrack_reset_global_timestamp
      character (len=StrKIND), pointer :: config_AM_lagrPartTrack_region_stream
      character (len=StrKIND), pointer :: config_AM_lagrPartTrack_reset_criteria
+     type (mpas_time_type) :: current_time
 !MRP     type (field1DInteger), pointer :: resetInsideRegionMaskValue1Field, resetOutsideRegionMaskValue1Field
 !MRP     integer, dimension(:), pointer :: resetInsideRegionMaskValue1, resetOutsideRegionMaskValue1
 
@@ -108,6 +109,9 @@ module ocn_lagrangian_particle_tracking_reset
        call MPAS_stream_mgr_read(domain % streamManager, streamID=trim(config_AM_lagrPartTrack_region_stream), ierr=err)
      end if
 
+     ! get current time
+     current_time = mpas_get_clock_time(domain % clock, MPAS_NOW, err)
+
      ! convert input config_AM_lagrPartTrack_reset_global_timestamp into S for calculations
      block => domain % blocklist
      do while (associated(block))
@@ -117,7 +121,7 @@ module ocn_lagrangian_particle_tracking_reset
 
        ! convert config_AM_lagrPartTrack_reset_global_timestamp into seconds and store in globalResetTimeValue
        call mpas_set_timeInterval(timeInterval, timeString=trim(config_AM_lagrPartTrack_reset_global_timestamp))
-       call mpas_get_timeInterval(timeInterval, dt=globalResetTimeValue)
+       call mpas_get_timeInterval(timeInterval, StartTimeIn=current_time, dt=globalResetTimeValue)
 
        !print *,  'resetTimeValue = ', globalResetTimeValue
 
