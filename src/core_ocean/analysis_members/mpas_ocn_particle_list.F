@@ -881,7 +881,6 @@ end subroutine mpas_particle_list_destroy_particle_list !}}}
      ! just empty the list without destroying the particle data (because we need particles that were just transferred!)
      call empty_list_particlelists(listPLRecv)
 
-     deallocate(listPLSend,listPLRecv)
      deallocate(nPartSend, nPartRecv)
 
      LIGHT_DEBUG_WRITE('finished mpas_particle_list_test_num_current_particlelist')
