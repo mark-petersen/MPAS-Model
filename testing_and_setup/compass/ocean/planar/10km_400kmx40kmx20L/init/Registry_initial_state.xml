@@ -1,5 +1,5 @@
 	<nml_record name="surface_gravity_wave" mode="init" configuration="surface_gravity_wave">
-		<nml_option name="config_surface_gravity_wave_vert_levels" type="integer" default_value="20" units="unitless"
+		<nml_option name="config_surface_gravity_wave_vert_levels" type="integer" default_value="10" units="unitless"
 			description="Number of vertical levels in surface gravity wave test case. Typical value is 20."
 			possible_values="Any positive integer number greater than 0."
 		/>
@@ -15,7 +15,7 @@
 			description="Temperature of the bottom."
 			possible_values="Any real number"
 		/>
-		<nml_option name="config_surface_gravity_wave_bottom_depth" type="real" default_value="1000.0" units="m"
+		<nml_option name="config_surface_gravity_wave_bottom_depth" type="real" default_value="100.0" units="m"
 			description="Depth of the bottom of the ocean for the surface gravity wave test case."
 			possible_values="Any positive real number."
 		/>

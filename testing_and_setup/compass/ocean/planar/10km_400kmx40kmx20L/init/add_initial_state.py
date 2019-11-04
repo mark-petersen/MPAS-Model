@@ -108,7 +108,9 @@ def ocn_generate_uniform_vertical_grid(interfaceLocations):
 
 
 def test_ocn_generate_uniform_vertical_grid():
-    nVertLevels = 20
+    # import from ini file later:
+    nVertLevels = 10
+
     nVertLevelsP1 = nVertLevels + 1
     interfaceLocations = np.zeros(nVertLevelsP1)
     interfaceLocations = ocn_generate_uniform_vertical_grid(interfaceLocations)
@@ -246,14 +248,17 @@ def SpecifyInitialConditions():
     restingThicknessArray = np.zeros((nCells,nVertLevels))
     layerThicknessArray = np.zeros((nCells,nVertLevels))
 
+    # import from ini file later:
+    constant_layer_thickness = 10.0
+
     for iCell in range(0,nCells):
         for k in range(0,nVertLevels):
-            restingThicknessArray[iCell,k] \
-            = SGWBottomDepthParam*(interfaceLocations[k+1] - interfaceLocations[k])
-            layerThicknessArray[iCell,k] \
-            = restingThicknessArray[iCell,k] \
-              *(1.0 + SGWSurfaceElevationToMeanDepthRatioParam \
-                      *np.exp(-((yCell[iCell] - yMidGlobal)/SGWGaussianSurfaceElevationDecayScaleParam)**2.0))
+            restingThicknessArray[iCell,k] = constant_layer_thickness
+            #= SGWBottomDepthParam*(interfaceLocations[k+1] - interfaceLocations[k])
+            layerThicknessArray[iCell,k] = constant_layer_thickness
+            #= restingThicknessArray[iCell,k] \
+            #  *(1.0 + SGWSurfaceElevationToMeanDepthRatioParam \
+            #          *np.exp(-((yCell[iCell] - yMidGlobal)/SGWGaussianSurfaceElevationDecayScaleParam)**2.0))
 
     restingThickness[:,:] = restingThicknessArray[:,:]
     layerThickness[0,:,:] = layerThicknessArray[:,:]
@@ -262,8 +267,8 @@ def SpecifyInitialConditions():
     temperature_type = 'linear'
     T0 = 20
     dTdx = 0 # 1e-4
-    dTdy = 1e-4
-    dTdz = 10.0/1000
+    dTdy = 0 #1e-4
+    dTdz = 0 #10.0/1000
 
     # import from ini file later:
     salinity_type = 'linear'
@@ -290,7 +295,8 @@ def SpecifyInitialConditions():
     surfaceStress[:] = SGWSurfaceStressParam
     atmosphericPressure[:] = SGWAtmosphericPressureParam
     boundaryLayerDepth[:] = SGWBottomLayerDepthParam
-    maxLevelCell[:] = SGWMaxLevelCellParam
+    # flat bottom:
+    maxLevelCell[:] = nVertLevels
     vertCoordMovementWeights[:] = SGWVertCoordMovementWeightsParam
     edgeMask[:] = SGWEdgeMaskParam
 
