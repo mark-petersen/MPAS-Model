@@ -138,10 +138,10 @@ def SpecifyInitialConditions():
     #    print(key)
 
     # Source file
-    src = Dataset("base_mesh.nc", "r", format='NETCDF4_CLASSIC')
+    src = Dataset("base_mesh.nc", "r", format='NETCDF3_64BIT_OFFSET')
 
     # Destination file
-    dst = Dataset("initial_state.nc", "w", format="NETCDF4_CLASSIC")
+    dst = Dataset("initial_state.nc", "w", format='NETCDF3_64BIT_OFFSET')
 
     # Copy attributes
     for name in src.ncattrs():
