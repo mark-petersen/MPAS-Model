@@ -1,12 +1,4 @@
-
-# coding: utf-8
-
-# Name: Initialization_SurfaceGravityWave.py
-#
-# Author: Siddhartha Bishnu
-
-# In[1]:
-
+# add_initial_state.py
 
 import numpy as np
 import netCDF4 as nc
@@ -14,86 +6,12 @@ from netCDF4 import Dataset
 from lxml import etree
 import configparser
 
-# In[2]:
-
-
-def StringToBoolean(x):
-    return x.lower() in ("TRUE", "T", "True", "true", "t")
-
-
-# In[3]:
-
-
-def read_Registry_surface_gravity_wave():
-
-    global SGWnVertLevelsParam, SGWUseDistancesParam, SGWSurfaceTemperatureParam, SGWBottomTemperatureParam, \
-           SGWBottomDepthParam, SGWSalinityParam, SGWCoriolisParam, SGWSurfaceElevationToMeanDepthRatioParam, \
-           SGWGaussianSurfaceElevationDecayScaleParam
-
-    # Parse the surfac gravity wave Registry file
-    Registry_surface_gravity_wave = etree.parse("Registry_initial_state.xml")
-
-    for nml_option in Registry_surface_gravity_wave.xpath('//nml_option'):
-        if nml_option.attrib['name'] == 'config_surface_gravity_wave_vert_levels':
-            SGWnVertLevelsParam = int(nml_option.attrib['default_value'])
-        if nml_option.attrib['name'] == 'config_surface_gravity_wave_use_distances':
-            SGWUseDistancesParam = StringToBoolean(nml_option.attrib['default_value'])
-        if nml_option.attrib['name'] == 'config_surface_gravity_wave_surface_temperature':
-            SGWSurfaceTemperatureParam = float(nml_option.attrib['default_value'])
-        if nml_option.attrib['name'] == 'config_surface_gravity_wave_bottom_temperature':
-            SGWBottomTemperatureParam = float(nml_option.attrib['default_value'])
-        if nml_option.attrib['name'] == 'config_surface_gravity_wave_bottom_depth':
-            SGWBottomDepthParam = float(nml_option.attrib['default_value'])
-        if nml_option.attrib['name'] == 'config_surface_gravity_wave_salinity':
-            SGWSalinityParam = float(nml_option.attrib['default_value'])
-        if nml_option.attrib['name'] == 'config_surface_gravity_wave_coriolis_parameter':
-            SGWCoriolisParam = float(nml_option.attrib['default_value'])
-        if nml_option.attrib['name'] == 'config_surface_elevation_to_mean_depth_ratio':
-            SGWSurfaceElevationToMeanDepthRatioParam = float(nml_option.attrib['default_value'])
-        if nml_option.attrib['name'] == 'config_Gaussian_surface_elevation_decay_scale':
-            SGWGaussianSurfaceElevationDecayScaleParam = float(nml_option.attrib['default_value'])
-
-
-# In[4]:
-
-
-def CommonData():
-
-    global ReadRegistrySurfaceGravityWave, SGWNormalVelocityParam, SGWLayerThicknessParam, \
-           SGWRestingThicknessParam, SGWSurfaceStressParam, SGWAtmosphericPressureParam, \
-           SGWBottomLayerDepthParam, SGWBottomDepthObservedParam, SGWMaxLevelCellParam, \
-           SGWVertCoordMovementWeightsParam, SGWEdgeMaskParam, SGWTemperatureParam
-
-    ReadRegistrySurfaceGravityWave = True
-
-    if ReadRegistrySurfaceGravityWave:
-        read_Registry_surface_gravity_wave()
-    else:
-        SGWnVertLevelsParam = 20
-        SGWUseDistancesParam = False
-        SGWSurfaceTemperatureParam = 13.1
-        SGWBottomTemperatureParam = 13.1
-        SGWBottomDepthParam = 1000.0
-        SGWSalinityParam = 35.0
-        SGWCoriolisParam = -1.2*10.0**(-4.0)
-        SGWSurfaceElevationToMeanDepthRatioParam = 10.0**(-2.0)
-        SGWGaussianSurfaceElevationDecayScaleParam = 5.0*10.0**4.0
-
-    SGWNormalVelocityParam = 0.0
-    SGWLayerThicknessParam = 50.0
-    SGWRestingThicknessParam = 50.0
-    SGWSurfaceStressParam = 0.0
-    SGWAtmosphericPressureParam = 0.0
-    SGWBottomLayerDepthParam = 0.0
-    SGWBottomDepthObservedParam = 0.0
-    SGWMaxLevelCellParam = 20.0
-    SGWVertCoordMovementWeightsParam = 1.0
-    SGWEdgeMaskParam = 0
-    SGWTemperatureParam = 13.1
-
-
-# In[5]:
-
+config = configparser.ConfigParser()
+config.read('config_initial_state.ini')
+dTdx = config['temperature']['dTdx']
+print(dTdx)
+for key in config['temperature']:
+    print(key)
 
 def ocn_generate_uniform_vertical_grid(interfaceLocations):
     nInterfaces = interfaceLocations.shape[0]
@@ -103,41 +21,8 @@ def ocn_generate_uniform_vertical_grid(interfaceLocations):
         interfaceLocations[iInterfaceLocation] = interfaceLocations[iInterfaceLocation-1] + layerSpacing
     return interfaceLocations
 
-
-# In[6]:
-
-
-def test_ocn_generate_uniform_vertical_grid():
-    # import from ini file later:
-    nVertLevels = 10
-
-    nVertLevelsP1 = nVertLevels + 1
-    interfaceLocations = np.zeros(nVertLevelsP1)
-    interfaceLocations = ocn_generate_uniform_vertical_grid(interfaceLocations)
-    print('The interfaces locations are:')
-    print(interfaceLocations)
-
-
-# In[7]:
-
-
-TestOcnGenerateUniformVerticalGrid = False
-if TestOcnGenerateUniformVerticalGrid:
-    test_ocn_generate_uniform_vertical_grid()
-
-
-# In[8]:
-
-
 def SpecifyInitialConditions():
 
-    CommonData()
-
-    # mrp trying to add config parser. not working yet.
-    config = configparser.ConfigParser()
-    config.read('config_initial_state.ini')
-    #for key in config['temperature']:
-    #    print(key)
 
     # Source file
     src = Dataset("base_mesh.nc", "r", format='NETCDF3_64BIT_OFFSET')
@@ -266,16 +151,16 @@ def SpecifyInitialConditions():
     # import from ini file later:
     temperature_type = 'linear'
     T0 = 20
-    dTdx = 0 # 1e-4
+    dTdx = 1e-4
     dTdy = 0 #1e-4
-    dTdz = 0 #10.0/1000
+    dTdz = 10.0/1000
 
     # import from ini file later:
     salinity_type = 'linear'
     S0 = 35
     dSdx = 0
     dSdy = 0
-    dSdz = 0
+    dSdz = -10.0/1000
 
     for iCell in range(0,nCells):
         for k in range(0,nVertLevels):
@@ -302,10 +187,6 @@ def SpecifyInitialConditions():
 
     # Close the destination file
     dst.close()
-
-
-# In[9]:
-
 
 SpecifyInitialConditions()
 
