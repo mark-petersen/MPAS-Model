@@ -7,11 +7,17 @@ from lxml import etree
 import configparser
 
 config = configparser.ConfigParser()
+config.optionxform = lambda option: option  # preserve case for letters
 config.read('config_initial_state.ini')
-dTdx = config['temperature']['dTdx']
+for section in config.sections():
+    for option in config.options(section):
+        try:
+           vars()[option] = float(config.get(section, option))
+        except:
+           vars()[option] = config.get(section, option)
+
+
 print(dTdx)
-for key in config['temperature']:
-    print(key)
 
 def ocn_generate_uniform_vertical_grid(interfaceLocations):
     nInterfaces = interfaceLocations.shape[0]
