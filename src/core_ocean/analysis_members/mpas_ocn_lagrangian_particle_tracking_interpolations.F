@@ -103,8 +103,8 @@ module ocn_lagrangian_particle_tracking_interpolations
     ! local / temporary arrays needed in the compute procedure
     type (field2DReal), pointer :: &
       ucReconstructX, ucReconstructY, ucReconstructZ, ucReconstructZonal, ucReconstructMeridional ! cell center values
-    type (field2DReal), pointer :: ucStore, vcStore, wcStore
-    type (field2DInteger), pointer :: boundaryVertex, boundaryCell, boundaryCellGlobal, boundaryVertexGlobal
+!mrp    type (field2DReal), pointer :: ucStore, vcStore, wcStore
+    type (field2DInteger), pointer :: boundaryVertex, boundaryCell, boundaryVertexGlobal
 
     ! get pointers
     call mpas_pool_get_field(scratchPool, 'ucReconstructX', ucReconstructX)
@@ -144,26 +144,26 @@ module ocn_lagrangian_particle_tracking_interpolations
     call mpas_pool_get_field(meshPool,'boundaryVertex', boundaryVertex)
     call mpas_pool_get_field(meshPool,'boundaryCell', boundaryCell)
 
-
-    if (filternum > 0) then
-      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      ! filter the cell velocity field
-      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      call ocn_second_order_shapiro_filter_ops(filterNum, meshPool, scratchPool, boundaryVertex, boundaryCell, &
-        layerThickness, ucReconstructX, ucReconstructY, ucReconstructZ)
-
-      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      ! store filter data &
-      ! write data to file for output
-      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      call mpas_pool_get_field(particleCellPool, 'filteredVelocityU', ucStore)
-      call mpas_pool_get_field(particleCellPool, 'filteredVelocityV', vcStore)
-      call mpas_pool_get_field(particleCellPool, 'filteredVelocityW', wcStore)
-      ucStore % array = ucReconstructX % array
-      vcStore % array = ucReconstructY % array
-      wcStore % array = ucReconstructZ % array
-
-    end if
+!mrp not using filter
+!mrp    if (filternum > 0) then
+!mrp      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!mrp      ! filter the cell velocity field
+!mrp      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!mrp      call ocn_second_order_shapiro_filter_ops(filterNum, meshPool, scratchPool, boundaryVertex, boundaryCell, &
+!mrp        layerThickness, ucReconstructX, ucReconstructY, ucReconstructZ)
+!mrp
+!mrp      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!mrp      ! store filter data &
+!mrp      ! write data to file for output
+!mrp      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!mrp      call mpas_pool_get_field(particleCellPool, 'filteredVelocityU', ucStore)
+!mrp      call mpas_pool_get_field(particleCellPool, 'filteredVelocityV', vcStore)
+!mrp      call mpas_pool_get_field(particleCellPool, 'filteredVelocityW', wcStore)
+!mrp      ucStore % array = ucReconstructX % array
+!mrp      vcStore % array = ucReconstructY % array
+!mrp      wcStore % array = ucReconstructZ % array
+!mrp
+!mrp    end if
 
     ! interpolate to vertex locations for use in Wachspress
     call ocn_vector_cell_center_to_vertex(meshPool, boundaryVertex % array, boundaryCell % array, &

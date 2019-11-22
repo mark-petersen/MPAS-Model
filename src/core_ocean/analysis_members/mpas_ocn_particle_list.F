@@ -697,7 +697,8 @@ end subroutine mpas_particle_list_destroy_particle_list !}}}
       call uniqueIntegerList(intArray, sendProcNeighs)
       call removeValueFromIntList(sendProcNeighs, domain % dminfo % my_proc_id)
 
-      deallocate(intArray, completeList, sendRequestID, recvRequestID)
+      deallocate(intArray, completeList, recvList, sendRequestID, recvRequestID)
+
       ! need to update IO processors as to the change also so that they know where to get data from!!!
       ! should uncomment for testing when multiple sendProcs are utilized (parallel IO)
       LIGHT_DEBUG_WRITE('sendProcSendList after = ' COMMA sendProcSendList)
@@ -4057,15 +4058,15 @@ end subroutine allocate_list_particlelists !}}}
      ! local variables
      type (mpas_pool_type), pointer :: lagrPartTrackCellsPool
      integer, dimension(:), pointer :: cellOwnerBlock
-     integer, pointer :: currentBlock, transfered
+     integer, pointer :: currentBlock !MRP, transfered
 
      call mpas_pool_get_subpool(block % structs, trim(poolname), lagrPartTrackCellsPool)
      call mpas_pool_get_array(lagrPartTrackCellsPool, 'cellOwnerBlock', cellOwnerBlock)
      call mpas_pool_get_array(particle % haloDataPool, 'currentBlock', currentBlock)
      if(cellOwnerBlock(iCell) /= currentBlock) then
        ! increment transfer counter
-       call mpas_pool_get_array(particle % haloDataPool, 'transfered', transfered)
-       transfered = transfered + 1
+!MRP       call mpas_pool_get_array(particle % haloDataPool, 'transfered', transfered)
+!MRP       transfered = transfered + 1
        ! set new current block
        currentBlock = cellOwnerBlock(iCell)
        ! reset cell_id to be brute force computed on new block after trasnfer

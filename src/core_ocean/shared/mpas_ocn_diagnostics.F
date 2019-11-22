@@ -190,7 +190,7 @@ contains
       call mpas_pool_get_array(diagnosticsPool, 'zMid', zMid)
       call mpas_pool_get_array(diagnosticsPool, 'zTop', zTop)
       call mpas_pool_get_array(diagnosticsPool, 'divergence', divergence)
-      call mpas_pool_get_array(diagnosticsPool, 'circulation', circulation)
+!mrp      call mpas_pool_get_array(diagnosticsPool, 'circulation', circulation)
       call mpas_pool_get_array(diagnosticsPool, 'relativeVorticity', relativeVorticity)
       call mpas_pool_get_array(diagnosticsPool, 'relativeVorticityCell', relativeVorticityCell)
       call mpas_pool_get_array(diagnosticsPool, 'normalizedPlanetaryVorticityEdge', normalizedPlanetaryVorticityEdge)
@@ -199,7 +199,7 @@ contains
       call mpas_pool_get_array(diagnosticsPool, 'density', density)
       call mpas_pool_get_array(diagnosticsPool, 'displacedDensity', displacedDensity)
       call mpas_pool_get_array(diagnosticsPool, 'potentialDensity', potentialDensity)
-      call mpas_pool_get_array(diagnosticsPool, 'montgomeryPotential', montgomeryPotential)
+!mrp      call mpas_pool_get_array(diagnosticsPool, 'montgomeryPotential', montgomeryPotential)
       call mpas_pool_get_array(diagnosticsPool, 'pressure', pressure)
       call mpas_pool_get_array(diagnosticsPool, 'BruntVaisalaFreqTop', BruntVaisalaFreqTop)
       call mpas_pool_get_array(diagnosticsPool, 'tangentialVelocity', tangentialVelocity)
@@ -207,8 +207,9 @@ contains
       call mpas_pool_get_array(diagnosticsPool, 'kineticEnergyCell', kineticEnergyCell)
       call mpas_pool_get_array(diagnosticsPool, 'vertVelocityTop', vertVelocityTop)
       call mpas_pool_get_array(diagnosticsPool, 'vertTransportVelocityTop', vertTransportVelocityTop)
-      call mpas_pool_get_array(diagnosticsPool, 'vertGMBolusVelocityTop', vertGMBolusVelocityTop)
-      call mpas_pool_get_array(diagnosticsPool, 'normalGMBolusVelocity', normalGMBolusVelocity)
+!mrp turn off GM for high res. runs - hard wired!!!!!!
+!mrp      call mpas_pool_get_array(diagnosticsPool, 'vertGMBolusVelocityTop', vertGMBolusVelocityTop)
+!mrp      call mpas_pool_get_array(diagnosticsPool, 'normalGMBolusVelocity', normalGMBolusVelocity)
       call mpas_pool_get_array(diagnosticsPool, 'normalTransportVelocity', normalTransportVelocity)
       call mpas_pool_get_array(diagnosticsPool, 'gradSSH', gradSSH)
       call mpas_pool_get_array(diagnosticsPool, 'RiTopOfCell', RiTopOfCell)
@@ -359,7 +360,7 @@ contains
          kineticEnergyCell(:, iCell) = 0.0_RKIND
          div_hu(:) = 0.0_RKIND
          div_huTransport(:) = 0.0_RKIND
-         div_huGMBolus(:) = 0.0_RKIND
+!mrp         div_huGMBolus(:) = 0.0_RKIND
          invAreaCell1 = 1.0_RKIND / areaCell(iCell)
          do i = 1, nEdgesOnCell(iCell)
             iEdge = edgesOnCell(i, iCell)
@@ -378,9 +379,10 @@ contains
                                     - layerThicknessEdge(k, iEdge) * edgeSignOnCell_temp &
                                     * dvEdge_temp * normalTransportVelocity(k, iEdge) * invAreaCell1
                ! Compute vertical velocity from the horizontal GM Bolus velocity
-               div_huGMBolus(k) = div_huGMBolus(k) &
-                                  - layerThicknessEdge(k, iEdge) * edgeSignOnCell_temp * dvEdge_temp &
-                                  * normalGMBolusVelocity(k, iEdge) * invAreaCell1
+!mrp turn off GM for high res. runs - hard wired!!!!!!
+!mrp               div_huGMBolus(k) = div_huGMBolus(k) &
+!mrp                                  - layerThicknessEdge(k, iEdge) * edgeSignOnCell_temp * dvEdge_temp &
+!mrp                                  * normalGMBolusVelocity(k, iEdge) * invAreaCell1
             end do
          end do
          ! Vertical velocity at bottom (maxLevelCell(iCell)+1) is zero, initialized above.
@@ -388,7 +390,7 @@ contains
          do k=maxLevelCell(iCell),1,-1
             vertVelocityTop(k,iCell) = vertVelocityTop(k+1,iCell) - div_hu(k)
             vertTransportVelocityTop(k,iCell) = vertTransportVelocityTop(k+1,iCell) - div_huTransport(k)
-            vertGMBolusVelocityTop(k,iCell) = vertGMBolusVelocityTop(k+1,iCell) - div_huGMBolus(k)
+!mrp            vertGMBolusVelocityTop(k,iCell) = vertGMBolusVelocityTop(k+1,iCell) - div_huGMBolus(k)
          end do
       end do
       !$omp end do
@@ -646,28 +648,28 @@ contains
         ! However, one may use 'pressure_and_zmid' when layers are isopycnal as well.
         ! Compute pressure at top of each layer, and then Montgomery Potential.
 
-        allocate(pTop(nVertLevels))
-
-        !$omp do schedule(runtime)
-        do iCell = 1, nCells
-
-           ! assume atmospheric pressure at the surface is zero for now.
-           pTop(1) = 0.0_RKIND
-           ! At top layer it is g*SSH, where SSH may be off by a
-           ! constant (ie, bottomDepth can be relative to top or bottom)
-           montgomeryPotential(1,iCell) = gravity &
-              * (bottomDepth(iCell) + sum(layerThickness(1:nVertLevels,iCell)))
-
-           do k = 2, nVertLevels
-              pTop(k) = pTop(k-1) + density(k-1,iCell)*gravity* layerThickness(k-1,iCell)
-
-              ! from delta M = p delta / density
-              montgomeryPotential(k,iCell) = montgomeryPotential(k-1,iCell) &
-                 + pTop(k)*(1.0_RKIND/density(k,iCell) - 1.0_RKIND/density(k-1,iCell))
-           end do
-
-        end do
-        !$omp end do
+!mrp        allocate(pTop(nVertLevels))
+!mrp
+!mrp        !$omp do schedule(runtime)
+!mrp        do iCell = 1, nCells
+!mrp
+!mrp           ! assume atmospheric pressure at the surface is zero for now.
+!mrp           pTop(1) = 0.0_RKIND
+!mrp           ! At top layer it is g*SSH, where SSH may be off by a
+!mrp           ! constant (ie, bottomDepth can be relative to top or bottom)
+!mrp           montgomeryPotential(1,iCell) = gravity &
+!mrp              * (bottomDepth(iCell) + sum(layerThickness(1:nVertLevels,iCell)))
+!mrp
+!mrp           do k = 2, nVertLevels
+!mrp              pTop(k) = pTop(k-1) + density(k-1,iCell)*gravity* layerThickness(k-1,iCell)
+!mrp
+!mrp              ! from delta M = p delta / density
+!mrp              montgomeryPotential(k,iCell) = montgomeryPotential(k-1,iCell) &
+!mrp                 + pTop(k)*(1.0_RKIND/density(k,iCell) - 1.0_RKIND/density(k-1,iCell))
+!mrp           end do
+!mrp
+!mrp        end do
+!mrp        !$omp end do
 
         deallocate(pTop)
 
@@ -1867,6 +1869,7 @@ contains
          GMBolusVelocityZonal, GMBolusVelocityMeridional, relativeSlopeTopOfEdge, relativeSlopeTopOfCellX, &
          relativeSlopeTopOfCellY, relativeSlopeTopOfCellZ, relativeSlopeTopOfCellZonal, relativeSlopeTopOfCellMeridional, &
          gmStreamFuncTopOfEdge, GMStreamFuncX, GMStreamFuncY, GMStreamFuncZ, GMStreamFuncZonal, GMStreamFuncMeridional
+      logical, pointer :: config_use_standardGM
 
       call mpas_timer_start('reconstruct gm vecs')
 
@@ -1877,27 +1880,6 @@ contains
       call mpas_pool_get_array(diagnosticsPool, 'transportVelocityZonal', transportVelocityZonal)
       call mpas_pool_get_array(diagnosticsPool, 'transportVelocityMeridional', transportVelocityMeridional)
 
-      call mpas_pool_get_array(diagnosticsPool, 'normalGMBolusVelocity', normalGMBolusVelocity)
-      call mpas_pool_get_array(diagnosticsPool, 'GMBolusVelocityX', GMBolusVelocityX)
-      call mpas_pool_get_array(diagnosticsPool, 'GMBolusVelocityY', GMBolusVelocityY)
-      call mpas_pool_get_array(diagnosticsPool, 'GMBolusVelocityZ', GMBolusVelocityZ)
-      call mpas_pool_get_array(diagnosticsPool, 'GMBolusVelocityZonal', GMBolusVelocityZonal)
-      call mpas_pool_get_array(diagnosticsPool, 'GMBolusVelocityMeridional', GMBolusVelocityMeridional)
-
-      call mpas_pool_get_array(diagnosticsPool, 'relativeSlopeTopOfEdge', relativeSlopeTopOfEdge)
-      call mpas_pool_get_array(diagnosticsPool, 'relativeSlopeTopOfCellX', relativeSlopeTopOfCellX)
-      call mpas_pool_get_array(diagnosticsPool, 'relativeSlopeTopOfCellY', relativeSlopeTopOfCellY)
-      call mpas_pool_get_array(diagnosticsPool, 'relativeSlopeTopOfCellZ', relativeSlopeTopOfCellZ)
-      call mpas_pool_get_array(diagnosticsPool, 'relativeSlopeTopOfCellZonal', relativeSlopeTopOfCellZonal)
-      call mpas_pool_get_array(diagnosticsPool, 'relativeSlopeTopOfCellMeridional', relativeSlopeTopOfCellMeridional)
-
-      call mpas_pool_get_array(diagnosticsPool, 'gmStreamFuncTopOfEdge', gmStreamFuncTopOfEdge)
-      call mpas_pool_get_array(diagnosticsPool, 'GMStreamFuncX', GMStreamFuncX)
-      call mpas_pool_get_array(diagnosticsPool, 'GMStreamFuncY', GMStreamFuncY)
-      call mpas_pool_get_array(diagnosticsPool, 'GMStreamFuncZ', GMStreamFuncZ)
-      call mpas_pool_get_array(diagnosticsPool, 'GMStreamFuncZonal', GMStreamFuncZonal)
-      call mpas_pool_get_array(diagnosticsPool, 'GMStreamFuncMeridional', GMStreamFuncMeridional)
-
       call mpas_reconstruct(meshPool, normalTransportVelocity,          &
                        transportVelocityX,            &
                        transportVelocityY,            &
@@ -1906,29 +1888,55 @@ contains
                        transportVelocityMeridional    &
                       )
 
-      call mpas_reconstruct(meshPool, normalGMBolusVelocity,          &
-                       GMBolusVelocityX,            &
-                       GMBolusVelocityY,            &
-                       GMBolusVelocityZ,            &
-                       GMBolusVelocityZonal,        &
-                       GMBolusVelocityMeridional    &
-                      )
+      call mpas_pool_get_config(ocnConfigs, 'config_use_standardGM', config_use_standardGM)
 
-      call mpas_reconstruct(meshPool, relativeSlopeTopOfEdge,          &
-                      relativeSlopeTopOfCellX,            &
-                      relativeSlopeTopOfCellY,            &
-                      relativeSlopeTopOfCellZ,            &
-                      relativeSlopeTopOfCellZonal,        &
-                      relativeSlopeTopOfCellMeridional    &
-                     )
+      if (config_use_standardGM) then
 
-      call mpas_reconstruct(meshPool, gmStreamFuncTopOfEdge,          &
-                      GMStreamFuncX,            &
-                      GMStreamFuncY,            &
-                      GMStreamFuncZ,            &
-                      GMStreamFuncZonal,        &
-                      GMStreamFuncMeridional    &
-                     )
+         call mpas_pool_get_array(diagnosticsPool, 'normalGMBolusVelocity', normalGMBolusVelocity)
+         call mpas_pool_get_array(diagnosticsPool, 'GMBolusVelocityX', GMBolusVelocityX)
+         call mpas_pool_get_array(diagnosticsPool, 'GMBolusVelocityY', GMBolusVelocityY)
+         call mpas_pool_get_array(diagnosticsPool, 'GMBolusVelocityZ', GMBolusVelocityZ)
+         call mpas_pool_get_array(diagnosticsPool, 'GMBolusVelocityZonal', GMBolusVelocityZonal)
+         call mpas_pool_get_array(diagnosticsPool, 'GMBolusVelocityMeridional', GMBolusVelocityMeridional)
+
+         call mpas_pool_get_array(diagnosticsPool, 'relativeSlopeTopOfEdge', relativeSlopeTopOfEdge)
+         call mpas_pool_get_array(diagnosticsPool, 'relativeSlopeTopOfCellX', relativeSlopeTopOfCellX)
+         call mpas_pool_get_array(diagnosticsPool, 'relativeSlopeTopOfCellY', relativeSlopeTopOfCellY)
+         call mpas_pool_get_array(diagnosticsPool, 'relativeSlopeTopOfCellZ', relativeSlopeTopOfCellZ)
+         call mpas_pool_get_array(diagnosticsPool, 'relativeSlopeTopOfCellZonal', relativeSlopeTopOfCellZonal)
+         call mpas_pool_get_array(diagnosticsPool, 'relativeSlopeTopOfCellMeridional', relativeSlopeTopOfCellMeridional)
+
+         call mpas_pool_get_array(diagnosticsPool, 'gmStreamFuncTopOfEdge', gmStreamFuncTopOfEdge)
+         call mpas_pool_get_array(diagnosticsPool, 'GMStreamFuncX', GMStreamFuncX)
+         call mpas_pool_get_array(diagnosticsPool, 'GMStreamFuncY', GMStreamFuncY)
+         call mpas_pool_get_array(diagnosticsPool, 'GMStreamFuncZ', GMStreamFuncZ)
+         call mpas_pool_get_array(diagnosticsPool, 'GMStreamFuncZonal', GMStreamFuncZonal)
+         call mpas_pool_get_array(diagnosticsPool, 'GMStreamFuncMeridional', GMStreamFuncMeridional)
+
+         call mpas_reconstruct(meshPool, normalGMBolusVelocity,          &
+                          GMBolusVelocityX,            &
+                          GMBolusVelocityY,            &
+                          GMBolusVelocityZ,            &
+                          GMBolusVelocityZonal,        &
+                          GMBolusVelocityMeridional    &
+                         )
+
+         call mpas_reconstruct(meshPool, relativeSlopeTopOfEdge,          &
+                         relativeSlopeTopOfCellX,            &
+                         relativeSlopeTopOfCellY,            &
+                         relativeSlopeTopOfCellZ,            &
+                         relativeSlopeTopOfCellZonal,        &
+                         relativeSlopeTopOfCellMeridional    &
+                        )
+
+         call mpas_reconstruct(meshPool, gmStreamFuncTopOfEdge,          &
+                         GMStreamFuncX,            &
+                         GMStreamFuncY,            &
+                         GMStreamFuncZ,            &
+                         GMStreamFuncZonal,        &
+                         GMStreamFuncMeridional    &
+                        )
+      end if
 
       call mpas_timer_stop('reconstruct gm vecs')
 

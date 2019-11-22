@@ -27,6 +27,14 @@
 			description="Logical flag determining if an analysis member write occurs on start-up."
 			possible_values=".true. or .false."
 		/>
+		<nml_option name="config_AM_lagrPartTrack_global_dtParticle" type="real" default_value="60" units="s"
+			description="Time step for particle advection, applied to all particles. Only used if config_AM_lagrPartTrack_enable_extra_variables=.false. Otherwise, dtParticle is set for each particle in the input file."
+			possible_values="timestamps of form 0000_00:00:00"
+		/>
+		<nml_option name="config_AM_lagrPartTrack_global_verticalTreatment" type="integer" default_value="4" units="unitless"
+			description="Type of vertical treatment to be used, with possible_values= 1 (indexLevel), 2 (fixedZLevel), 3 (passiveFloat), 4 (buoyancySurface), 5 (argoFloat ENUM)"
+			possible_values="1,2,3,4,5"
+		/>
 		<nml_option name="config_AM_lagrPartTrack_filter_number" type="integer" default_value="0" units="unitless"
 			description="Number of times to apply filtering operation."
 			possible_values="0, 1, 2, ..."
@@ -35,7 +43,7 @@
 			 description="type of temporal interpolation with possible_values='EE(1), RK2(2), RK4(4)' as ENUMs"
 			possible_values="1, 2, 4,..."
 		/>
-		<nml_option name="config_AM_lagrPartTrack_reset_criteria" type="character" default_value="none" units="unitless"
+		<nml_option name="config_AM_lagrPartTrack_reset_criteria" type="character" default_value="global_time" units="unitless"
 			description="Specify whether particles should not be reset ('none'), be reset on a timer for each particle ('particle_time'), be reset on config_AM_lagrPartTrack_reset_time_globally value ('global_time'), be reset based on regions ('region'), or be reset for all conditions ('all')."
 			possible_values="'none','particle_time','global_time', 'region','all'"
 		/>
@@ -125,33 +133,39 @@
 			runtime_format="single_file">
 
 			<var name="xtime"/>
-			<var name="indexToParticleID"/>
-			<var name="currentBlock"/>
-			<var name="currentCell"/>
 			<var name="currentCellGlobalID"/>
 			<var name="xParticle"/>
 			<var name="yParticle"/>
 			<var name="zParticle"/>
+			<var name="zLevelParticle"/>
 			<var name="lonParticle"/>
 			<var name="latParticle"/>
-			<var name="zLevelParticle"/>
-			<var name="xParticleReset"/>
-			<var name="yParticleReset"/>
-			<var name="zParticleReset"/>
-			<var name="zLevelParticleReset"/>
+<!-- MRP COMMENT OUT EXTRA FIELDS
+			<var name="dtParticle"/>
+			<var name="verticalTreatment"/>
 			<var name="timeSinceReset"/>
 			<var name="resetTime"/>
 			<var name="numTimesReset"/>
-			<var name="buoyancyParticle"/>
-			<var name="verticalTreatment"/>
-			<var name="dtParticle"/>
-			<var name="indexLevel"/>
-			<var name="cellOwnerBlock"/>
+			<var name="zLevelParticleReset"/>
 			<var name="transfered"/>
+			<var name="indexLevel"/>
 			<var name="buoyancySurfaceValues"/>
 			<var name="buoyancySurfaceVelocityMeridional"/>
 			<var name="buoyancySurfaceVelocityZonal"/>
 			<var name="buoyancySurfaceDepth"/>
+			<var name="indexToParticleID"/>
+MRP COMMENT OUT EXTRA FIELDS END -->
+<!-- MRP reset fields not needed in output
+			<var name="xParticleReset"/>
+			<var name="yParticleReset"/>
+			<var name="zParticleReset"/>
+			<var name="buoyancyParticle"/>
+MRP COMMENT OUT EXTRA FIELDS END -->
+<!-- MRP block information not needed in output except for debugging
+			<var name="cellOwnerBlock"/>
+			<var name="currentBlock"/>
+			<var name="currentCell"/>
+MRP COMMENT OUT EXTRA FIELDS END -->
 		</stream>
 
 		<stream name="lagrPartTrackRestart" type="input;output"
@@ -176,18 +190,20 @@
 			<var name="xParticleReset"/>
 			<var name="yParticleReset"/>
 			<var name="zParticleReset"/>
-			<var name="zLevelParticleReset"/>
 			<var name="currentBlockReset"/>
 			<var name="currentCellReset"/>
+			<var name="buoyancyParticle"/>
+<!-- MRP COMMENT OUT EXTRA FIELDS
+			<var name="dtParticle"/>
+			<var name="verticalTreatment"/>
 			<var name="timeSinceReset"/>
 			<var name="resetTime"/>
 			<var name="numTimesReset"/>
-			<var name="buoyancyParticle"/>
-			<var name="verticalTreatment"/>
-			<var name="dtParticle"/>
-			<var name="indexLevel"/>
+			<var name="zLevelParticleReset"/>
 			<var name="transfered"/>
+			<var name="indexLevel"/>
 			<var name="buoyancySurfaceValues"/>
+MRP COMMENT OUT EXTRA FIELDS END -->
 		</stream>
 
 		<stream name="lagrPartTrackInput" type="input"
@@ -207,18 +223,21 @@
 			<var name="xParticleReset"/>
 			<var name="yParticleReset"/>
 			<var name="zParticleReset"/>
-			<var name="zLevelParticleReset"/>
 			<var name="currentBlockReset"/>
 			<var name="currentCellReset"/>
-			<var name="resetTime"/>
 			<var name="buoyancyParticle"/>
-			<var name="verticalTreatment"/>
+<!-- MRP COMMENT OUT EXTRA FIELDS
 			<var name="dtParticle"/>
-			<var name="indexLevel"/>
+			<var name="verticalTreatment"/>
+			<var name="resetTime"/>
 			<var name="transfered"/>
+			<var name="zLevelParticleReset"/>
+			<var name="indexLevel"/>
 			<var name="buoyancySurfaceValues"/>
+MRP COMMENT OUT EXTRA FIELDS END -->
 		</stream>
 
+<!-- MRP COMMENT OUT EXTRA FIELDS
 		<stream name="lagrPartTrackRegions" type="input"
 				runtime_format="single_file"
 				mode="forward;analysis"
@@ -229,8 +248,10 @@
 			<var name="resetOutsideRegionMaskValue1"/>
 			<var name="resetInsideRegionMaskValue1"/>
 		</stream>
+MRP COMMENT OUT EXTRA FIELDS END -->
 	</streams>
 
+<!-- MRP COMMENT OUT EXTRA FIELDS
 	<var_struct name="lagrPartTrackRegions" time_levs="1" packages="lagrPartTrackAMPKG">
 		<var name="resetOutsideRegionMaskValue1" type="integer" dimensions="nCells" units="Unitless"
 			 description="Mask for particle resets that leave this particular region (specified by 1)" default="0"
@@ -239,9 +260,14 @@
 			 description="Mask for particle resets that enter this particular region (specified by 1)" default="0"
 		/>
 	</var_struct>
+MRP COMMENT OUT EXTRA FIELDS END -->
+
 	<var_struct name="lagrPartTrackScalars" time_levs="1" packages="lagrPartTrackAMPKG">
 		<var name="globalResetTimeValue" type="real" dimensions="Time" units="s"
 			 description="Time in s for a global reset."
+		/>
+		<var name="globalTimeSinceReset" type="real" dimensions="Time" units="s"
+			 description="Time in s since last global reset."
 		/>
 	</var_struct>
 	<var_struct name="lagrPartTrackFields" time_levs="2" packages="lagrPartTrackAMPKG">
@@ -262,6 +288,7 @@
 		<var name="cellOwnerBlock" type="integer" dimensions="nCells" units="unitless"
 			 description="designates ownership of cell in terms of computational block"
 		/>
+<!-- MRP COMMENT OUT EXTRA FIELDS
 		<var name="filteredVelocityW" type="real" dimensions="nVertLevels nCells Time" units="m s^{-1}"
 			 description="filtered u horizontal velocity at cells"
 		/>
@@ -283,6 +310,7 @@
 		<var name="buoyancySurfaceValues" type="real" dimensions="nBuoyancySurfaces" units="kg m^{-3}"
 			 description="definition of buoyancy surfaces in terms of potential density"
 		/>
+MRP COMMENT OUT EXTRA FIELDS END -->
 		<var name="wachspressAreaB" type="real" dimensions="nCells maxEdges" units="m^2"
 			 description="cached polygon subarea B_i used in Wachspess calculation"
 		/>
@@ -330,14 +358,18 @@
 		<var name="zParticleReset" type="real" dimensions="nParticles" units="m"
 			 description="reset z location of horizontal particle position"
 		/>
-		<var name="zLevelParticleReset" type="real" dimensions="nParticles" units="m"
-			 description="reset z-level for vertical elevation of particle position"
-		/>
 		<var name="currentBlockReset" type="integer" dimensions="nParticles" units="unitless"
 			 description="reset block for a particle"
 		/>
 		<var name="currentCellReset" type="integer" dimensions="nParticles" units="unitless"
 			 description="reset cell for a particle"
+		/>
+<!-- MRP COMMENT OUT EXTRA FIELDS
+		<var name="dtParticle" type="real" dimensions="nParticles Time" units="s"
+			 description="Any positive real value, but limited by CFL condition."
+		/>
+		<var name="verticalTreatment" type="integer" dimensions="nParticles Time" units="unitless"
+			 description="select type of vertical treatment to be used, with possible_values='indexLevel','fixedZLevel','passiveFloat','buoyancySurface','argoFloat' (ENUM)"
 		/>
 		<var name="timeSinceReset" type="real" dimensions="nParticles" units="m"
 			 description="time (in seconds) since last particle reset" default_value="0.0"
@@ -348,20 +380,18 @@
 		<var name="numTimesReset" type ="integer" dimensions="nParticles Time" units="unitless"
 			 description="flag to specify how many times the particle was reset" default_value="0"
 		/>
-		<var name="verticalTreatment" type="integer" dimensions="nParticles Time" units="unitless"
-			 description="select type of vertical treatment to be used, with possible_values='indexLevel','fixedZLevel','passiveFloat','buoyancySurface','argoFloat' (ENUM)"
+		<var name="transfered" type ="integer" dimensions="nParticles Time" units="unitless"
+			 description="flag to monitor if the particle was transfered"
+		/>
+		<var name="zLevelParticleReset" type="real" dimensions="nParticles" units="m"
+			 description="reset z-level for vertical elevation of particle position"
 		/>
 		<var name="indexLevel" type="integer" dimensions="nParticles Time" units="unitless"
 			 description="0 if particle is fixed, or index level if particle is free-floating"
 		/>
-		<var name="dtParticle" type="real" dimensions="nParticles Time" units="s"
-			 description="Any positive real value, but limited by CFL condition."
-		/>
+MRP COMMENT OUT EXTRA FIELDS END -->
 		<var name="buoyancyParticle" type="real" dimensions="nParticles Time" units="kg m^{-3}"
 			 description="buoyancy values for particle, currently proxy for density"
-		/>
-		<var name="transfered" type ="integer" dimensions="nParticles Time" units="unitless"
-			 description="flag to monitor if the particle was transfered"
 		/>
 <!-- TEMP FIELDS THAT NEED MOVED TO NonHalo below after verifying interpolation is correct -->
 		<var name="particleTemperature" type="real" dimensions="nParticles Time" units="degrees Celsius"
@@ -370,6 +400,7 @@
 		<var name="particleSalinity" type="real" dimensions="nParticles Time" units="grams salt per kilogram seawater"
 			 description="sampled salinity for particle"
 		/>
+<!-- MRP COMMENT OUT BGC FIELDS
 		<var name="particleDIC" type="real" dimensions="nParticles Time" units="mmol m^{-3}"
 			 description="sampled dissolved inorganic carbon for particle"
 		/>
@@ -394,6 +425,7 @@
 		<var name="particleO2" type="real" dimensions="nParticles Time" units="meq m^{-3}"
 			 description="sampled dissolved oxygen for particle"
 		/>
+ MRP END -->
 	</var_struct>
 <!--
 	<var_struct name="lagrPartTrackNonHalo" time_levs="1" packages="lagrPartTrackAMPKG">
@@ -439,7 +471,9 @@
 		<var name="boundaryVertexGlobal" type="integer" dimensions="nVertLevels nVertices" units="unitless"
 			 description="Mask for determining boundary vertices, but global. A boundary vertex has at least one inactive cell neighboring it."
 		/>
+<!-- MRP COMMENT OUT EXTRA FIELDS
 		<var name="boundaryCellGlobal" type="integer" dimensions="nVertLevels nCells" units="unitless"
 			 description="Mask for determining boundary cells, but global. A boundary cell has at least one inactive cell neighboring it."
 		/>
+MRP COMMENT OUT EXTRA FIELDS END -->
 	</var_struct>

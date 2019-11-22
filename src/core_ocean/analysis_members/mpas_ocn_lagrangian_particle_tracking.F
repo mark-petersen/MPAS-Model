@@ -123,7 +123,7 @@ contains
       ! local variables
       !
       !-----------------------------------------------------------------
-      logical :: config_AM_lagrPartTrack_reset_particles
+!MRP      logical :: config_AM_lagrPartTrack_reset_particles ! this is not a namelist flag. That is confusing.
       character (len=StrKIND), pointer :: config_AM_lagrPartTrack_reset_criteria
 
       err = 0
@@ -186,8 +186,8 @@ contains
       ! previous compute startup calls
       call intialize_wachspress_coefficients(domain, err)
       call initalize_fields(domain, err)
-      call compute_velocity_on_potentialdensity_surface(domain,err,1)
-      call compute_velocity_on_potentialdensity_surface(domain,err,2)
+!mrp      call compute_velocity_on_potentialdensity_surface(domain,err,1)
+!mrp      call compute_velocity_on_potentialdensity_surface(domain,err,2)
       call initialize_particle_properties(domain,2,err)
       call write_lagrangian_particle_tracking(domain, err)
 
@@ -255,8 +255,9 @@ contains
       type (mpas_pool_type), pointer :: diagnosticsPool
       type (mpas_pool_type), pointer :: tracersPool
       type (mpas_pool_type), pointer :: lagrPartTrackFieldsPool, lagrPartTrackCellsPool, lagrPartTrackScratchPool
+      type (mpas_pool_type), pointer :: lagrPartTrackScalarPool
       integer, dimension(:), pointer :: cellOwnerBlock
-      integer, pointer :: currentBlock, ioBlock, indexToParticleID, transfered, currentCellGlobalID
+      integer, pointer :: currentBlock, ioBlock, indexToParticleID, currentCellGlobalID
       type (mpas_particle_list_type), pointer :: particlelist
       type (mpas_particle_type), pointer :: particle
 
@@ -286,7 +287,7 @@ contains
       integer, dimension(:,:), pointer :: cellsOnCell
       integer, dimension(:,:), pointer :: cellsOnVertex
       logical, pointer :: onSphere
-      logical :: config_AM_lagrPartTrack_reset_particles
+!MRP      logical :: config_AM_lagrPartTrack_reset_particles ! this is not a namelist flag. That is confusing.
       character (len=StrKIND), pointer :: config_AM_lagrPartTrack_reset_criteria, &
         config_AM_lagrPartTrack_compute_interval, config_AM_lagrPartTrack_output_stream
 
@@ -298,15 +299,18 @@ contains
       real (kind=RKIND), dimension(5) :: kCoeffVert
       real (kind=RKIND), dimension(2) :: timeCoeff
       real (kind=RKIND) :: dt, dtSim, tSubStep
-      real (kind=RKIND), pointer :: dtParticle
+!mrp      real (kind=RKIND), pointer :: dtParticle
       real (kind=RKIND) :: zSubStep
       real (kind=RKIND) :: diffSubStepVert, diffParticlePositionVert, particleVelocityVert, verticalVelocityInterp
       real (kind=RKIND) :: buoyancyInterp
       real (kind=RKIND), pointer :: sphereRadius
-      integer, pointer :: verticalTreatment, indexLevel, filterNum, timeIntegration
+      integer, pointer :: verticalTreatment, filterNum, timeIntegration
+      integer :: indexLevel
       character(len=StrKIND), pointer :: config_dt
       type (MPAS_timeInterval_type) :: timeStepESMF
-      logical :: resetParticle, resetParticleAny
+!MRP      logical :: resetParticle, resetParticleAny
+      real (kind=RKIND), pointer :: globalResetTimeValue, globalTimeSinceReset
+      logical :: resetAllParticles
       integer :: err_tmp
 
       ! sampling variables
@@ -317,6 +321,8 @@ contains
 
       logical, pointer :: config_AM_lagrPartTrack_sample_temperature
       logical, pointer :: config_AM_lagrPartTrack_sample_horizontal_interp
+      real (kind=RKIND), pointer :: config_AM_lagrPartTrack_global_dtParticle
+
       real (kind=RKIND), pointer :: particleTemperature
 
       logical, pointer :: config_AM_lagrPartTrack_sample_salinity
@@ -388,6 +394,9 @@ contains
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_timeIntegration', timeIntegration)
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_sample_horizontal_interp', &
                                              config_AM_lagrPartTrack_sample_horizontal_interp)
+      call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_global_dtParticle', config_AM_lagrPartTrack_global_dtParticle)
+      call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_global_verticalTreatment', verticalTreatment)
+
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_sample_temperature', config_AM_lagrPartTrack_sample_temperature)
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_sample_salinity', config_AM_lagrPartTrack_sample_salinity)
       call mpas_pool_get_config(ocnConfigs, 'config_use_ecosysTracers', config_use_ecosysTracers)
@@ -400,22 +409,22 @@ contains
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_sample_Fe', config_AM_lagrPartTrack_sample_Fe)
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_sample_O2', config_AM_lagrPartTrack_sample_O2)
 
-      if (trim(config_AM_lagrPartTrack_reset_criteria) == 'none') then
-        config_AM_lagrPartTrack_reset_particles = .False.
-      else
-        config_AM_lagrPartTrack_reset_particles = .True.
-      end if
+!MRP      if (trim(config_AM_lagrPartTrack_reset_criteria) == 'none') then
+!MRP        config_AM_lagrPartTrack_reset_particles = .False.
+!MRP      else
+!MRP        config_AM_lagrPartTrack_reset_particles = .True.
+!MRP      end if
 
       ! get the most recent velocities on the potential density surfaces
 #ifdef MPAS_DEBUG
       call mpas_timer_start("velocity_pot_density_LPT")
 #endif
-      call compute_velocity_on_potentialdensity_surface(domain,err,2)
+!mrp      call compute_velocity_on_potentialdensity_surface(domain,err,2)
 #ifdef MPAS_DEBUG
       call mpas_timer_stop("velocity_pot_density_LPT")
 #endif
 
-      resetParticleAny = .False.
+!MRP      resetParticleAny = .False.
 
       block => domain % blocklist
       do while (associated(block)) !{{{
@@ -512,6 +521,27 @@ contains
         call mpas_get_timeInterval(timeStepESMF, dt=dtSim)
         LIGHT_DEBUG_WRITE('dtSim = ' COMMA dtSim)
 
+        ! MRP moved this outside of particle loop
+        ! adjust time step for consistency with integer number of steps
+        nSteps = ceiling(dtSim/config_AM_lagrPartTrack_global_dtParticle)
+        dt = dtSim/nSteps
+
+        ! test if it is time to reset the particles
+        resetAllParticles = .false.
+        call mpas_pool_get_subpool(block % structs, 'lagrPartTrackScalars', lagrPartTrackScalarPool)
+        call mpas_pool_get_array(lagrPartTrackScalarPool, 'globalResetTimeValue', globalResetTimeValue)
+        call mpas_pool_get_array(lagrPartTrackScalarPool, 'globalTimeSinceReset', globalTimeSinceReset)
+        ! advance particle time
+        globalTimeSinceReset = globalTimeSinceReset + dt
+        if (globalTimeSinceReset > globalResetTimeValue) then
+          resetAllParticles = .true.
+          globalTimeSinceReset = 0.0_RKIND
+          ! set up particle reset condition
+          call ocn_setup_particle_reset_condition(domain, err)
+          call mpas_log_write('called ocn_setup_particle_reset_condition. New globalResetTimeValue (in s)=$r', &
+             realArgs=(/globalResetTimeValue/) )
+        end if
+
         !{{{
         ! flip previous time level to back (switching memory pointers)
         call mpas_pool_shift_time_levels(lagrPartTrackFieldsPool)
@@ -560,7 +590,8 @@ contains
           call mpas_pool_get_array(particle % haloDataPool, 'latParticle', latParticle)
 
           ! compute particle lat/lon position
-          call convert_latlon_from_xyz(latParticle, lonParticle, xParticle, yParticle, zParticle)
+!mrp only compute lat/lon particles at end
+!mrp          call convert_latlon_from_xyz(latParticle, lonParticle, xParticle, yParticle, zParticle)
 
           particlePosition(1) = xParticle
           particlePosition(2) = yParticle
@@ -568,9 +599,9 @@ contains
 
           call mpas_pool_get_array(particle % haloDataPool, 'zLevelParticle', zLevelParticle)
 
-          call mpas_pool_get_array(particle % haloDataPool, 'verticalTreatment', verticalTreatment)
-          call mpas_pool_get_array(particle % haloDataPool, 'indexLevel', indexLevel)
-          call mpas_pool_get_array(particle % haloDataPool, 'dtParticle', dtParticle)
+! MRP moved out of particle loop call mpas_pool_get_array(particle % haloDataPool, 'verticalTreatment', verticalTreatment)
+!mrp          call mpas_pool_get_array(particle % haloDataPool, 'indexLevel', indexLevel)
+          indexLevel = -99 !mrp indexLevel is not used for buoyancy surfaces.
           call mpas_pool_get_array(particle % haloDataPool, 'buoyancyParticle', buoyancyParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'indexToParticleID', indexToParticleID)
           call mpas_pool_get_array(particle % haloDataPool, 'currentCell', iCell)
@@ -610,8 +641,9 @@ contains
           call mpas_timer_start("time_step_LPT")
 #endif
           ! adjust time step for consistency with integer number of steps
-          nSteps = ceiling(dtSim/dtParticle)
-          dt = dtSim/nSteps
+          ! MRP this was moved outside of loop
+!mrp          nSteps = ceiling(dtSim/dtParticle)
+!mrp          dt = dtSim/nSteps
 
           !!!!!!!!!! ASSIGN TEMPORAL INTEGRATION COEFFICIENTS !!!!!!!!!!
           ! kCoeff   is (3,subStepOrder+1)
@@ -724,18 +756,19 @@ contains
               call mpas_timer_stop("get_validated_cell_idLPT")
 #endif
 
-              if(verticalTreatment /= 4) then
-                ! other cases using zSubStep for iLevel and vertical interpolation
-#ifdef MPAS_DEBUG
-                call mpas_timer_start("mpas_get_vertical_idLPT")
-#endif
-                ! must have inputs into mpas_get_vertical_id be positive to get right top/bottom
-                iLevel = mpas_get_vertical_id(maxLevelCell(iCell), -zSubStep, -zMid(:,iCell))
-#ifdef MPAS_DEBUG
-                call mpas_timer_stop("mpas_get_vertical_idLPT")
-#endif
-                LIGHT_DEBUG_WRITE('iLevel=' COMMA iLevel)
-              end if
+!mrp only verticalTreatment=4 (density surfaces) is allowed for this simulation
+!mrp              if(verticalTreatment /= 4) then
+!mrp                ! other cases using zSubStep for iLevel and vertical interpolation
+!mrp#ifdef MPAS_DEBUG
+!mrp                call mpas_timer_start("mpas_get_vertical_idLPT")
+!mrp#endif
+!mrp                ! must have inputs into mpas_get_vertical_id be positive to get right top/bottom
+!mrp                iLevel = mpas_get_vertical_id(maxLevelCell(iCell), -zSubStep, -zMid(:,iCell))
+!mrp#ifdef MPAS_DEBUG
+!mrp                call mpas_timer_stop("mpas_get_vertical_idLPT")
+!mrp#endif
+!mrp                LIGHT_DEBUG_WRITE('iLevel=' COMMA iLevel)
+!mrp              end if
 
               !!!!!!!!!! TEMPORALLY INTERPOLATE TIME FIELD !!!!!!!!!!
               ! use these coefficients to just get the velocity at n
@@ -1116,15 +1149,17 @@ contains
           call mpas_timer_start("particleAssignments")
 #endif
 
-          resetParticle = .False.
-          if (config_AM_lagrPartTrack_reset_particles) then   ! need to link to currentBlockReset for communication
+!MRP          resetParticle = .False.
+!MRP          if (config_AM_lagrPartTrack_reset_particles) then   ! need to link to currentBlockReset for communication
+          if (resetAllParticles) then   ! need to link to currentBlockReset for communication
             ! determine if particles should be reset based on different criteria.  If so, reset them.
-            call ocn_evaluate_particle_reset_condition(domain, block, particle, dtSim, iCell, resetParticle, err)
-          end if
-          resetParticleAny = resetParticleAny .or. resetParticle
-
-          if (.not. resetParticle) then
+            call ocn_evaluate_particle_reset_condition(domain, block, particle, dtSim, iCell, err)
+!MRP          end if
+!MRP          resetParticleAny = resetParticleAny .or. resetParticle
+!MRP
+!MRP          if (.not. resetParticle) then
             ! update halo fields for particles moving from adjacent computational halos
+          else
             call mpas_particle_list_update_particle_block(domain, block, particle, 'lagrPartTrackCells', iCell)
           end if
 
@@ -1157,7 +1192,8 @@ contains
 #ifdef MPAS_DEBUG
       call mpas_timer_start("trans_from_block_to_blockLPT")
 #endif
-      if (config_AM_lagrPartTrack_reset_particles .and. resetParticleAny) then
+!MRP      if (config_AM_lagrPartTrack_reset_particles .and. resetParticleAny) then
+      if (resetAllParticles) then
          ! need to link to currentBlockReset for communication
          call mpas_particle_list_build_halos(domain, err, 'currentBlockReset', g_compProcNeighs)
          ! take the union of this halo with the particle computation halos to build complete computational halo
@@ -1619,6 +1655,10 @@ contains
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_filter_number', filterNum)
 
       err = 0
+      !mrp require that no filter is applied, because I removed variables.
+      if (filterNum.ne.0) then
+          call mpas_log_write('config_AM_lagrPartTrack_filter_number must be 0. Exiting...', MPAS_LOG_CRIT)
+      endif
 
       block => domain % blocklist
       do while (associated(block))
@@ -1849,14 +1889,14 @@ contains
         ! connect variables to pointer array
         call mpas_pool_get_array(diagnosticsPool, 'velocityMeridional', normalVelocityMer)
         call mpas_pool_get_array(diagnosticsPool, 'velocityZonal', normalVelocityZon)
-        call mpas_pool_get_array(lagrPartTrackCellsPool, 'buoyancySurfaceVelocityZonal', zonVel)
-        call mpas_pool_get_array(lagrPartTrackCellsPool, 'buoyancySurfaceVelocityMeridional', merVel)
-        call mpas_pool_get_array(lagrPartTrackCellsPool, 'buoyancySurfaceDepth', depth)
+!mrp        call mpas_pool_get_array(lagrPartTrackCellsPool, 'buoyancySurfaceVelocityZonal', zonVel)
+!mrp        call mpas_pool_get_array(lagrPartTrackCellsPool, 'buoyancySurfaceVelocityMeridional', merVel)
+!mrp        call mpas_pool_get_array(lagrPartTrackCellsPool, 'buoyancySurfaceDepth', depth)
         call mpas_pool_get_array(diagnosticsPool, 'potentialDensity', buoyancy)
         call mpas_pool_get_array(diagnosticsPool, 'zMid', zMid)
         call mpas_pool_get_dimension(meshPool, 'nCells', nCells)
-        call mpas_pool_get_dimension(meshPool, 'nBuoyancySurfaces', nBuoyancySurfaces)
-        call mpas_pool_get_array(lagrPartTrackCellsPool,'buoyancySurfaceValues', buoyancySurfaceValues)
+!mrp        call mpas_pool_get_dimension(meshPool, 'nBuoyancySurfaces', nBuoyancySurfaces)
+!mrp        call mpas_pool_get_array(lagrPartTrackCellsPool,'buoyancySurfaceValues', buoyancySurfaceValues)
         call mpas_pool_get_array(meshPool, 'maxLevelCell', maxLevelCell)
 
         LIGHT_DEBUG_ALL_WRITE('nBuoyancySurfaces  =' COMMA nBuoyancySurfaces)
@@ -1971,7 +2011,7 @@ contains
       type (mpas_pool_type), pointer :: diagnosticsPool
       type (mpas_pool_type), pointer :: lagrPartTrackFieldsPool, lagrPartTrackCellsPool, lagrPartTrackScratchPool
       integer, dimension(:), pointer :: cellOwnerBlock
-      integer, pointer :: currentBlock, ioBlock, indexToParticleID, transfered
+      integer, pointer :: currentBlock, ioBlock, indexToParticleID
       integer :: currentProc, ioProc
       type (mpas_particle_list_type), pointer :: particlelist
       type (mpas_particle_type), pointer :: particle
@@ -2013,12 +2053,13 @@ contains
       real (kind=RKIND), dimension(5) :: kCoeffVert
       real (kind=RKIND), dimension(2) :: timeCoeff
       real (kind=RKIND) :: dt, dtSim, tSubStep
-      real (kind=RKIND), pointer :: dtParticle
+!mrp      real (kind=RKIND), pointer :: dtParticle
       real (kind=RKIND) :: zSubStep
       real (kind=RKIND) :: diffSubStepVert, diffParticlePositionVert, particleVelocityVert, verticalVelocityInterp
       real (kind=RKIND) :: buoyancyInterp
       real (kind=RKIND), pointer :: sphereRadius
-      integer, pointer :: verticalTreatment, indexLevel, filterNum, iCell, currentCellGlobalID
+      integer, pointer :: verticalTreatment, filterNum, iCell, currentCellGlobalID
+      integer :: indexLevel
 
       type (mpas_pool_type), pointer :: tracersPool
       real (kind=RKIND), dimension(:,:,:), pointer :: activeTracers
@@ -2071,6 +2112,8 @@ contains
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_sample_NH4', config_AM_lagrPartTrack_sample_NH4)
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_sample_Fe', config_AM_lagrPartTrack_sample_Fe)
       call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_sample_O2', config_AM_lagrPartTrack_sample_O2)
+
+      call mpas_pool_get_config(ocnConfigs, 'config_AM_lagrPartTrack_global_verticalTreatment', verticalTreatment)
 
       dminfo = domain % dminfo
 
@@ -2161,9 +2204,10 @@ contains
 
           call mpas_pool_get_array(particle % haloDataPool, 'zLevelParticle', zLevelParticle)
 
-          call mpas_pool_get_array(particle % haloDataPool, 'verticalTreatment', verticalTreatment)
-          call mpas_pool_get_array(particle % haloDataPool, 'indexLevel', indexLevel)
-          call mpas_pool_get_array(particle % haloDataPool, 'dtParticle', dtParticle)
+! MRP moved out of particle loop call mpas_pool_get_array(particle % haloDataPool, 'verticalTreatment', verticalTreatment)
+!mrp          call mpas_pool_get_array(particle % haloDataPool, 'indexLevel', indexLevel)
+          indexLevel = -99 !mrp indexLevel is not used for buoyancy surfaces.
+!mrp          call mpas_pool_get_array(particle % haloDataPool, 'dtParticle', dtParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'buoyancyParticle', buoyancyParticle)
           call mpas_pool_get_array(particle % haloDataPool, 'indexToParticleID', indexToParticleID)
 
@@ -2636,7 +2680,7 @@ contains
     integer, intent(in) :: iCell
     integer, dimension(:), intent(in) :: maxLevelCell
     integer, intent(in) :: verticalTreatment
-    integer, pointer, intent(in) :: indexLevel
+    integer, intent(in) :: indexLevel
     integer, intent(in) :: nCellVertices
     integer, dimension(:,:), intent(in) :: verticesOnCell
     integer, dimension(:,:), intent(in) :: boundaryVertex

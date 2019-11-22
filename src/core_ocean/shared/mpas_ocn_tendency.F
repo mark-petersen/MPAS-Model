@@ -285,7 +285,7 @@ contains
       call mpas_pool_get_array(diagnosticsPool, 'normalizedPlanetaryVorticityEdge', normalizedPlanetaryVorticityEdge)
       call mpas_pool_get_array(diagnosticsPool, 'divergence', divergence)
       call mpas_pool_get_array(diagnosticsPool, 'viscosity', viscosity)
-      call mpas_pool_get_array(diagnosticsPool, 'montgomeryPotential', montgomeryPotential)
+!mrp      call mpas_pool_get_array(diagnosticsPool, 'montgomeryPotential', montgomeryPotential)
       call mpas_pool_get_array(diagnosticsPool, 'pressure', pressure)
       call mpas_pool_get_array(diagnosticsPool, 'vertViscTopOfEdge', vertViscTopOfEdge)
       call mpas_pool_get_array(diagnosticsPool, 'density', density)
@@ -298,7 +298,7 @@ contains
       call mpas_pool_get_array(forcingPool, 'surfaceStress', surfaceStress)
       call mpas_pool_get_array(forcingPool, 'surfaceStressMagnitude', surfaceStressMagnitude)
 
-      call mpas_pool_get_array(diagnosticsPool, 'wettingVelocity', wettingVelocity)
+!mrp      call mpas_pool_get_array(diagnosticsPool, 'wettingVelocity', wettingVelocity)
       !
       ! velocity tendency: start accumulating tendency terms
       !
@@ -400,11 +400,11 @@ contains
       !
       ! velocity tendency: zero if drying
       !
-      !$omp do schedule(runtime)
-      do iEdge = 1, nEdges
-         tend_normalVelocity(:, iEdge) = tend_normalVelocity(:, iEdge) * (1.0_RKIND - wettingVelocity(:, iEdge))
-      end do
-      !$omp end do
+!mrp      !$omp do schedule(runtime)
+!mrp      do iEdge = 1, nEdges
+!mrp         tend_normalVelocity(:, iEdge) = tend_normalVelocity(:, iEdge) * (1.0_RKIND - wettingVelocity(:, iEdge))
+!mrp      end do
+!mrp      !$omp end do
 
       !
       ! velocity tendency: vertical mixing d/dz( nu_v du/dz))

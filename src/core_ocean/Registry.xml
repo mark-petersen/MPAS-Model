@@ -2511,10 +2511,12 @@
 			 description="Brunt Vaisala frequency defined at the center (horizontally) and top (vertically) of cell"
 			 packages="forwardMode;analysisMode"
 		/>
+<!-- MRP COMMENT OUT EXTRA FIELDS
 		<var name="montgomeryPotential" type="real" dimensions="nVertLevels nCells Time" units="m^2 s^{-2}"
 			 description="Montgomery potential, may be used as the pressure for isopycnal coordinates."
 			 packages="forwardMode;analysisMode"
 		/>
+MRP COMMENT OUT EXTRA FIELDS END -->
 		<var name="pressure" type="real" dimensions="nVertLevels nCells Time" units="N m^{-2}"
 			 description="pressure used in the momentum equation"
 		/>
@@ -2526,10 +2528,12 @@
 			 description="horizontal velocity used to transport mass and tracers"
 			 packages="forwardMode;analysisMode"
 		/>
+<!-- MRP COMMENT OUT EXTRA FIELDS
 		<var name="wettingVelocity" type="real" dimensions="nVertLevels nEdges Time" units="m s^{-1}"
 			 description="Velocity to prevent drying of cell."
 			 packages="forwardMode"
 		/>
+MRP COMMENT OUT EXTRA FIELDS END -->
 		<var name="vertAleTransportTop" type="real" dimensions="nVertLevelsP1 nCells Time" units="m s^{-1}"
 			 description="vertical transport through the layer interface at the top of the cell"
 			 packages="forwardMode;analysisMode"
@@ -2545,7 +2549,7 @@
 		/>
 		<var name="vertGMBolusVelocityTop" type="real" dimensions="nVertLevelsP1 nCells Time" units="m s^{-1}"
 			 description="vertical tracer-transport velocity defined at center (horizontally) and top (vertically) of cell.  This is not the vertical ALE transport, but is Eulerian (fixed-frame) in the vertical, and computed from the continuity equation from the horizontal GM Bolus velocity."
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 
 		/>
 		<var name="tangentialVelocity" type="real" dimensions="nVertLevels nEdges Time" units="m s^{-1}"
@@ -2573,10 +2577,12 @@
 			 description="divergence of horizonal velocity"
 			 packages="forwardMode;analysisMode"
 		/>
+<!-- MRP COMMENT OUT EXTRA FIELDS
 		<var name="circulation" type="real" dimensions="nVertLevels nVertices Time" units="m^2 s^{-1}"
 			 description="area-integrated vorticity"
 			 packages="forwardMode;analysisMode"
 		/>
+MRP COMMENT OUT EXTRA FIELDS END -->
 		<var name="relativeVorticity" type="real" dimensions="nVertLevels nVertices Time" units="s^{-1}"
 			 description="curl of horizontal velocity, defined at vertices"
 			 packages="forwardMode;analysisMode"
@@ -2672,35 +2678,35 @@
 		/>
 		<var name="normalGMBolusVelocity" type="real" dimensions="nVertLevels nEdges Time" units="m s^{-1}"
 			 description="Bolus velocity in Gent-McWilliams eddy parameterization"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="cGMphaseSpeed" type="real" dimensions="nEdges Time" units="m s^{-1}"
 			description="phase speed for the bolus velocity calculation"
-			packages="forwardMode;analysisMode"
+			packages="gm"
 			/>
 		<var name="kappaGM3D" type="real" dimensions="nVertLevels nEdges Time" units="m s^{-1}"
 			description="spatially and depth varying GM kappa"
-			packages="forwardMode;analysisMode"
+			packages="gm"
 		/>
 		<var name="GMBolusVelocityX" type="real" dimensions="nVertLevels nCells Time" units="m s^{-1}"
 			 description="Bolus velocity in Gent-McWilliams eddy parameterization, x-direction"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="GMBolusVelocityY" type="real" dimensions="nVertLevels nCells Time" units="m s^{-1}"
 			 description="Bolus velocity in Gent-McWilliams eddy parameterization, y-direction"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="GMBolusVelocityZ" type="real" dimensions="nVertLevels nCells Time" units="m s^{-1}"
 			 description="Bolus velocity in Gent-McWilliams eddy parameterization, z-direction"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="GMBolusVelocityZonal" type="real" dimensions="nVertLevels nCells Time" units="m s^{-1}"
 			 description="Bolus velocity in Gent-McWilliams eddy parameterization, zonal-direction"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="GMBolusVelocityMeridional" type="real" dimensions="nVertLevels nCells Time" units="m s^{-1}"
 			 description="Bolus velocity in Gent-McWilliams eddy parameterization, meridional-direction"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="RiTopOfCell" type="real" dimensions="nVertLevelsP1 nCells Time" units="nondimensional"
 			 description="gradient Richardson number defined at the center (horizontally) and top (vertically)"
@@ -2774,71 +2780,71 @@
 		/>
 		<var name="relativeSlopeTopOfEdge" type="real" dimensions="nVertLevelsP1 nEdges Time" units="non-dimensional"
 			 description="Slope of isopycnal surface relative to constant coordinate surface"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="relativeSlopeTopOfCell" type="real" dimensions="nVertLevelsP1 nCells Time" units="non-dimensional"
 			 description="Magnitude of slope of isopycnal surface relative to constant coordinate surface averaged to cell centers"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="relativeSlopeTapering" type="real" dimensions="nVertLevelsP1 nEdges Time" units="non-dimensional"
 			 description="scalar tapering function applied to limit magnitude of isopycnal mixing in regions where relativeSlopeTopOfCell is greater than config_gm_max_slope"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="relativeSlopeTaperingCell" type="real" dimensions="nVertLevelsP1 nCells Time" units="non-dimensional"
 			 description="averaging of relativeSlopeTapering function to cell centers"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="relativeSlopeTopOfCellX" type="real" dimensions="nVertLevelsP1 nCells Time" units="unitless"
 			 description="Slope of isopycnal surface relative to constant coordinate surface"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="relativeSlopeTopOfCellY" type="real" dimensions="nVertLevelsP1 nCells Time" units="unitless"
 			 description="Slope of isopycnal surface relative to constant coordinate surface"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="relativeSlopeTopOfCellZ" type="real" dimensions="nVertLevelsP1 nCells Time" units="unitless"
 			 description="Slope of isopycnal surface relative to constant coordinate surface"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="relativeSlopeTopOfCellZonal" type="real" dimensions="nVertLevelsP1 nCells Time" units="unitless"
 			 description="Slope of isopycnal surface relative to constant coordinate surface"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="relativeSlopeTopOfCellMeridional" type="real" dimensions="nVertLevelsP1 nCells Time" units="unitless"
 			 description="Slope of isopycnal surface relative to constant coordinate surface"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="k33" type="real" dimensions="nVertLevelsP1 nCells Time" units="m^2 s^{-1}"
 			 description="The (3,3) entry of the Redi diffusion tensor. Added to the model vertical diffusion."
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="gmStreamFuncTopOfEdge" type="real" dimensions="nVertLevelsP1 nEdges Time" units="m^2 s^{-1}"
 			 description="GM stream function"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="gmStreamFuncTopOfCell" type="real" dimensions="nVertLevels nCells Time" units="m^2 s^{-1}"
 			 description="GM stream function reconstructed to the cell centers"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="GMStreamFuncX" type="real" dimensions="nVertLevelsP1 nCells Time" units="m^2 s^{-1}"
 			 description="GM stream function"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="GMStreamFuncY" type="real" dimensions="nVertLevelsP1 nCells Time" units="m^2 s^{-1}"
 			 description="GM stream function"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="GMStreamFuncZ" type="real" dimensions="nVertLevelsP1 nCells Time" units="m^2 s^{-1}"
 			 description="GM stream function"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="GMStreamFuncZonal" type="real" dimensions="nVertLevelsP1 nCells Time" units="m^2 s^{-1}"
 			 description="GM stream function"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="GMStreamFuncMeridional" type="real" dimensions="nVertLevelsP1 nCells Time" units="m^2 s^{-1}"
 			 description="GM stream function"
-			 packages="forwardMode;analysisMode"
+			 packages="gm"
 		/>
 		<var name="gmBolusKappa" type="real" dimensions="nEdges" units="m^2 s^{-1}"
 			 description="GM Bolus Kappa value.  This is constant in time, and set at init based on the constant or ramp fuction."

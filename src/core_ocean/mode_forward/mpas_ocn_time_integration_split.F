@@ -657,7 +657,8 @@ module ocn_time_integration_split
                call mpas_pool_get_array(statePool, 'normalBaroclinicVelocity', normalBaroclinicVelocityNew, 2)
 
                call mpas_pool_get_array(diagnosticsPool, 'normalTransportVelocity', normalTransportVelocity)
-               call mpas_pool_get_array(diagnosticsPool, 'normalGMBolusVelocity', normalGMBolusVelocity)
+!mrp turn off GM for high res. runs - hard wired!!!!!!
+!mrp               call mpas_pool_get_array(diagnosticsPool, 'normalGMBolusVelocity', normalGMBolusVelocity)
 
                call mpas_pool_get_array(meshPool, 'edgeMask', edgeMask)
 
@@ -675,8 +676,9 @@ module ocn_time_integration_split
                      ! normalTransportVelocity = normalBaroclinicVelocity + normalGMBolusVelocity
                      ! This is u used in advective terms for layerThickness and tracers
                      ! in tendency calls in stage 3.
+!mrp turn off GM for high res. runs - hard wired!!!!!!
                      normalTransportVelocity(k,iEdge) = edgeMask(k,iEdge) &
-                           *( normalBaroclinicVelocityNew(k,iEdge) + normalGMBolusVelocity(k,iEdge) )
+                           *( normalBaroclinicVelocityNew(k,iEdge) )!mrp+ normalGMBolusVelocity(k,iEdge) )
 
                   enddo
                end do  ! iEdge
@@ -1345,7 +1347,8 @@ module ocn_time_integration_split
                call mpas_pool_get_array(statePool, 'normalBaroclinicVelocity', normalBaroclinicVelocityNew, 2)
 
                call mpas_pool_get_array(diagnosticsPool, 'normalTransportVelocity', normalTransportVelocity)
-               call mpas_pool_get_array(diagnosticsPool, 'normalGMBolusVelocity', normalGMBolusVelocity)
+!mrp turn off GM for high res. runs - hard wired!!!!!!
+!mrp               call mpas_pool_get_array(diagnosticsPool, 'normalGMBolusVelocity', normalGMBolusVelocity)
                call mpas_pool_get_array(diagnosticsPool, 'layerThicknessEdge', layerThicknessEdge)
                call mpas_pool_get_array(diagnosticsPool, 'barotropicThicknessFlux', barotropicThicknessFlux)
 
@@ -1374,8 +1377,9 @@ module ocn_time_integration_split
                do iEdge = 1, nEdges
 
                   ! velocity for normalVelocityCorrectionection is normalBarotropicVelocity + normalBaroclinicVelocity + uBolus
-                  uTemp(:) = normalBarotropicVelocityNew(iEdge) + normalBaroclinicVelocityNew(:,iEdge) &
-                           + normalGMBolusVelocity(:,iEdge)
+!mrp turn off GM for high res. runs - hard wired!!!!!!
+                  uTemp(:) = normalBarotropicVelocityNew(iEdge) + normalBaroclinicVelocityNew(:,iEdge) !mrp&
+!mrp                           + normalGMBolusVelocity(:,iEdge)
 
                   ! thicknessSum is initialized outside the loop because on land boundaries
                   ! maxLevelEdgeTop=0, but I want to initialize thicknessSum with a
@@ -1399,10 +1403,13 @@ module ocn_time_integration_split
                      ! in tendency calls in stage 3.
 !mrp note: in QC version, there is an if (config_use_standardGM) on adding normalGMBolusVelocity
 ! I think it is not needed because normalGMBolusVelocity=0 when GM not on.
+
+!mrp turn off GM for high res. runs - hard wired!!!!!!
                      normalTransportVelocity(k,iEdge) &
                            = edgeMask(k,iEdge) &
                            *( normalBarotropicVelocityNew(iEdge) + normalBaroclinicVelocityNew(k,iEdge) &
-                           + normalGMBolusVelocity(k,iEdge) + normalVelocityCorrection )
+                           + normalVelocityCorrection )
+!mrp                           + normalGMBolusVelocity(k,iEdge) + normalVelocityCorrection )
                   enddo
 
                end do ! iEdge
