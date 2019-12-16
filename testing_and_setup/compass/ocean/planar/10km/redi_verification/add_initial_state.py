@@ -105,7 +105,7 @@ def tracer_init(ds):
 
 def velocity_init(ds):
     normalVelocity = ds.createVariable('normalVelocity', np.float64, ('Time','nEdges','nVertLevels',))
-    normalVelocity = 0.0
+    normalVelocity[:] = 0.0
 
 
 def coriolis_init(ds):
