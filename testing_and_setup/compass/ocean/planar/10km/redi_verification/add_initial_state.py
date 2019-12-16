@@ -66,8 +66,13 @@ def vertical_init(ds):
 def tracer_init(ds):
 
     # config settings
+    P0 = 2
+    dPdx = 0 #1e-4
+    dPdy = 0
+    dPdz = 1/1000
+
     T0 = 20
-    dTdx = 1e-4
+    dTdx = 0 #1e-4
     dTdy = 0
     dTdz = 10.0/1000
 
@@ -77,6 +82,7 @@ def tracer_init(ds):
     dSdz = -10.0/1000
 
     # create new variables
+    tracer1 = ds.createVariable('tracer1', np.float64, ('Time','nCells','nVertLevels',))
     temperature = ds.createVariable('temperature', np.float64, ('Time','nCells','nVertLevels',))
     salinity = ds.createVariable('salinity', np.float64, ('Time','nCells','nVertLevels',))
 
@@ -89,6 +95,8 @@ def tracer_init(ds):
 
     for iCell in range(0,nCells):
         for k in range(0,nVertLevels):
+            tracer1[0,iCell,k] \
+                = P0 + xCell[iCell]*dPdx + yCell[iCell]*dPdy + refZMid[k]*dPdz
             temperature[0,iCell,k] \
                 = T0 + xCell[iCell]*dTdx + yCell[iCell]*dTdy + refZMid[k]*dTdz
             salinity[0,iCell,k] \
