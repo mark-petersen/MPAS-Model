@@ -207,7 +207,7 @@ contains
          call mpas_pool_get_dimension(block % dimensions, 'nEdges', nEdges)
 
          call mpas_pool_get_array(statePool, 'normalVelocity', normalVelocity, 1)
-         call mpas_pool_get_array(diagnosticsPool, 'normalGMBolusVelocity', normalGMBolusVelocity)
+!         call mpas_pool_get_array(diagnosticsPool, 'normalGMBolusVelocity', normalGMBolusVelocity)
          call mpas_pool_get_array(tracersPool, 'activeTracers', activeTracers, 1)
          call mpas_pool_get_dimension(tracersPool, 'index_temperature', index_temperature)
 
@@ -227,11 +227,11 @@ contains
          call mpas_pool_get_array(eddyProductVariablesAMPool, 'velocityZonalTimesTemperature', velocityZonalTimesTemperature)
          call mpas_pool_get_array(eddyProductVariablesAMPool, 'velocityMeridionalTimesTemperature', &
             velocityMeridionalTimesTemperature)
-         call mpas_pool_get_array(eddyProductVariablesAMPool,'velocityZonalTimesTemperature_GM', velocityZonalTimesTemperature_GM)
-         call mpas_pool_get_array(eddyProductVariablesAMPool,'velocityMeridionalTimesTemperature_GM', &
-            velocityMeridionalTimesTemperature_GM)
-         call mpas_pool_get_array(eddyProductVariablesAMPool,'normalGMBolusVelocityTimesTemperature', normalGMBolusVelocityTimesTemperature)
-         call mpas_pool_get_array(eddyProductVariablesAMPool,'normalGMBolusVelocitySquared', normalGMBolusVelocitySquared)
+         !call mpas_pool_get_array(eddyProductVariablesAMPool,'velocityZonalTimesTemperature_GM', velocityZonalTimesTemperature_GM)
+         !call mpas_pool_get_array(eddyProductVariablesAMPool,'velocityMeridionalTimesTemperature_GM', &
+         !   velocityMeridionalTimesTemperature_GM)
+         !call mpas_pool_get_array(eddyProductVariablesAMPool,'normalGMBolusVelocityTimesTemperature', normalGMBolusVelocityTimesTemperature)
+         !call mpas_pool_get_array(eddyProductVariablesAMPool,'normalGMBolusVelocitySquared', normalGMBolusVelocitySquared)
          call mpas_pool_get_array(eddyProductVariablesAMPool,'normalVelocityTimesTemperature', normalVelocityTimesTemperature)
          call mpas_pool_get_array(eddyProductVariablesAMPool,'normalVelocitySquared', normalVelocitySquared)
 
@@ -240,9 +240,9 @@ contains
             cell2 = cellsOnEdge(2,iEdge)
 
             do k = 1, maxLevelEdgeTop(iEdge)
-               normalGMBolusVelocityTimesTemperature(k,iEdge) = 0.5_RKIND*(activeTracers(index_temperature,k,cell1) + &
-                            activeTracers(index_temperature,k,cell2)) * normalGMBolusVelocity(k,iEdge)
-               normalGMBolusVelocitySquared(k,iEdge) = normalGMBolusVelocity(k,iEdge)**2
+               !normalGMBolusVelocityTimesTemperature(k,iEdge) = 0.5_RKIND*(activeTracers(index_temperature,k,cell1) + &
+               !             activeTracers(index_temperature,k,cell2)) * normalGMBolusVelocity(k,iEdge)
+               !normalGMBolusVelocitySquared(k,iEdge) = normalGMBolusVelocity(k,iEdge)**2
                normalVelocityTimesTemperature(k,iEdge) = 0.5_RKIND*(activeTracers(index_temperature,k,cell1) + &
                             activeTracers(index_temperature,k,cell2)) * normalVelocity(k,iEdge)
                normalVelocitySquared(k,iEdge) = normalVelocity(k,iEdge)**2
@@ -256,8 +256,8 @@ contains
                velocityMeridionalSquared(k,iCell) = velocityMeridional(k,iCell)**2
                velocityZonalTimesTemperature(k,iCell) = velocityZonal(k,iCell)*activeTracers(index_temperature,k,iCell)
                velocityMeridionalTimesTemperature(k,iCell) = velocityMeridional(k,iCell)*activeTracers(index_temperature,k,iCell)
-               velocityZonalTimesTemperature_GM(k,iCell) = GMBolusVelocityZonal(k,iCell)*activeTracers(index_temperature,k,iCell)
-               velocityMeridionalTimesTemperature_GM(k,iCell) = GMBolusVelocityMeridional(k,iCell)*activeTracers(index_temperature,k,iCell)
+               !velocityZonalTimesTemperature_GM(k,iCell) = GMBolusVelocityZonal(k,iCell)*activeTracers(index_temperature,k,iCell)
+               !velocityMeridionalTimesTemperature_GM(k,iCell) = GMBolusVelocityMeridional(k,iCell)*activeTracers(index_temperature,k,iCell)
              end do
          end do
 
