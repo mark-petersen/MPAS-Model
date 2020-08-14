@@ -1,0 +1,115 @@
+<?xml version="1.0"?>
+<config case="forward">
+	<add_link source="../init_step2/ocean.nc" dest="init.nc"/>
+	<add_link source="../init_step2/graph.info" dest="graph.info"/>
+
+	<add_executable source="model" dest="ocean_model"/>
+	<add_executable source="metis" dest="metis"/>
+
+        <namelist name="init_namelist.ocean" mode="forward">
+                <template file="baroclinic_channel_10km_template.xml" path_base="script_resolution_dir"/>
+                <option name="config_run_duration">'0000_00:00:01'</option>
+                <option name="config_write_output_on_startup">.true.</option>
+                <option name="config_eos_linear_alpha">0.2</option>
+                <option name="config_eos_linear_beta">0.8</option>
+                <option name="config_eos_linear_Tref">20.0</option>
+                <option name="config_eos_linear_Sref">35.0</option>
+                <option name="config_eos_linear_densityref">1025.0</option>
+                <option name="config_use_mom_del2">.true.</option>
+                <option name="config_mom_del2">66.67</option>
+                <option name="config_use_mom_del4">.true.</option>
+                <option name="config_mom_del4">3.6e7</option>
+        </namelist>
+
+        <namelist name="namelist.ocean" mode="forward">
+                <template file="baroclinic_channel_10km_template.xml" path_base="script_resolution_dir"/>
+                <option name="config_run_duration">'0000_00:00:30'</option>
+                <option name="config_write_output_on_startup">.true.</option>
+                <option name="config_AM_global_stats_enable">.true.</option>
+                <option name="config_global_stats_compute_on_startup">.true.</option>
+                <option name="config_eos_linear_alpha">0.2</option>
+                <option name="config_eos_linear_beta">0.8</option>
+                <option name="config_eos_linear_Tref">20.0</option>
+                <option name="config_eos_linear_Sref">35.0</option>
+                <option name="config_eos_linear_densityref">1025.0</option>
+                <option name="config_use_activeTracers_interior_restoring">.true.</option>
+                <option name="config_use_mom_del2">.true.</option>
+                <option name="config_mom_del2">666.67</option>
+                <option name="config_use_mom_del4">.true.</option>
+                <option name="config_mom_del4">3.5e10</option>
+        </namelist>
+
+        <streams name="init_streams.ocean" keep="immutable" mode="forward">
+                <template file="baroclinic_channel_10km_template.xml" path_base="script_resolution_dir"/>
+                <stream name="input_init">
+                        <attribute name="filename_template">mesh.nc</attribute>
+                </stream>
+                <stream name="output">
+                        <attribute name="type">output</attribute>
+                        <attribute name="output_interval">0000_00:10:00</attribute>
+                        <attribute name="clobber_mode">truncate</attribute>
+                        <attribute name="filename_template">initial_output.nc</attribute>
+                        <add_contents>
+                                <member name="pressure" type="var"/>
+                                <member name="velocityX" type="var"/>
+                                <member name="velocityY" type="var"/>
+                        </add_contents>
+                </stream>
+
+        </streams>
+
+        <streams name="streams.ocean" keep="immutable" mode="forward">
+                <template file="baroclinic_channel_10km_template.xml" path_base="script_resolution_dir"/>
+                <stream name="input">
+                        <attribute name="type">input</attribute>
+                        <attribute name="filename_template">velocity_init.nc</attribute>
+                </stream>
+
+                <stream name="output">
+                        <attribute name="type">output</attribute>
+                        <attribute name="output_interval">0000_01:00:00</attribute>
+                        <add_contents>
+                                <member name="pressure" type="var"/>
+                                <member name="velocityX" type="var"/>
+                                <member name="velocityY" type="var"/>
+                                <member name="kineticEnergyCell" type="var"/>
+                        </add_contents>
+
+                </stream>
+                <stream name="globalStatsOutput">
+                        <attribute name="type">output</attribute>
+                        <attribute name="output_interval">0000_01:00:00</attribute>
+                        <attribute name="filename_template">globalStats.$Y-$M-$D_$h.$m.$s.nc</attribute>
+                        <attribute name="filename_interval">01-00-00_00:00:00</attribute>
+                        <attribute name="clobber_mode">append</attribute>
+                        <attribute name="packages">globalStatsAMPKG</attribute>
+
+                        <add_contents>
+                                <member name="minGlobalStats" type="var_array"/>
+                                <member name="maxGlobalStats" type="var_array"/>
+                                <member name="sumGlobalStats" type="var_array"/>
+                                <member name="rmsGlobalStats" type="var_array"/>
+                                <member name="avgGlobalStats" type="var_array"/>
+                                <member name="vertSumMinGlobalStats" type="var_array"/>
+                                <member name="vertSumMaxGlobalStats" type="var_array"/>
+                                <member name="xtime" type="var"/>
+                                <member name="daysSinceStartOfSim" type="var"/>
+                                <member name="volumeCellGlobal" type="var"/>
+                                <member name="CFLNumberGlobal" type="var"/>
+                        </add_contents>
+
+                </stream>
+        </streams>
+
+
+	<run_script name="run.py">
+		<step executable="./metis">
+			<argument flag="graph.info">4</argument>
+		</step>
+		<model_run procs="4" threads="1" namelist="init_namelist.ocean" streams="init_streams.ocean"/>
+                <step executable="./velocity_init.py">
+                </step>
+                <model_run procs="4" threads="1" namelist="namelist.ocean" streams="streams.ocean"/>
+	</run_script>
+
+</config>
