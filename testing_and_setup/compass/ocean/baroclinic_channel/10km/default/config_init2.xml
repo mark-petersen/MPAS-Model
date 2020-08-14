@@ -11,6 +11,16 @@
 		<option name="config_vert_levels">-1</option>
 		<option name="config_ocean_run_mode">'init'</option>
 		<option name="config_write_cull_cell_mask">.false.</option>
+                <option name="config_vertical_grid">'60layerBC'</option>
+                <option name="config_baroclinic_channel_vert_levels">60</option>
+                <option name="config_eos_linear_alpha">0.2</option>
+                <option name="config_eos_linear_beta">0.8</option>
+                <option name="config_eos_linear_Tref">20.0</option>
+                <option name="config_eos_linear_Sref">35.0</option>
+                <option name="config_eos_linear_densityref">1025.0</option>
+                <option name="config_use_activeTracers_interior_restoring">.true.</option>
+                <option name="config_baroclinic_channel_gradient_width_frac">0.08</option>
+
 	</namelist>
 
 	<streams name="streams.ocean" keep="immutable" mode="init">
@@ -39,6 +49,8 @@
 				<member name="vertCoordMovementWeights" type="var"/>
 				<member name="edgeMask" type="var"/>
 				<member name="cullCell" type="var"/>
+                                <member name="activeTracersInteriorRestoringRate" type="var"/>
+                                <member name="activeTracersInteriorRestoringValue" type="var"/>
 			</add_contents>
 		</stream>
 	</streams>
