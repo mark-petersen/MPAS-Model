@@ -80,8 +80,11 @@ contains
       type (domain_type), intent(inout) :: domain
       integer, intent(out) :: iErr
       real (kind=RKIND) :: yMin, yMax, xMin, xMax, dcEdgeMin, dcEdgeMinGlobal
-      real (kind=RKIND) :: yMinGlobal, yMaxGlobal, yMidGlobal, xMinGlobal, xMaxGlobal
-      real (kind=RKIND) :: temperature, yOffset, xPerturbationMin, xPerturbationMax
+      real (kind=RKIND) :: yMinGlobal, yMaxGlobal, yMidGlobal, xMinGlobal, xMaxGlobal, xMidGlobal
+      real (kind=RKIND) :: temperature, yOffset, xPerturbationMin, xPerturbationMax, perturbationWidthY, perturbationWidthX
+      real (kind=RKIND) :: dz_north, dz_south, rho_north, rho_south, lat_rad
+      real (kind=RKIND) :: trans_function, density
+
       real (kind=RKIND) :: perturbationWidth
 
       type (block_type), pointer :: block_ptr
@@ -90,6 +93,8 @@ contains
       type (mpas_pool_type), pointer :: statePool
       type (mpas_pool_type), pointer :: tracersPool
       type (mpas_pool_type), pointer :: verticalMeshPool
+      type (mpas_pool_type), pointer :: forcingPool
+      type (mpas_pool_type), pointer :: tracersInteriorRestoringFieldsPool
 
       integer :: iCell, k, idx
 
@@ -111,11 +116,16 @@ contains
 
       ! Define variable pointers
       integer, dimension(:), pointer :: maxLevelCell
-      real (kind=RKIND), dimension(:), pointer :: xCell, yCell,refBottomDepth, refZMid, &
+      real (kind=RKIND), dimension(:), pointer :: xCell, yCell, yEdge, yVertex, &
+                                                  refBottomDepth, refZMid, &
                                                   vertCoordMovementWeights, bottomDepth, &
                                                   fCell, fEdge, fVertex, dcEdge
       real (kind=RKIND), dimension(:,:), pointer :: layerThickness, restingThickness
       real (kind=RKIND), dimension(:,:,:), pointer :: activeTracers, debugTracers
+
+      real (kind=RKIND), dimension(:, :, :), pointer :: activeTracersInteriorRestoringValue, &
+
+    activeTracersInteriorRestoringRate
 
       ! Define local interfaceLocations variable
       real (kind=RKIND), dimension(:), pointer :: interfaceLocations
@@ -174,6 +184,8 @@ contains
 
         call mpas_pool_get_array(meshPool, 'xCell', xCell)
         call mpas_pool_get_array(meshPool, 'yCell', yCell)
+        call mpas_pool_get_array(meshPool, 'yEdge', yEdge)
+        call mpas_pool_get_array(meshPool, 'yVertex', yVertex)
         call mpas_pool_get_array(meshPool, 'dcEdge', dcEdge)
 
         yMin = min( yMin, minval(yCell(1:nCellsSolve)))
@@ -193,8 +205,8 @@ contains
       call mpas_dmpar_min_real(domain % dminfo, dcEdgeMin, dcEdgeMinGlobal)
 
       yMidGlobal = (yMinGlobal + yMaxGlobal) * 0.5_RKIND
-      xPerturbationMin = xMinGlobal + 4.0_RKIND * (xMaxGlobal - xMinGlobal) / 6.0_RKIND
-      xPerturbationMax = xMinGlobal + 5.0_RKIND * (xMaxGlobal - xMinGlobal) / 6.0_RKIND
+      xPerturbationMin = xMinGlobal + 4.5_RKIND * (xMaxGlobal - xMinGlobal) / 6.0_RKIND
+      xPerturbationMax = xMinGlobal + 5.5_RKIND * (xMaxGlobal - xMinGlobal) / 6.0_RKIND
       if(config_baroclinic_channel_use_distances) then
          perturbationWidth = config_baroclinic_channel_gradient_width_dist
       else
@@ -206,6 +218,7 @@ contains
         call mpas_pool_get_subpool(block_ptr % structs, 'mesh', meshPool)
         call mpas_pool_get_subpool(block_ptr % structs, 'state', statePool)
         call mpas_pool_get_subpool(block_ptr % structs, 'verticalMesh', verticalMeshPool)
+        call mpas_pool_get_subpool(block_ptr % structs, 'forcing', forcingPool)
         call mpas_pool_get_subpool(statePool, 'tracers', tracersPool)
 
         call mpas_pool_get_dimension(meshPool, 'nVertLevels', nVertLevels)
@@ -234,6 +247,13 @@ contains
 
         call ocn_mark_north_boundary(meshPool, yMaxGlobal, dcEdgeMinGlobal, iErr)
         call ocn_mark_south_boundary(meshPool, yMinGlobal, dcEdgeMinGlobal, iErr)
+        call mpas_pool_get_subpool(forcingPool, 'tracersInteriorRestoringFields', &
+tracersInteriorRestoringFieldsPool)
+       call mpas_pool_get_array(tracersInteriorRestoringFieldsPool, &
+                 'activeTracersInteriorRestoringRate', activeTracersInteriorRestoringRate, 1)
+       call mpas_pool_get_array(tracersInteriorRestoringFieldsPool, &
+                 'activeTracersInteriorRestoringValue', activeTracersInteriorRestoringValue, 1)
+
 
         ! Set refBottomDepth and refZMid
         do k = 1, nVertLevels
@@ -256,46 +276,68 @@ contains
               enddo
            end if
 
-           ! Set stratification based on northern half of domain temperature
+
+           ! Calculate temperature using from Soufflet et al.
            if ( associated(activeTracers) ) then
               idx = index_temperature
               do k = nVertLevels, 1, -1
-                 temperature = config_baroclinic_channel_bottom_temperature &
-                             + (config_baroclinic_channel_surface_temperature - config_baroclinic_channel_bottom_temperature) &
-                             * ( (refZMid(k) + refBottomDepth(nVertLevels)) / refBottomDepth(nVertLevels) )
-                 activeTracers(idx, k, iCell) = temperature
+                  dz_north = -400 + (refZMid(k) + 400) * ( 1 + 0.5 * (( &
+                  refZMid(k) + 400  + abs( refZMid(k) + 400 )) / (1.3 * 300 )) &
+                  ** 2 ) ** 0.5
+
+                  dz_south = -1000 + (refZMid(k) + 1000) * ( 1 + 0.5 * (( &
+                  refZMid(k) + 1000  + abs( refZMid(k) + 1000 )) / (1.3 * 700 ))&
+                  ** 2 ) ** 0.5
+
+                  rho_north = 27.75 - 9.8e-6 * ( refZMid(k) + 4000 ) - 0.5 * &
+                  1.41 * (1 + tanh( (dz_north + 400) / 300 )) - ( 1 / (2 * &
+                  tanh(1.0) ) ) * 0.0 * ( 1 + tanh(( -300 - refZMid(k) ) / &
+                  (-300) ))
+
+                  rho_south = 27.75 - 9.8e-6 * ( refZMid(k) + 4000 ) - 0.5 * &
+                  1.40 * (1 + tanh( (dz_south + 1000) / 700 )) - ( 1 / (2 * &
+                  tanh(1.0) ) ) * 1.5 * ( 1 + tanh(( -300 - refZMid(k) ) / &
+                  (-300) ))
+
+                  ! Calculate transition function
+                  lat_rad = (pii * (( yCell(iCell) - 1.0e6) / 1.6e6)) + (pii /2)
+
+
+                  if ( lat_rad > pii ) then
+                      trans_function = 0.0
+                  else if ( lat_rad < 0.0 ) then
+                      trans_function = 1.0
+                  else
+                      trans_function =  1 - ( (lat_rad - sin(lat_rad) * &
+                      cos(lat_rad)))/pii
+                  end if
+
+                  density = ( trans_function * rho_south) + ((1 - &
+                  trans_function ) * rho_north)
+
+                  ! Calculate temperature from density
+                  temperature = (( density - 25.0 ) / (-0.2)) + 20.0
+
+                  ! Add perterbation
+                  if(yCell(iCell) >= yMidGlobal  .and. yCell(iCell) < (yMidGlobal + perturbationWidth) .and. &
+                      xCell(iCell) >= xMidGlobal .and. xCell(iCell) < (xMidGlobal + perturbationWidth) ) then
+                           activeTracers(idx, k, iCell) = temperature + 0.3
+                  else
+                           activeTracers(idx, k, iCell) = temperature
+                  end if
+
+                  ! Add interior restoring value and rate
+                  activeTracersInteriorRestoringValue(idx, k, iCell) = temperature
+                  activeTracersInteriorRestoringRate(idx, :, iCell) = 2.3e-7
+                  
               end do
 
-              if(yCell(iCell) < yMidGlobal - yOffset) then
-                   ! If cell is in the southern half, outside the sin width, subtract temperature difference
-                   activeTracers(idx, :, iCell) = activeTracers(idx, :, iCell) - config_baroclinic_channel_temperature_difference
-              else if(yCell(iCell) >= yMidGlobal - yOffset .and. &
-                      yCell(iCell) < yMidGlobal - yOffset + perturbationWidth) then
-                   activeTracers(idx, :, iCell) = activeTracers(idx, :, iCell) - config_baroclinic_channel_temperature_difference &
-                                                * ( 1.0_RKIND - ( yCell(iCell) - ((yMaxGlobal + yMinGlobal) * 0.5_RKIND &
-                                                - yOffset)) / perturbationWidth)
-              end if
-
-              ! Determine yOffset for 3rd crest in sin wave.
-              yOffset = 0.5_RKIND * perturbationWidth * sin(pii * (xCell(iCell) - xPerturbationMin) &
-                      / (xPerturbationMax - xPerturbationMin))
-
-              if ( yCell(iCell) >= yMidGlobal - yOffset - 0.5_RKIND * perturbationWidth .and. &
-                   yCell(iCell) <= yMidGlobal - yOffset + 0.5_RKIND * perturbationWidth .and. &
-                   xCell(iCell) >= xPerturbationMin .and. &
-                   xCell(iCell) <= xPerturbationMax) then
-
-
-                   do k = 1, nVertLevels
-                      activeTracers(idx, k, iCell) = activeTracers(idx, k, iCell) &
-                                + 0.3_RKIND * ( 1.0_RKIND - ( ( yCell(iCell) - (yMidGlobal - yOffset)) &
-                                / (0.5_RKIND * perturbationWidth)))
-                   end do
-              end if
 
               ! Set salinity
               idx = index_salinity
               activeTracers(idx, :, iCell) = config_baroclinic_channel_salinity
+              activeTracersInteriorRestoringValue(idx, :, iCell) = config_baroclinic_channel_salinity
+              activeTracersInteriorRestoringRate(idx, :, iCell) = 2.3e-7
            end if
 
            ! Set layerThickness and restingThickness
@@ -315,9 +357,9 @@ contains
         end do
 
         ! Set Coriolis parameters
-        fCell(:) = config_baroclinic_channel_coriolis_parameter
-        fEdge(:) = config_baroclinic_channel_coriolis_parameter
-        fVertex(:) = config_baroclinic_channel_coriolis_parameter
+        fCell(:) = 8.4e-5 + (yCell * 1.6e-11)
+        fEdge(:) = 8.4e-5 + (yEdge * 1.6e-11)
+        fVertex(:) = 8.4e-5 + (yVertex * 1.6e-11)
 
         block_ptr => block_ptr % next
       end do

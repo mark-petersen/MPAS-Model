@@ -88,6 +88,14 @@ contains
          call ocn_generate_42layerWOCE_vertical_grid(interfaceLocations)
       else if ( trim(gridType) == '100layerACMEv1' ) then
          call ocn_generate_100layerACMEv1_vertical_grid(interfaceLocations)
+      else if ( trim(gridType) == '40layerBC' ) then
+         call ocn_generate_baroclinic_chanel_40layer_vertical_grid(interfaceLocations)
+     else if ( trim(gridType) == '60layerBC' ) then
+         call ocn_generate_baroclinic_chanel_60layer_vertical_grid(interfaceLocations)
+     else if ( trim(gridType) == '80layerBC' ) then
+         call ocn_generate_baroclinic_chanel_80layer_vertical_grid(interfaceLocations)
+     else if ( trim(gridType) == '100layerBC' ) then
+         call ocn_generate_baroclinic_chanel_100layer_vertical_grid(interfaceLocations)
       else if ( trim(gridType) == '1dCVTgenerator' ) then
          if (.not. present(configPool)) then
             call mpas_log_write("MPAS-ocean: requesting a 1d CVT vertical grid generation " &
@@ -118,19 +126,30 @@ contains
 
       real (kind=RKIND), dimension(:), intent(out) :: interfaceLocations
 
-      real (kind=RKIND) :: layerSpacing
+      real (kind=RKIND) :: layerSpacing, layerSpacing_surface, layerSpacing_interior
       integer :: nInterfaces, iInterface
 
       call mpas_log_write( ' ---- Generating uniform vertical grid ---- ')
 
       nInterfaces = size(interfaceLocations, dim=1)
       layerSpacing = 1.0_RKIND / (nInterfaces - 1)
+      
+      layerSpacing_surface = 0.0005_RKIND
+      layerSpacing_interior = 0.0195_RKIND
 
       interfaceLocations(1) = 0.0_RKIND
 
       do iInterface = 2, nInterfaces
          interfaceLocations(iInterface) = interfaceLocations(iInterface-1) + layerSpacing
       end do
+
+      !do iInterface = 2, 51
+      !   interfaceLocations(iInterface) = interfaceLocations(iInterface-1) + layerSpacing_surface
+      !end do 
+      
+      !do iInterface = 52, nInterfaces
+      !   interfaceLocations(iInterface) = interfaceLocations(iInterface-1) + layerSpacing_interior
+      !end do
 
    end subroutine ocn_generate_uniform_vertical_grid!}}}
 
@@ -227,6 +246,382 @@ contains
       interfaceLocations(:) = interfaceLocations(:) / maxInterfaceLocation
 
    end subroutine ocn_generate_60layerPHC_vertical_grid!}}}
+
+subroutine ocn_generate_baroclinic_chanel_40layer_vertical_grid(interfaceLocations)!{{{
+      implicit none
+
+      real (kind=RKIND), dimension(:), intent(out) :: interfaceLocations
+
+      real (kind=RKIND) :: maxInterfaceLocation
+      integer :: nInterfaces, iInterface
+
+      nInterfaces = size(interfaceLocations, dim=1)
+
+      if ( nInterfaces /= 41 ) then
+         call mpas_log_write("MPAS-ocean: Vertical grid must have 40 layers to "// &
+                                      "apply 40 Layer grid. Exiting...", MPAS_LOG_CRIT)
+      end if
+
+      interfaceLocations(1) = 0.0_RKIND
+      interfaceLocations(2) = 6.250_RKIND
+      interfaceLocations(3) = 12.500_RKIND
+      interfaceLocations(4) = 18.750_RKIND
+      interfaceLocations(5) = 25.000_RKIND
+      interfaceLocations(6) = 31.250_RKIND
+      interfaceLocations(7) = 37.500_RKIND
+      interfaceLocations(8) = 43.750_RKIND
+      interfaceLocations(9) = 50.00_RKIND
+      interfaceLocations(10) = 68.750_RKIND
+      interfaceLocations(11) = 87.500_RKIND
+      interfaceLocations(12) = 106.250_RKIND
+      interfaceLocations(13) = 125.00_RKIND
+      interfaceLocations(14) = 143.750_RKIND
+      interfaceLocations(15) = 162.500_RKIND
+      interfaceLocations(16) = 181.250_RKIND
+      interfaceLocations(17) = 200.000_RKIND
+      interfaceLocations(18) = 250.000_RKIND
+      interfaceLocations(19) = 300.000_RKIND
+      interfaceLocations(20) = 350.000_RKIND
+      interfaceLocations(21) = 400.000_RKIND
+      interfaceLocations(22) = 450.000_RKIND
+      interfaceLocations(23) = 500.000_RKIND
+      interfaceLocations(24) = 666.667_RKIND
+      interfaceLocations(25) = 833.333_RKIND
+      interfaceLocations(26) = 1000.000_RKIND
+      interfaceLocations(27) = 1166.667_RKIND
+      interfaceLocations(28) = 1333.333_RKIND
+      interfaceLocations(29) = 1500.000_RKIND
+      interfaceLocations(30) = 1708.333_RKIND
+      interfaceLocations(31) = 1916.667_RKIND
+      interfaceLocations(32) = 2125.000_RKIND
+      interfaceLocations(33) = 2333.333_RKIND
+      interfaceLocations(34) = 2541.667_RKIND
+      interfaceLocations(35) = 2750.000_RKIND
+      interfaceLocations(36) = 2958.333_RKIND
+      interfaceLocations(37) = 3166.667_RKIND
+      interfaceLocations(38) = 3375.000_RKIND
+      interfaceLocations(39) = 3583.333_RKIND
+      interfaceLocations(40) = 3791.667_RKIND
+      interfaceLocations(41) = 4000.000_RKIND
+
+      maxInterfaceLocation = maxval(interfaceLocations)
+
+      interfaceLocations(:) = interfaceLocations(:) / maxInterfaceLocation
+
+   end subroutine ocn_generate_baroclinic_chanel_40layer_vertical_grid!}}}
+
+   
+subroutine ocn_generate_baroclinic_chanel_60layer_vertical_grid(interfaceLocations)!{{{
+      implicit none
+
+      real (kind=RKIND), dimension(:), intent(out) :: interfaceLocations
+
+      real (kind=RKIND) :: maxInterfaceLocation
+      integer :: nInterfaces, iInterface
+
+      nInterfaces = size(interfaceLocations, dim=1)
+
+      if ( nInterfaces /= 61 ) then
+         call mpas_log_write("MPAS-ocean: Vertical grid must have 60 layers to "// &
+                                      "apply 60 Layer grid. Exiting...", MPAS_LOG_CRIT)
+      end if
+
+      interfaceLocations(1) = 0.0_RKIND
+      interfaceLocations(2) = 4.17_RKIND
+      interfaceLocations(3) = 8.33_RKIND
+      interfaceLocations(4) = 12.5_RKIND
+      interfaceLocations(5) = 16.67_RKIND
+      interfaceLocations(6) = 20.83_RKIND
+      interfaceLocations(7) = 25.00_RKIND
+      interfaceLocations(8) = 29.17_RKIND
+      interfaceLocations(9) = 33.33_RKIND
+      interfaceLocations(10) = 37.50_RKIND
+      interfaceLocations(11) = 41.67_RKIND
+      interfaceLocations(12) = 45.83_RKIND
+      interfaceLocations(13) = 50.00_RKIND
+      interfaceLocations(14) = 62.50_RKIND
+      interfaceLocations(15) = 75.00_RKIND
+      interfaceLocations(16) = 87.50_RKIND
+      interfaceLocations(17) = 100.00_RKIND
+      interfaceLocations(18) = 112.50_RKIND
+      interfaceLocations(19) = 125.00_RKIND
+      interfaceLocations(20) = 137.50_RKIND
+      interfaceLocations(21) = 150.00_RKIND
+      interfaceLocations(22) = 162.50_RKIND
+      interfaceLocations(23) = 175.00_RKIND
+      interfaceLocations(24) = 187.50_RKIND
+      interfaceLocations(25) = 200.00_RKIND
+      interfaceLocations(26) = 233.33_RKIND
+      interfaceLocations(27) = 266.67_RKIND
+      interfaceLocations(28) = 300.00_RKIND
+      interfaceLocations(29) = 333.33_RKIND
+      interfaceLocations(30) = 366.67_RKIND
+      interfaceLocations(31) = 400.00_RKIND
+      interfaceLocations(32) = 433.33_RKIND
+      interfaceLocations(33) = 466.67_RKIND
+      interfaceLocations(34) = 500.00_RKIND
+      interfaceLocations(35) = 611.11_RKIND
+      interfaceLocations(36) = 722.22_RKIND
+      interfaceLocations(37) = 833.33_RKIND
+      interfaceLocations(38) = 944.44_RKIND
+      interfaceLocations(39) = 1055.56_RKIND
+      interfaceLocations(40) = 1166.67_RKIND
+      interfaceLocations(41) = 1277.78_RKIND
+      interfaceLocations(42) = 1388.89_RKIND
+      interfaceLocations(43) = 1500.00_RKIND
+      interfaceLocations(44) = 1638.89_RKIND
+      interfaceLocations(45) = 1777.78_RKIND
+      interfaceLocations(46) = 1916.67_RKIND
+      interfaceLocations(47) = 2055.56_RKIND
+      interfaceLocations(48) = 2194.44_RKIND
+      interfaceLocations(49) = 2333.33_RKIND
+      interfaceLocations(50) = 2472.22_RKIND
+      interfaceLocations(51) = 2611.11_RKIND
+      interfaceLocations(52) = 2750.00_RKIND
+      interfaceLocations(53) = 2888.89_RKIND
+      interfaceLocations(54) = 3027.78_RKIND
+      interfaceLocations(55) = 3166.67_RKIND
+      interfaceLocations(56) = 3305.56_RKIND
+      interfaceLocations(57) = 3444.44_RKIND
+      interfaceLocations(58) = 3583.33_RKIND
+      interfaceLocations(59) = 3722.22_RKIND
+      interfaceLocations(60) = 3861.11_RKIND
+      interfaceLocations(61) = 4000.00_RKIND
+
+      maxInterfaceLocation = maxval(interfaceLocations)
+
+      interfaceLocations(:) = interfaceLocations(:) / maxInterfaceLocation
+
+   end subroutine ocn_generate_baroclinic_chanel_60layer_vertical_grid!}}}i
+
+
+subroutine ocn_generate_baroclinic_chanel_80layer_vertical_grid(interfaceLocations)!{{{
+      implicit none
+
+      real (kind=RKIND), dimension(:), intent(out) :: interfaceLocations
+
+      real (kind=RKIND) :: maxInterfaceLocation
+      integer :: nInterfaces, iInterface
+
+      nInterfaces = size(interfaceLocations, dim=1)
+
+      if ( nInterfaces /= 81 ) then
+         call mpas_log_write("MPAS-ocean: Vertical grid must have 80 layers to "// &
+                                      "apply 80 Layer grid. Exiting...", MPAS_LOG_CRIT)
+      end if
+
+      interfaceLocations(1) = 0.0_RKIND
+      interfaceLocations(2) = 3.125_RKIND
+      interfaceLocations(3) = 6.250_RKIND
+      interfaceLocations(4) = 9.375_RKIND
+      interfaceLocations(5) = 12.500_RKIND
+      interfaceLocations(6) = 15.625_RKIND
+      interfaceLocations(7) = 18.750_RKIND
+      interfaceLocations(8) = 21.875_RKIND
+      interfaceLocations(9) = 25.000_RKIND
+      interfaceLocations(10) = 28.125_RKIND
+      interfaceLocations(11) = 31.25_RKIND
+      interfaceLocations(12) = 34.375_RKIND
+      interfaceLocations(13) = 37.500_RKIND
+      interfaceLocations(14) = 40.625_RKIND
+      interfaceLocations(15) = 43.750_RKIND
+      interfaceLocations(16) = 46.875_RKIND
+      interfaceLocations(17) = 50.000_RKIND
+      interfaceLocations(18) = 59.375_RKIND
+      interfaceLocations(19) = 68.75_RKIND
+      interfaceLocations(20) = 78.125_RKIND
+      interfaceLocations(21) = 87.500_RKIND
+      interfaceLocations(22) = 96.875_RKIND
+      interfaceLocations(23) = 106.25_RKIND
+      interfaceLocations(24) = 115.625_RKIND
+      interfaceLocations(25) = 125.000_RKIND
+      interfaceLocations(26) = 134.375_RKIND
+      interfaceLocations(27) = 143.750_RKIND
+      interfaceLocations(28) = 153.125_RKIND
+      interfaceLocations(29) = 162.500_RKIND
+      interfaceLocations(30) = 171.875_RKIND
+      interfaceLocations(31) = 181.250_RKIND
+      interfaceLocations(32) = 190.625_RKIND
+      interfaceLocations(33) = 200.00_RKIND
+      interfaceLocations(34) = 225.000_RKIND
+      interfaceLocations(35) = 250.000_RKIND
+      interfaceLocations(36) = 275.000_RKIND
+      interfaceLocations(37) = 300.000_RKIND
+      interfaceLocations(38) = 325.000_RKIND
+      interfaceLocations(39) = 350.000_RKIND
+      interfaceLocations(40) = 375.000_RKIND
+      interfaceLocations(41) = 400.000_RKIND
+      interfaceLocations(42) = 425.000_RKIND
+      interfaceLocations(43) = 450.000_RKIND
+      interfaceLocations(44) = 475.000_RKIND
+      interfaceLocations(45) = 500.000_RKIND
+      interfaceLocations(46) = 583.333_RKIND
+      interfaceLocations(47) = 666.667_RKIND
+      interfaceLocations(48) = 750.000_RKIND
+      interfaceLocations(49) = 833.333_RKIND
+      interfaceLocations(50) = 916.667_RKIND
+      interfaceLocations(51) = 1000.000_RKIND
+      interfaceLocations(52) = 1083.333_RKIND
+      interfaceLocations(53) = 1166.667_RKIND
+      interfaceLocations(54) = 1250.000_RKIND
+      interfaceLocations(55) = 1333.333_RKIND
+      interfaceLocations(56) = 1416.667_RKIND
+      interfaceLocations(57) = 1500.000_RKIND
+      interfaceLocations(58) = 1604.167_RKIND
+      interfaceLocations(59) = 1708.333_RKIND
+      interfaceLocations(60) = 1812.500_RKIND
+      interfaceLocations(61) = 1916.667_RKIND
+      interfaceLocations(62) = 2020.833_RKIND
+      interfaceLocations(63) = 2125.000_RKIND
+      interfaceLocations(64) = 2229.167_RKIND
+      interfaceLocations(65) = 2333.333_RKIND
+      interfaceLocations(66) = 2437.500_RKIND
+      interfaceLocations(67) = 2541.667_RKIND
+      interfaceLocations(68) = 2645.833_RKIND
+      interfaceLocations(69) = 2750.000_RKIND
+      interfaceLocations(70) = 2854.167_RKIND
+      interfaceLocations(71) = 2958.333_RKIND
+      interfaceLocations(72) = 3062.500_RKIND
+      interfaceLocations(73) = 3166.667_RKIND
+      interfaceLocations(74) = 3270.833_RKIND
+      interfaceLocations(75) = 3375.000_RKIND
+      interfaceLocations(76) = 3479.167_RKIND
+      interfaceLocations(77) = 3583.333_RKIND
+      interfaceLocations(78) = 3687.500_RKIND
+      interfaceLocations(79) = 3791.667_RKIND
+      interfaceLocations(80) = 3895.833_RKIND
+      interfaceLocations(81) = 4000.000_RKIND
+
+      maxInterfaceLocation = maxval(interfaceLocations)
+
+      interfaceLocations(:) = interfaceLocations(:) / maxInterfaceLocation
+
+   end subroutine ocn_generate_baroclinic_chanel_80layer_vertical_grid!}}}
+
+subroutine ocn_generate_baroclinic_chanel_100layer_vertical_grid(interfaceLocations)!{{{
+      implicit none
+
+      real (kind=RKIND), dimension(:), intent(out) :: interfaceLocations
+
+      real (kind=RKIND) :: maxInterfaceLocation
+      integer :: nInterfaces, iInterface
+
+      nInterfaces = size(interfaceLocations, dim=1)
+
+      if ( nInterfaces /= 101 ) then
+         call mpas_log_write("MPAS-ocean: Vertical grid must have 100 layers to "// &
+                                      "apply 100 Layer grid. Exiting...", MPAS_LOG_CRIT)
+      end if
+
+      interfaceLocations(1) = 0.0_RKIND
+      interfaceLocations(2) = 2.500_RKIND
+      interfaceLocations(3) = 5.000_RKIND
+      interfaceLocations(4) = 7.500_RKIND
+      interfaceLocations(5) = 10.000_RKIND
+      interfaceLocations(6) = 12.500_RKIND
+      interfaceLocations(7) = 15.000_RKIND
+      interfaceLocations(8) = 17.500_RKIND
+      interfaceLocations(9) = 20.000_RKIND
+      interfaceLocations(10) = 22.500_RKIND
+      interfaceLocations(11) = 25.000_RKIND
+      interfaceLocations(12) = 27.500_RKIND
+      interfaceLocations(13) = 30.000_RKIND
+      interfaceLocations(14) = 32.500_RKIND
+      interfaceLocations(15) = 35.000_RKIND
+      interfaceLocations(16) = 37.500_RKIND
+      interfaceLocations(17) = 40.000_RKIND
+      interfaceLocations(18) = 42.500_RKIND
+      interfaceLocations(19) = 45.000_RKIND
+      interfaceLocations(20) = 47.500_RKIND
+      interfaceLocations(21) = 50.000_RKIND
+      interfaceLocations(22) = 57.500_RKIND
+      interfaceLocations(23) = 65.000_RKIND
+      interfaceLocations(24) = 72.500_RKIND
+      interfaceLocations(25) = 80.000_RKIND
+      interfaceLocations(26) = 87.500_RKIND
+      interfaceLocations(27) = 95.000_RKIND
+      interfaceLocations(28) = 102.500_RKIND
+      interfaceLocations(29) = 110.000_RKIND
+      interfaceLocations(30) = 117.500_RKIND
+      interfaceLocations(31) = 125.000_RKIND
+      interfaceLocations(32) = 132.500_RKIND
+      interfaceLocations(33) = 140.000_RKIND
+      interfaceLocations(34) = 147.500_RKIND
+      interfaceLocations(35) = 155.000_RKIND
+      interfaceLocations(36) = 162.500_RKIND
+      interfaceLocations(37) = 170.000_RKIND
+      interfaceLocations(38) = 177.500_RKIND
+      interfaceLocations(39) = 185.000_RKIND
+      interfaceLocations(40) = 192.500_RKIND
+      interfaceLocations(41) = 200.000_RKIND
+      interfaceLocations(42) = 220.000_RKIND
+      interfaceLocations(43) = 240.000_RKIND
+      interfaceLocations(44) = 260.000_RKIND
+      interfaceLocations(45) = 280.000_RKIND
+      interfaceLocations(46) = 300.000_RKIND
+      interfaceLocations(47) = 320.000_RKIND
+      interfaceLocations(48) = 340.000_RKIND
+      interfaceLocations(49) = 360.000_RKIND
+      interfaceLocations(50) = 380.000_RKIND
+      interfaceLocations(51) = 400.000_RKIND
+      interfaceLocations(52) = 420.000_RKIND
+      interfaceLocations(53) = 440.000_RKIND
+      interfaceLocations(54) = 460.000_RKIND
+      interfaceLocations(55) = 480.000_RKIND
+      interfaceLocations(56) = 500.000_RKIND
+      interfaceLocations(57) = 566.667_RKIND
+      interfaceLocations(58) = 633.333_RKIND
+      interfaceLocations(59) = 700.000_RKIND
+      interfaceLocations(60) = 766.667_RKIND
+      interfaceLocations(61) = 833.333_RKIND
+      interfaceLocations(62) = 900.000_RKIND
+      interfaceLocations(63) = 966.667_RKIND
+      interfaceLocations(64) = 1033.333_RKIND
+      interfaceLocations(65) = 1100.000_RKIND
+      interfaceLocations(66) = 1166.667_RKIND
+      interfaceLocations(67) = 1233.333_RKIND
+      interfaceLocations(68) = 1300.000_RKIND
+      interfaceLocations(69) = 1366.667_RKIND
+      interfaceLocations(70) = 1433.333_RKIND
+      interfaceLocations(71) = 1500.000_RKIND
+      interfaceLocations(72) = 1583.333_RKIND
+      interfaceLocations(73) = 1666.667_RKIND
+      interfaceLocations(74) = 1750.000_RKIND
+      interfaceLocations(75) = 1833.333_RKIND
+      interfaceLocations(76) = 1916.667_RKIND
+      interfaceLocations(77) = 2000.000_RKIND
+      interfaceLocations(78) = 2083.333_RKIND
+      interfaceLocations(79) = 2166.667_RKIND
+      interfaceLocations(80) = 2250.000_RKIND
+      interfaceLocations(81) = 2333.333_RKIND
+      interfaceLocations(82) = 2416.667_RKIND
+      interfaceLocations(83) = 2500.000_RKIND
+      interfaceLocations(84) = 2583.333_RKIND
+      interfaceLocations(85) = 2666.667_RKIND
+      interfaceLocations(86) = 2750.000_RKIND
+      interfaceLocations(87) = 2833.333_RKIND
+      interfaceLocations(88) = 2916.667_RKIND
+      interfaceLocations(89) = 3000.000_RKIND
+      interfaceLocations(90) = 3083.333_RKIND
+      interfaceLocations(91) = 3166.667_RKIND
+      interfaceLocations(92) = 3250.000_RKIND
+      interfaceLocations(93) = 3333.333_RKIND
+      interfaceLocations(94) = 3416.667_RKIND
+      interfaceLocations(95) = 3500.000_RKIND
+      interfaceLocations(96) = 3583.333_RKIND
+      interfaceLocations(97) = 3666.667_RKIND
+      interfaceLocations(98) = 3750.000_RKIND
+      interfaceLocations(99) = 3833.3333_RKIND
+      interfaceLocations(100) = 3916.667_RKIND
+      interfaceLocations(101) = 4000.000_RKIND
+
+
+      maxInterfaceLocation = maxval(interfaceLocations)
+
+      interfaceLocations(:) = interfaceLocations(:) / maxInterfaceLocation
+
+   end subroutine ocn_generate_baroclinic_chanel_100layer_vertical_grid!}}}
+
 
    !***********************************************************************
    !
