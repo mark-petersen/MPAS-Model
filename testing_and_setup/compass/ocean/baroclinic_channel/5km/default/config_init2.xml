@@ -11,8 +11,8 @@
 		<option name="config_vert_levels">-1</option>
 		<option name="config_ocean_run_mode">'init'</option>
 		<option name="config_write_cull_cell_mask">.false.</option>
-                <option name="config_vertical_grid">'100layerBC'</option>
-                <option name="config_baroclinic_channel_vert_levels">100</option>
+                <option name="config_vertical_grid">'80layerBC'</option>
+                <option name="config_baroclinic_channel_vert_levels">80</option>
                 <option name="config_eos_linear_alpha">0.2</option>
                 <option name="config_eos_linear_beta">0.8</option>
                 <option name="config_eos_linear_Tref">20.0</option>

@@ -7,7 +7,7 @@
                         <argument flag="--nx">100</argument>
                         <argument flag="--ny">100</argument>
                         <argument flag="--npy"></argument>
-                        <argument flag="dc">5000</argument>
+                        <argument flag="--dc">5000</argument>
                         <argument flag="-o">base_mesh.nc</argument>
                 </step>
 		<step executable="MpasCellCuller.x">

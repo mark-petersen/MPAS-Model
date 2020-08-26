@@ -2,6 +2,8 @@
 <config case="forward">
 	<add_link source="../init_step2/ocean.nc" dest="init.nc"/>
 	<add_link source="../init_step2/graph.info" dest="graph.info"/>
+        <copy source_path="script_core_dir" file="scripts/effective_resolution/velocity_init_2km.py" dest="velocity_init.py"/>
+        <copy_file source="../init_step2/ocean.nc" dest="velocity_init.nc"/>
 
 	<add_executable source="model" dest="ocean_model"/>
 	<add_executable source="metis" dest="metis"/>
@@ -37,13 +39,12 @@
                 <option name="config_mom_del2">666.67</option>
                 <option name="config_use_mom_del4">.true.</option>
                 <option name="config_mom_del4">3.5e10</option>
+                <option name="config_dt">'00:01:00'</option>
+                <option name="config_btr_dt">'00:00:03'</option>
         </namelist>
 
         <streams name="init_streams.ocean" keep="immutable" mode="forward">
                 <template file="baroclinic_channel_10km_template.xml" path_base="script_resolution_dir"/>
-                <stream name="input_init">
-                        <attribute name="filename_template">mesh.nc</attribute>
-                </stream>
                 <stream name="output">
                         <attribute name="type">output</attribute>
                         <attribute name="output_interval">0000_00:10:00</attribute>
@@ -107,7 +108,8 @@
 			<argument flag="graph.info">4</argument>
 		</step>
 		<model_run procs="4" threads="1" namelist="init_namelist.ocean" streams="init_streams.ocean"/>
-                <step executable="./velocity_init.py">
+                <step executable="python">
+                        <argument flag="velocity_init.py"></argument>
                 </step>
                 <model_run procs="4" threads="1" namelist="namelist.ocean" streams="streams.ocean"/>
 	</run_script>
