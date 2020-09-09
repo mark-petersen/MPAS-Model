@@ -8,9 +8,9 @@
 		<step executable="python">
 			<argument flag="add_initial_state.py"></argument>
 			<argument flag="-i">base_mesh.nc</argument>
-			<argument flag="-o">init.nc</argument>
-			<argument flag="-t">1</argument>
-			<argument flag="-H">10</argument>
+			<argument flag="-o">initial_state.nc</argument>
+			<argument flag="-L">3</argument>
+			<argument flag="-H">1000</argument>
 		</step>
 	</run_script>
 

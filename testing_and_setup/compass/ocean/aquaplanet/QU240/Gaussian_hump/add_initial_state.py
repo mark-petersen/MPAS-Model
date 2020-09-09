@@ -27,8 +27,7 @@ def main():
                         default=3,
                         help='Number of vertical levels'
                         )
-    parser.add_argument(
-        '-H',
+    parser.add_argument('-H',
         '--thicknessAllLayers',
         dest='thicknessAllLayers',
         default=1000,
@@ -100,7 +99,7 @@ def vertical_init(ds, thicknessAllLayers, nVertLevels):
 def tracer_init(ds, thicknessAllLayers):
     S0 = 35 # constant salinity in psu
     T0 = 10 # constant temperature in C
-# {{{
+
     h = thicknessAllLayers
     # create new variables # {{{
     temperature = ds.createVariable(
