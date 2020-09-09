@@ -25,6 +25,7 @@ def main():
                         )
     parser.add_argument('-L', '--nVertLevels', dest='nVertLevels',
                         default=3,
+                        type=int,
                         help='Number of vertical levels'
                         )
     parser.add_argument('-H',
@@ -128,16 +129,20 @@ def tracer_init(ds, thicknessAllLayers):
     H = max(refBottomDepth)
     # }}}
 
-    for iCell in range(0, nCells):
-        x = lonCell[iCell]
-        y = latCell[iCell]
-        for k in range(0, nVertLevels):
-            z = refZMid[k]
+    #for iCell in range(0, nCells):
+    #    x = lonCell[iCell]
+    #    y = latCell[iCell]
+    #    for k in range(0, nVertLevels):
+    #        z = refZMid[k]
 
-            salinity[0, iCell, k] = S0
-            temperature[0,iCell,k] = T0
-            tracer1[0,iCell,k] = 0.0
-            tracer2[0,iCell,k] = 0.0
+    #        salinity[0, iCell, k] = S0
+    #        temperature[0,iCell,k] = T0
+    #        tracer1[0,iCell,k] = 0.0
+    #        tracer2[0,iCell,k] = 0.0
+    salinity = S0
+    temperature = T0
+    tracer1 = 0.0
+    tracer2 = 0.0
 
 def velocity_init(ds):
     # {{{
