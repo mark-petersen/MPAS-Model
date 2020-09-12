@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<config case="test1_res1">
-	<add_link source="../initial_state/init_test1_res1.nc" dest="init.nc"/>
+<config case="convergence_test">
+    <add_link source_path="script_test_dir" source="convergence_test.py" dest="convergence_test.py"/>
 
 	<namelist name="namelist.ocean" mode="forward">
 		<template file="template_forward.xml" path_base="script_configuration_dir"/>
@@ -13,6 +13,10 @@
 	</streams>
 
 	<run_script name="run.py">
-		<model_run procs="1" threads="1" namelist="namelist.ocean" streams="streams.ocean"/>
+		<step executable="convergence_test.py">
+			<argument flag="--minCellWidth">16</argument>
+			<argument flag="--maxCellWidth">64</argument>
+			<argument flag="--factorCellWidth">2</argument>
+		</step>
 	</run_script>
 </config>

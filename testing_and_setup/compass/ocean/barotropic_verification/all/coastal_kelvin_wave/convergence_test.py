@@ -2,84 +2,80 @@
 '''
 This script creates an initial condition file for MPAS-Ocean.
 '''
-# import packages {{{
+# import packages
 import os
 import shutil
 import numpy as np
 import netCDF4 as nc
 from netCDF4 import Dataset
 import argparse
-# }}}
-
-# output from polynomial_validation.py:
-# {{{
-#    Temperature T                  tracer P             Slope Sx                   term 1     term 2                                                      term 3                         powers
-# 1   Tx*(x + x0) + Ty + Tz*z        P0*z*(x + x0)        -Tx/Tz                     0          -P0*Tx/Tz                                                   -P0*Tx/Tz                      px=1;py=0;pz=1;pTx=1;pTy=0;pTz=1;
-# 2   Tx*(x + x0) + Ty + Tz*z        P0*z*(x + x0)**2     -Tx/Tz                     2*P0*z     -P0*Tx*(2*x + 2*x0)/Tz                                      -P0*Tx*(2*x + 2*x0)/Tz         px=2;py=0;pz=1;pTx=1;pTy=0;pTz=1;
-# 3   Tx*(x + x0) + Ty + Tz*z        P0*z**2*(x + x0)     -Tx/Tz                     0          -2*P0*Tx*z/Tz                                               -2*P0*Tx*z/Tz                  px=1;py=0;pz=2;pTx=1;pTy=0;pTz=1;
-# 4   Tx*(x + x0) + Ty + Tz*z        P0*z**2*(x + x0)**2  -Tx/Tz                     2*P0*z**2  -2*P0*Tx*z*(2*x + 2*x0)/Tz                                  -2*P0*Tx*z*(2*x + 2*x0)/Tz     px=2;py=0;pz=2;pTx=1;pTy=0;pTz=1;
-# 5   Tx*(x + x0)**2 + Ty + Tz*z     P0*z*(x + x0)        -Tx*(2*x + 2*x0)/Tz        0          -2*P0*Tx*(x + x0)/Tz - P0*Tx*(2*x + 2*x0)/Tz                -P0*Tx*(2*x + 2*x0)/Tz         px=1;py=0;pz=1;pTx=2;pTy=0;pTz=1;
-# 6   Tx*(x + x0)**2 + Ty + Tz*z     P0*z*(x + x0)**2     -Tx*(2*x + 2*x0)/Tz        2*P0*z     -2*P0*Tx*(x + x0)**2/Tz - P0*Tx*(2*x + 2*x0)**2/Tz          -P0*Tx*(2*x + 2*x0)**2/Tz      px=2;py=0;pz=1;pTx=2;pTy=0;pTz=1;
-# 7   Tx*(x + x0)**2 + Ty + Tz*z     P0*z**2*(x + x0)     -Tx*(2*x + 2*x0)/Tz        0          -4*P0*Tx*z*(x + x0)/Tz - 2*P0*Tx*z*(2*x + 2*x0)/Tz          -2*P0*Tx*z*(2*x + 2*x0)/Tz     px=1;py=0;pz=2;pTx=2;pTy=0;pTz=1;
-# 8   Tx*(x + x0)**2 + Ty + Tz*z     P0*z**2*(x + x0)**2  -Tx*(2*x + 2*x0)/Tz        2*P0*z**2  -4*P0*Tx*z*(x + x0)**2/Tz - 2*P0*Tx*z*(2*x + 2*x0)**2/Tz    -2*P0*Tx*z*(2*x + 2*x0)**2/Tz  px=2;py=0;pz=2;pTx=2;pTy=0;pTz=1;
-# 9   Tx*(x + x0) + Ty + Tz*z**2     P0*z*(x + x0)        -Tx/(2*Tz*z)               0          -P0*Tx/(2*Tz*z)                                             0                              px=1;py=0;pz=1;pTx=1;pTy=0;pTz=2;
-# 10  Tx*(x + x0) + Ty + Tz*z**2     P0*z*(x + x0)**2     -Tx/(2*Tz*z)               2*P0*z     -P0*Tx*(2*x + 2*x0)/(2*Tz*z)                                0                              px=2;py=0;pz=1;pTx=1;pTy=0;pTz=2;
-# 11  Tx*(x + x0) + Ty + Tz*z**2     P0*z**2*(x + x0)     -Tx/(2*Tz*z)               0          -P0*Tx/Tz                                                   -P0*Tx/(2*Tz)                  px=1;py=0;pz=2;pTx=1;pTy=0;pTz=2;
-# 12  Tx*(x + x0) + Ty + Tz*z**2     P0*z**2*(x + x0)**2  -Tx/(2*Tz*z)               2*P0*z**2  -P0*Tx*(2*x + 2*x0)/Tz                                      -P0*Tx*(2*x + 2*x0)/(2*Tz)     px=2;py=0;pz=2;pTx=1;pTy=0;pTz=2;
-# 13  Tx*(x + x0)**2 + Ty + Tz*z**2  P0*z*(x + x0)        -Tx*(2*x + 2*x0)/(2*Tz*z)  0          -P0*Tx*(x + x0)/(Tz*z) - P0*Tx*(2*x + 2*x0)/(2*Tz*z)        0                              px=1;py=0;pz=1;pTx=2;pTy=0;pTz=2;
-# 14  Tx*(x + x0)**2 + Ty + Tz*z**2  P0*z*(x + x0)**2     -Tx*(2*x + 2*x0)/(2*Tz*z)  2*P0*z     -P0*Tx*(x + x0)**2/(Tz*z) - P0*Tx*(2*x + 2*x0)**2/(2*Tz*z)  0                              px=2;py=0;pz=1;pTx=2;pTy=0;pTz=2;
-# 15  Tx*(x + x0)**2 + Ty + Tz*z**2  P0*z**2*(x + x0)     -Tx*(2*x + 2*x0)/(2*Tz*z)  0          -2*P0*Tx*(x + x0)/Tz - P0*Tx*(2*x + 2*x0)/Tz                -P0*Tx*(2*x + 2*x0)/(2*Tz)     px=1;py=0;pz=2;pTx=2;pTy=0;pTz=2;
-# 16  Tx*(x + x0)**2 + Ty + Tz*z**2  P0*z**2*(x + x0)**2  -Tx*(2*x + 2*x0)/(2*Tz*z)  2*P0*z**2  -2*P0*Tx*(x + x0)**2/Tz - P0*Tx*(2*x + 2*x0)**2/Tz          -P0*Tx*(2*x + 2*x0)**2/(2*Tz)  px=2;py=0;pz=2;pTx=2;pTy=0;pTz=2;
-# }}}
 
 
 def main():
-    # {{{
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--input_file', dest='input_file',
-                        default='base_mesh.nc',
-                        help='Input file, containing base mesh'
-                        )
-    parser.add_argument('-o', '--output_file', dest='output_file',
-                        default='initial_state.nc',
-                        help='Output file, containing initial variables'
-                        )
-    parser.add_argument('-t', '--test', dest='test',
-                        default=1,
+    parser.add_argument('-m', '--nCellsXMin', dest='nCellsXMin',
+                        default=16,
                         type=int,
-                        help='Test number 1, 2, or 3'
+                        help='minimum cell width of domain'
                         )
-    parser.add_argument('-L', '--nVertLevels', dest='nVertLevels',
-                        default=10,
-                        help='Number of vertical levels'
+    parser.add_argument('-M', '--nCellsXMax', dest='nCellsXMax',
+                        default=64,
+                        type=int,
+                        help='maximum cell width of domain'
                         )
-    parser.add_argument(
-        '-H',
-        '--thicknessAllLayers',
-        dest='thicknessAllLayers',
-        default=10,
-        type=float,
-        help='thickness of each layer, [m]')
-    thicknessAllLayers = parser.parse_args().thicknessAllLayers
-    nVertLevels = parser.parse_args().nVertLevels
-    test = parser.parse_args().test
-    if (test != 1) & (test != 2) & (test != 3):
-        print('Invalid choice of test. Setting to test=1.')
-        test = 1
+    parser.add_argument('-f', '--nCellsFactor', dest='nCellsFactor',
+                        default=2,
+                        type=int,
+                        help='factor increment for cell width of domain'
+                        )
+    nCellsXMin = parser.parse_args().nCellsXMin
+    nCellsXMax = parser.parse_args().nCellsXMax
+    nCellsFactor = parser.parse_args().nCellsFactor
 
-    input_file = parser.parse_args().input_file
-    output_file = parser.parse_args().output_file
-    shutil.copy2(input_file, output_file)
-    ds = Dataset(output_file, 'a', format='NETCDF3_64BIT_OFFSET')
+    #shutil.copy2(input_file, output_file)
+    #ds = Dataset(output_file, 'a', format='NETCDF3_64BIT_OFFSET')
 
-    vertical_init(ds, thicknessAllLayers, nVertLevels)
-    tracer_init(ds, thicknessAllLayers, parser.parse_args().test)
-    velocity_init(ds)
-    coriolis_init(ds)
-    others_init(ds)
+    maxIter = 20
+    cellWidth = nCellsXMin
+    for j in range(maxIter):
+        print('cellWidth',cellWidth)
+        cellWidth = cellWidth*nCellsFactor
+        if cellWidth>nCellsXMax:
+            break
 
-    ds.close()
-# }}}
+#nCellsXMin = 10
+#nCellsXMax = 300
+#nCellsFactor = 10
+#nRes = int((nCellsXMax - nCellsXMin)/nCellsFactor) + 1
+#nCellsX = np.linspace(nCellsXMin,nCellsXMax,nRes,dtype=int)
+#
+#lX = 100.0*50000.0
+#
+#for iCase in range(0,nRes):
+#    dcEdge = lX/float(nCellsX[iCase])
+#    os.system("./planar_hex.py --nx %d --ny %d --npx --dc %f -o base_mesh_%d.nc" 
+#              %(nCellsX[iCase],nCellsX[iCase],dcEdge,nCellsX[iCase]))
+#    os.system("MpasCellCuller.x base_mesh_%d.nc culled_mesh_%d.nc" 
+#              %(nCellsX[iCase],nCellsX[iCase]))
+#    os.system("MpasMeshConverter.x culled_mesh_%d.nc mesh_%d.nc" 
+#              %(nCellsX[iCase],nCellsX[iCase]))
+#    os.system("mv culled_graph.info culled_graph_%d.info" %(nCellsX[iCase]))
+#    os.system("mv graph.info graph_%d.info" %(nCellsX[iCase]))
+#
+##os.system("rm culled_graph_*.info")
+##os.system("rm graph_*.info")
+##    for cellWidth in range(nCellsXMin, nCellsXMax, nCellsFactor):
+##        print(cellWidth)
+##        subprocess.check_call(['planar_hex', '--nx', '10', '--ny', '10', '--dc',
+##                               '100e3', '-o', 'planar_hex_mesh_res4.nc'])
+#    vertical_init(ds, thicknessAllLayers, nVertLevels)
+#    tracer_init(ds, thicknessAllLayers, parser.parse_args().test)
+#    velocity_init(ds)
+#    coriolis_init(ds)
+#    others_init(ds)
+#
+#    ds.close()
+## }}}
 
 
 def vertical_init(ds, thicknessAllLayers, nVertLevels):
