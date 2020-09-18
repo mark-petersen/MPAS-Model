@@ -47,6 +47,9 @@
 		<dim name="TWENTYONE" definition="21" units="unitless"
 			 description="The number 21 as a dimension."
 		/>
+		<dim name="nbnds" definition="2" units="unitless"
+			 description="time bounds dimension for CF compliance"
+		/>
 		<dim name="vertexDegree" units="unitless"
 			 description="The number of cells or edges touching each vertex."
 		/>
@@ -1491,6 +1494,14 @@
 			<var name="layerThickness"/>
 			<var name="ssh"/>
 		</stream>
+		<stream name="cf_compliant_time"
+				type="none"
+				filename_template="none.nc"
+				immutable="true">
+
+			<var name="time"/>
+			<var name="time_bnds"/>
+		</stream>
 		<stream name="KPP_testing"
 				type="output"
 				filename_template="output/KPP_test.$Y-$M-$D_$h.$m.$s.nc"
@@ -2200,6 +2211,12 @@
 	<var_struct name="diagnostics" time_levs="1">
 		<var name="xtime" type="text" dimensions="Time" units="unitless"
 			 description="model time, with format 'YYYY-MM-DD_HH:MM:SS'"
+		/>
+		<var name="time" type="real" dimensions="Time" units="years since 1500-01-01 00:00:00"
+			 description="description of time variable here"
+		/>
+		<var name="time_bnds" type="real" dimensions="Time nbnds" units="years since 1500-01-01 00:00:00"
+			 description="start and end points of each time step"
 		/>
 		<var name="simulationStartTime" type="text" dimensions="" units="unitless" default_value="'no_date_available'"
 			 description="start time of first simulation, with format 'YYYY-MM-DD_HH:MM:SS'"
