@@ -68,6 +68,9 @@ module ocn_time_series_stats
     integer, pointer :: counter
     character (len=StrKIND), pointer :: xtime_start
     character (len=StrKIND), pointer :: xtime_end
+    real (kind=RKIND), pointer :: CFtime_start
+    !real (kind=RKIND), pointer :: CFtime_mid
+    !real (kind=RKIND), pointer :: CFtime_end
   end type time_series_buffer_type
 
   type time_series_type
@@ -263,6 +266,7 @@ subroutine ocn_init_time_series_stats(domain, instance, err)!{{{
   do b = 1, series % number_of_buffers
     if (trim(series % buffers(b) % xtime_start) == '') then
       series % buffers(b) % xtime_start = start_xtime
+      series % buffers(b) % CFtime_start = 123.456_RKIND ! mrp dummy for now
     end if
   end do
 
@@ -327,9 +331,13 @@ subroutine ocn_compute_time_series_stats(domain, timeLevel, instance, err)!{{{
       if (series % buffers(b) % reset_flag == 1) then
         series % buffers(b) % xtime_start = start_xtime
         series % buffers(b) % counter = 1
+        series % buffers(b) % CFtime_start = 123.456_RKIND ! mrp dummy for now
       else
         series % buffers(b) % xtime_end = end_xtime
         series % buffers(b) % counter = series % buffers(b) % counter + 1
+        !series % buffers(b) % CFtime_end = 456.456_RKIND ! mrp dummy for now
+        !series % buffers(b) % CFtime_mid = 0.5_RKIND*( &
+        !   series % buffers(b) % CFtime_end - series % buffers(b) % CFtime_start)
       end if
     end if
   end do
@@ -794,6 +802,11 @@ subroutine get_state(domain, instance, series)
     call mpas_pool_get_array(amPool, &
       field_name, series % buffers(b) % xtime_end, 1)
 
+    ! CF time start
+    field_name = 'CF_time_start'
+    call mpas_pool_get_array(amPool, &
+      field_name, series % buffers(b) % CFtime_start, 1)
+
   end do
 
 end subroutine get_state
@@ -1144,6 +1157,13 @@ subroutine modify_stream(domain, instance, series, valid_input, err)!{{{
       call mpas_stream_mgr_add_field(domain % streamManager, &
        restart_stream_name, field_name, ierr=err)
     end if
+
+    ! CF compliant time start
+    field_name = 'CF_time_start'
+    call add_new_real(domain % blocklist % allFields, amPool, amPool, &
+      field_name, series % buffers(b) % CFtime_start)
+    call mpas_stream_mgr_add_field(domain % streamManager, &
+      output_stream_name, field_name, ierr=err)
 
     ! xtime end
     if (series % number_of_buffers > 1) then
