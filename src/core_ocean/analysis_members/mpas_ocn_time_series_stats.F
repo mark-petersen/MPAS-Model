@@ -166,6 +166,9 @@ module ocn_time_series_stats
 
   character (len=StrKIND), parameter :: CURRENT_CORE_NAME = 'MPAS-Ocean'
   character (len=4), parameter :: NONE_TOKEN = 'none'
+  !integer :: CF_YYYY, CF_MM, CF_DD, CF_H, CF_M, CF_S, CF_Sn, CF_Sd
+  type (MPAS_Time_type) :: CF_reference_time
+  real (kind=RKIND), parameter :: seconds_to_days = 1.0_RKIND/86400.0_RKIND
 
 !***********************************************************************
 contains
@@ -240,6 +243,9 @@ subroutine ocn_init_time_series_stats(domain, instance, err)!{{{
   type (time_series_alarms_type), allocatable, dimension(:) :: alarms
   type (MPAS_Time_type) :: start_intv
   character (len=StrKIND) :: start_xtime
+  character (len=StrKIND), pointer :: config_AM_timeSeriesStats_CF_reference_time
+  type (mpas_timeinterval_type) :: CF_interval_start
+  real (kind=RKIND) :: CFtime_start_days, CFtime_start_sec
 
   ! start procedure
   err = 0
@@ -261,10 +267,18 @@ subroutine ocn_init_time_series_stats(domain, instance, err)!{{{
   start_intv = mpas_get_clock_time(domain % clock, MPAS_NOW, err)
   call mpas_get_time(start_intv, dateTimeString=start_xtime, ierr=err)
 
+  call mpas_pool_get_config(domain % configs, 'config_AM_timeSeriesStats_CF_reference_time', config_AM_timeSeriesStats_CF_reference_time)
+  call mpas_set_time(CF_reference_time, dateTimeString=config_AM_timeSeriesStats_CF_reference_time, ierr=err)
+  CF_interval_start = start_intv - CF_reference_time
+  call mpas_get_timeInterval(CF_interval_start, CF_reference_time, dt=CFtime_start_sec, ierr=err)
+  CFtime_start_days = CFtime_start_sec*seconds_to_days
+
   do b = 1, series % number_of_buffers
     if (trim(series % buffers(b) % xtime_start) == '') then
       series % buffers(b) % xtime_start = start_xtime
-      series % buffers(b) % CFtime_bnds(1)= 123.456_RKIND ! mrp dummy for now
+      series % buffers(b) % CFtime_bnds(1) = CFtime_start_days
+      !series % buffers(b) % CFtime_bnds(1) = YYYY - CF_YYYY + (MM - CF_MM)/12.0_RKIND &
+      !   + (DD-CF_DD + (H-CF_H + (M-CF_M + (S-CF_S)/60.0_RKIND)/60.0_RKIND)/24.0_RKIND)/365.0_RKIND
     end if
   end do
 
@@ -305,6 +319,9 @@ subroutine ocn_compute_time_series_stats(domain, timeLevel, instance, err)!{{{
   type (MPAS_Time_type) :: start_intv, end_intv
   character (len=StrKIND) :: start_xtime, end_xtime
   logical :: unset_xtime
+  !integer :: YYYY, MM, DD, H, M, S, Sn, Sd
+  type (mpas_timeinterval_type) :: CF_interval_start, CF_interval_end
+  real (kind=RKIND) :: CFtime_start_sec, CFtime_end_sec, CFtime_start_days, CFtime_end_days
 
   ! start procedure
   err = 0
@@ -321,21 +338,28 @@ subroutine ocn_compute_time_series_stats(domain, timeLevel, instance, err)!{{{
       if (unset_xtime) then
         end_intv = mpas_get_clock_time(domain % clock, MPAS_NOW, err)
         call mpas_get_time(end_intv, dateTimeString=end_xtime, ierr=err)
+        CF_interval_end = end_intv - CF_reference_time
+        call mpas_get_timeInterval(CF_interval_end, CF_reference_time, dt=CFtime_end_sec, ierr=err)
+        CFtime_end_days = CFtime_end_sec*seconds_to_days
+
         start_intv = end_intv - mpas_get_clock_timestep(domain % clock, err)
         call mpas_get_time(start_intv, dateTimeString=start_xtime, ierr=err)
+        CF_interval_start = start_intv - CF_reference_time
+        call mpas_get_timeInterval(CF_interval_start, CF_reference_time, dt=CFtime_start_sec, ierr=err)
+        CFtime_start_days = CFtime_start_sec*seconds_to_days
         unset_xtime = .false.
       end if
+      print *, 'CFtime_start_days, CFtime_end_days',CFtime_start_days,CFtime_end_days
 
       if (series % buffers(b) % reset_flag == 1) then
         series % buffers(b) % xtime_start = start_xtime
         series % buffers(b) % counter = 1
-        series % buffers(b) % CFtime_bnds(1)= 123.456_RKIND ! mrp dummy for now
+        series % buffers(b) % CFtime_bnds(1) = CFtime_start_days 
       else
         series % buffers(b) % xtime_end = end_xtime
         series % buffers(b) % counter = series % buffers(b) % counter + 1
-        series % buffers(b) % CFtime_bnds(2)= 222.456_RKIND ! mrp dummy for now
-        series % buffers(b) % CFtime_mid = 0.5_RKIND*( &
-           series % buffers(b) % CFtime_bnds(2) - series % buffers(b) % CFtime_bnds(1))
+        series % buffers(b) % CFtime_bnds(2) = CFtime_end_days
+        series % buffers(b) % CFtime_mid = 0.5_RKIND*( CFtime_end_days + CFtime_start_days)
       end if
     end if
   end do

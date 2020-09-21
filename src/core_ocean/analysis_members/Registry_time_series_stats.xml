@@ -12,7 +12,7 @@
 			description="This is the timeSeriesStats analysis member that can write out time and time_bnds with no suffixes."
 			possible_values="Any valid time series analysis member, i.e. 'timeSeriesStatsMonthly', or 'none'"
 		/>
-		<nml_option name="config_AM_timeSeriesStats_CF_start_date" type="character" default_value="01-01-01_00:00:00" units="unitless"
+		<nml_option name="config_AM_timeSeriesStats_CF_reference_time" type="character" default_value="01-01-01_00:00:00" units="unitless"
 			description="Starte date for CF compliant clock"
 			possible_values="Date of the form '01-01-01_00:00:00'"
 		/>
