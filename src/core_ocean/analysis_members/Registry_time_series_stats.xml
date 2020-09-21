@@ -10,6 +10,12 @@
 	<var_struct name="timeSeriesStatsAM"
 				time_levs="1"
 				packages="timeSeriesStatsDailyAMPKG;timeSeriesStatsMonthlyAMPKG;timeSeriesStatsMonthlyMaxAMPKG;timeSeriesStatsMonthlyMinAMPKG;timeSeriesStatsClimatologyAMPKG;timeSeriesStatsCustomAMPKG">
+		<var name="time" type="real" dimensions="Time" units="years since 1500-01-01 00:00:00"
+			 description="Represents the middle time point of each measurement"
+		/>
+		<var name="time_bnds" type="real" dimensions="Time nbnds" units="years since 1500-01-01 00:00:00"
+			 description="Start and end points of each time step"
+		/>
 		<var name="timeSeriesStatsOneString"
 			 type="text"
 			 dimensions="Time"

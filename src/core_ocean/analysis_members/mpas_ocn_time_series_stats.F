@@ -115,8 +115,6 @@ module ocn_time_series_stats
     'timeSeriesStatsOneInteger'
   character (len=StrKIND), parameter :: ONE_REAL_MEMORY = &
     'timeSeriesStatsOneReal'
-  character (len=StrKIND), parameter :: TWO_REAL_MEMORY_BNDS = &
-    'timeSeriesStatsTwoRealBnds'
   character (len=StrKIND), parameter :: CONFIG_PREFIX = &
     'config_AM_timeSeriesStats'
   character (len=StrKIND), parameter :: FRAMEWORK_PREFIX = 'time'
@@ -580,28 +578,29 @@ end subroutine add_new_real
 
 
 !***********************************************************************
-! routine add_new_1D_real
+! routine copy_field1DReal
 !
-!> \brief Allocate a real in the MPAS framework for this AM
-!> \author  Jon Woodring
-!> \date    December 17, 2015
+!> \brief   copy an field from an existing field and return a pointer to it.
+!> \author  Mark Petersen
+!> \date    September 2020
 !> \details
-!> Allocate a new real in the AM pool and return a pointer to it.
+!> copy an field from an existing field and return a pointer to it.
 !-----------------------------------------------------------------------
-subroutine add_new_1D_real(all_fields, inpool, outpool, field_name, target_ptr)
+subroutine copy_field1DReal(all_fields, inpool, outpool, field_source, field_name, target_ptr)
   ! input variables
-  character (len=StrKIND) :: field_name
+  character (len=StrKIND), intent(in) :: field_name
+  character (len=StrKIND), intent(in) :: field_source
 
   ! input/output variables
   type (mpas_pool_type), pointer, intent(inout) :: all_fields, inpool, outpool
 
   ! output variables
-  real (kind=RKIND), dimension(:), pointer, optional :: target_ptr
+  real (kind=RKIND), dimension(:), pointer, optional, intent(out) :: target_ptr
 
   ! local variables
   type (field1DReal), pointer :: srcReal, dstReal
 
-  call mpas_pool_get_field(inpool, TWO_REAL_MEMORY_BNDS, srcReal, 1)
+  call mpas_pool_get_field(inpool, field_source, srcReal, 1)
   call mpas_duplicate_field(srcReal, dstReal)
   dstReal % fieldName = field_name
   call mpas_pool_add_field(outpool, dstReal % fieldName, dstReal)
@@ -609,7 +608,7 @@ subroutine add_new_1D_real(all_fields, inpool, outpool, field_name, target_ptr)
   if (present(target_ptr)) then
     call mpas_pool_get_array(outpool, dstReal % fieldName, target_ptr, 1)
   end if
-end subroutine add_new_1D_real
+end subroutine copy_field1DReal
 
 
 !***********************************************************************
@@ -838,7 +837,7 @@ subroutine get_state(domain, instance, series)
     call mpas_pool_get_array(amPool, &
       field_name, series % buffers(b) % xtime_end, 1)
 
-    ! CF time start
+    ! CF compliant time_bnds
     if (series % number_of_buffers > 1) then
       field_name = trim(TIME_BNDS_PREFIX) // trim(instance) // &
         '_' // buf_identifier
@@ -1079,7 +1078,7 @@ subroutine modify_stream(domain, instance, series, valid_input, err)!{{{
   logical :: emptyRestartStream, restartStreamEnabled
   character (len=StrKIND), pointer :: output_stream_name, restart_stream_name
   character (len=StrKIND) :: fieldName
-  character (len=StrKIND) :: field_name, config, op_name
+  character (len=StrKIND) :: field_name, config, op_name, field_source
   character (len=StrKIND) :: namelist_prefix, &
     storage_prefix, buf_identifier, buf_prefix
   type (mpas_pool_field_info_type) :: info
@@ -1199,18 +1198,6 @@ subroutine modify_stream(domain, instance, series, valid_input, err)!{{{
        restart_stream_name, field_name, ierr=err)
     end if
 
-    ! CF compliant time start
-    if (series % number_of_buffers > 1) then
-      field_name = trim(TIME_BNDS_PREFIX) // trim(instance) // &
-        '_' // buf_identifier
-    else
-      field_name = trim(TIME_BNDS_PREFIX) // trim(instance)
-    end if
-    call add_new_1D_real(domain % blocklist % allFields, amPool, amPool, &
-      field_name, series % buffers(b) % CFtime_bnds)
-    call mpas_stream_mgr_add_field(domain % streamManager, &
-      output_stream_name, field_name, ierr=err)
-
     ! xtime end
     if (series % number_of_buffers > 1) then
       field_name = trim(TIME_END_PREFIX) // trim(instance) // &
@@ -1228,6 +1215,20 @@ subroutine modify_stream(domain, instance, series, valid_input, err)!{{{
       call mpas_stream_mgr_add_field(domain % streamManager, &
         restart_stream_name, field_name, ierr=err)
     end if
+
+    ! CF compliant time_bnds
+    if (series % number_of_buffers > 1) then
+      field_name = trim(TIME_BNDS_PREFIX) // trim(instance) // &
+        '_' // buf_identifier
+    else
+      field_name = trim(TIME_BNDS_PREFIX) // trim(instance)
+    end if
+    field_source = 'time_bnds'
+    call copy_field1DReal(domain % blocklist % allFields, amPool, amPool, &
+      field_source, field_name, series % buffers(b) % CFtime_bnds)
+    call mpas_stream_mgr_add_field(domain % streamManager, &
+      output_stream_name, field_name, ierr=err)
+
   end do
 
   ! set up the variables
