@@ -166,9 +166,10 @@ module ocn_time_series_stats
 
   character (len=StrKIND), parameter :: CURRENT_CORE_NAME = 'MPAS-Ocean'
   character (len=4), parameter :: NONE_TOKEN = 'none'
-  !integer :: CF_YYYY, CF_MM, CF_DD, CF_H, CF_M, CF_S, CF_Sn, CF_Sd
+
   type (MPAS_Time_type) :: CF_reference_time
   real (kind=RKIND), parameter :: seconds_to_days = 1.0_RKIND/86400.0_RKIND
+  !integer :: CF_YYYY, CF_MM, CF_DD, CF_H, CF_M, CF_S, CF_Sn, CF_Sd
 
 !***********************************************************************
 contains
@@ -243,7 +244,7 @@ subroutine ocn_init_time_series_stats(domain, instance, err)!{{{
   type (time_series_alarms_type), allocatable, dimension(:) :: alarms
   type (MPAS_Time_type) :: start_intv
   character (len=StrKIND) :: start_xtime
-  character (len=StrKIND), pointer :: config_AM_timeSeriesStats_CF_reference_time
+  character (len=StrKIND), pointer :: config_CF_reference_time
   type (mpas_timeinterval_type) :: CF_interval_start
   real (kind=RKIND) :: CFtime_start_days, CFtime_start_sec
 
@@ -267,8 +268,8 @@ subroutine ocn_init_time_series_stats(domain, instance, err)!{{{
   start_intv = mpas_get_clock_time(domain % clock, MPAS_NOW, err)
   call mpas_get_time(start_intv, dateTimeString=start_xtime, ierr=err)
 
-  call mpas_pool_get_config(domain % configs, 'config_AM_timeSeriesStats_CF_reference_time', config_AM_timeSeriesStats_CF_reference_time)
-  call mpas_set_time(CF_reference_time, dateTimeString=config_AM_timeSeriesStats_CF_reference_time, ierr=err)
+  call mpas_pool_get_config(domain % configs, 'config_CF_reference_time', config_CF_reference_time)
+  call mpas_set_time(CF_reference_time, dateTimeString=config_CF_reference_time, ierr=err)
   CF_interval_start = start_intv - CF_reference_time
   call mpas_get_timeInterval(CF_interval_start, CF_reference_time, dt=CFtime_start_sec, ierr=err)
   CFtime_start_days = CFtime_start_sec*seconds_to_days
@@ -277,6 +278,7 @@ subroutine ocn_init_time_series_stats(domain, instance, err)!{{{
     if (trim(series % buffers(b) % xtime_start) == '') then
       series % buffers(b) % xtime_start = start_xtime
       series % buffers(b) % CFtime_bnds(1) = CFtime_start_days
+
       !series % buffers(b) % CFtime_bnds(1) = YYYY - CF_YYYY + (MM - CF_MM)/12.0_RKIND &
       !   + (DD-CF_DD + (H-CF_H + (M-CF_M + (S-CF_S)/60.0_RKIND)/60.0_RKIND)/24.0_RKIND)/365.0_RKIND
     end if
@@ -756,11 +758,13 @@ subroutine get_state(domain, instance, series)
   character (len=StrKIND) :: storage_prefix, var_identifier, &
     buf_identifier, var_prefix, buf_prefix, field_name, op_name
   type (mpas_pool_type), pointer :: amPool
+  character (len=StrKIND), pointer :: config_AM_timeSeriesStats_simple_CF_time_bnds
 
   ! start procedure
   storage_prefix = trim(FRAMEWORK_PREFIX) // trim(instance)
   call mpas_pool_get_subpool(domain % blocklist % structs, &
     TIME_SERIES_STATS_POOL, amPool)
+  call mpas_pool_get_config(domain % configs, 'config_AM_timeSeriesStats_simple_CF_time_bnds', config_AM_timeSeriesStats_simple_CF_time_bnds)
 
   !
   ! get the base
@@ -790,6 +794,7 @@ subroutine get_state(domain, instance, series)
   !
   ! get the instance values for variables
   !
+
 
   do v = 1, series % number_of_variables
     ! identifier
@@ -895,8 +900,7 @@ subroutine get_state(domain, instance, series)
     else
       field_name = 'time' // trim(instance)
     end if
-    call mpas_pool_get_array(amPool, &
-      field_name, series % buffers(b) % CFtime_mid, 1)
+    call mpas_pool_get_array(amPool, field_name, series % buffers(b) % CFtime_mid, 1)
 
     ! CF compliant time_bnds
     if (series % number_of_buffers > 1) then
@@ -904,9 +908,19 @@ subroutine get_state(domain, instance, series)
     else
       field_name = 'time_bnds' // trim(instance)
     end if
-    call mpas_pool_get_array(amPool, &
-      field_name, series % buffers(b) % CFtime_bnds, 1)
+    call mpas_pool_get_array(amPool, field_name, series % buffers(b) % CFtime_bnds, 1)
 
+    if (trim(instance).eq.trim(config_AM_timeSeriesStats_simple_CF_time_bnds)) then
+
+      ! CF compliant time, which is the mid-time of the time average period
+      field_name = 'time'
+      call mpas_pool_get_array(amPool, field_name, series % buffers(b) % CFtime_mid, 1)
+  
+      ! CF compliant time_bnds
+      field_name = 'time_bnds'
+      call mpas_pool_get_array(amPool, field_name, series % buffers(b) % CFtime_bnds, 1)
+
+    end if
   end do
 
 end subroutine get_state
@@ -1143,9 +1157,12 @@ subroutine modify_stream(domain, instance, series, valid_input, err)!{{{
     storage_prefix, buf_identifier, buf_prefix
   type (mpas_pool_field_info_type) :: info
   type (mpas_pool_type), pointer :: amPool
+  character (len=StrKIND), pointer :: config_AM_timeSeriesStats_simple_CF_time_bnds
 
   ! start procedure
   err = 0
+
+  call mpas_pool_get_config(domain % configs, 'config_AM_timeSeriesStats_simple_CF_time_bnds', config_AM_timeSeriesStats_simple_CF_time_bnds)
 
   namelist_prefix = trim(CONFIG_PREFIX) // trim(instance)
   storage_prefix = trim(FRAMEWORK_PREFIX) // trim(instance)
@@ -1300,6 +1317,24 @@ subroutine modify_stream(domain, instance, series, valid_input, err)!{{{
     call mpas_stream_mgr_add_field(domain % streamManager, &
       output_stream_name, field_name, ierr=err)
 
+print *, 'trim(instance)',trim(instance)
+    !if (trim(instance).eq.trim(config_AM_timeSeriesStats_simple_CF_time_bnds)) then
+
+      !! CF compliant time, which is the mid-time of the time average period
+      !field_name = 'time'
+      !call copy_field0DReal(domain % blocklist % allFields, amPool, amPool, &
+      !  field_source, field_name, series % buffers(b) % CFtime_mid)
+      !call mpas_stream_mgr_add_field(domain % streamManager, &
+      !  output_stream_name, field_name, ierr=err)
+  
+      !! CF compliant time_bnds
+      !field_name = 'time_bnds'
+      !call copy_field1DReal(domain % blocklist % allFields, amPool, amPool, &
+      !  field_source, field_name, series % buffers(b) % CFtime_bnds)
+      !call mpas_stream_mgr_add_field(domain % streamManager, &
+      !  output_stream_name, field_name, ierr=err)
+
+     !end if
 print *, 'b, associated(series % buffers(b) % CFtime_bnds)',b, associated(series % buffers(b) % CFtime_bnds)
 print *, 'b, associated(series % buffers(b) % CFtime_mid)',b, associated(series % buffers(b) % CFtime_mid)
   end do

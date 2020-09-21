@@ -8,12 +8,12 @@
 	</packages>
 
 	<nml_record name="AM_timeSeriesStats" mode="forward;analysis">
-		<nml_option name="config_AM_timeSeriesStats_CFcompliant" type="character" default_value="timeSeriesStatsMonthly" units="unitless"
+		<nml_option name="config_AM_timeSeriesStats_simple_CF_time_bnds" type="character" default_value="timeSeriesStatsMonthly" units="unitless"
 			description="This is the timeSeriesStats analysis member that can write out time and time_bnds with no suffixes."
 			possible_values="Any valid time series analysis member, i.e. 'timeSeriesStatsMonthly', or 'none'"
 		/>
-		<nml_option name="config_AM_timeSeriesStats_CF_reference_time" type="character" default_value="01-01-01_00:00:00" units="unitless"
-			description="Starte date for CF compliant clock"
+		<nml_option name="config_CF_reference_time" type="character" default_value="01-01-01_00:00:00" units="unitless"
+			description="Start date for CF compliant clock"
 			possible_values="Date of the form '01-01-01_00:00:00'"
 		/>
 	</nml_record>
@@ -21,10 +21,10 @@
 	<var_struct name="timeSeriesStatsAM"
 				time_levs="1"
 				packages="timeSeriesStatsDailyAMPKG;timeSeriesStatsMonthlyAMPKG;timeSeriesStatsMonthlyMaxAMPKG;timeSeriesStatsMonthlyMinAMPKG;timeSeriesStatsClimatologyAMPKG;timeSeriesStatsCustomAMPKG">
-		<var name="time" type="real" dimensions="Time" units="years since 1500-01-01 00:00:00"
+		<var name="time" type="real" dimensions="Time" units="days since config_CF_reference_time"
 			 description="Represents the middle time point of each measurement"
 		/>
-		<var name="time_bnds" type="real" dimensions="Time nbnds" units="years since 1500-01-01 00:00:00"
+		<var name="time_bnds" type="real" dimensions="Time nbnds" units="days since config_CF_reference_time"
 			 description="Start and end points of each time step"
 		/>
 		<var name="timeSeriesStatsOneString"
