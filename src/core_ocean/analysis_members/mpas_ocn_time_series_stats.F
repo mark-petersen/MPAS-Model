@@ -265,8 +265,6 @@ subroutine ocn_init_time_series_stats(domain, instance, err)!{{{
     if (trim(series % buffers(b) % xtime_start) == '') then
       series % buffers(b) % xtime_start = start_xtime
       series % buffers(b) % CFtime_bnds(1)= 123.456_RKIND ! mrp dummy for now
-      series % buffers(b) % CFtime_bnds(2)= 222.456_RKIND ! mrp dummy for now
-      series % buffers(b) % CFtime_mid = 333.456_RKIND ! mrp dummy for now
     end if
   end do
 
@@ -1256,10 +1254,9 @@ subroutine modify_stream(domain, instance, series, valid_input, err)!{{{
 
     ! CF compliant time, which is the mid-time of the time average period
     if (series % number_of_buffers > 1) then
-      field_name = trim(TIME_PREFIX) // trim(instance) // &
-        '_' // buf_identifier
+      field_name = 'time' // trim(instance) // '_' // buf_identifier
     else
-      field_name = trim(TIME_PREFIX) // trim(instance)
+      field_name = 'time' // trim(instance)
     end if
     field_source = 'time'
     call copy_field0DReal(domain % blocklist % allFields, amPool, amPool, &
@@ -1269,10 +1266,9 @@ subroutine modify_stream(domain, instance, series, valid_input, err)!{{{
 
     ! CF compliant time_bnds
     if (series % number_of_buffers > 1) then
-      field_name = trim(TIME_BNDS_PREFIX) // trim(instance) // &
-        '_' // buf_identifier
+      field_name = 'time_bnds' // trim(instance) // '_' // buf_identifier
     else
-      field_name = trim(TIME_BNDS_PREFIX) // trim(instance)
+      field_name = 'time_bnds' // trim(instance)
     end if
     field_source = 'time_bnds'
     call copy_field1DReal(domain % blocklist % allFields, amPool, amPool, &
