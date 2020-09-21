@@ -351,7 +351,6 @@ subroutine ocn_compute_time_series_stats(domain, timeLevel, instance, err)!{{{
         CFtime_start_days = CFtime_start_sec*seconds_to_days
         unset_xtime = .false.
       end if
-      print *, 'CFtime_start_days, CFtime_end_days',CFtime_start_days,CFtime_end_days
 
       if (series % buffers(b) % reset_flag == 1) then
         series % buffers(b) % xtime_start = start_xtime
@@ -894,17 +893,17 @@ subroutine get_state(domain, instance, series)
 
     ! CF compliant time, which is the mid-time of the time average period
     if (series % number_of_buffers > 1) then
-      field_name = 'time' // trim(instance) // '_' // buf_identifier
+      field_name = 'CF_CHANGEtime' // trim(instance) // '_' // buf_identifier
     else
-      field_name = 'time' // trim(instance)
+      field_name = 'CF_CHANGEtime' // trim(instance)
     end if
     call mpas_pool_get_array(amPool, field_name, series % buffers(b) % CFtime_mid, 1)
 
     ! CF compliant time_bnds
     if (series % number_of_buffers > 1) then
-      field_name = 'time_bnds' // trim(instance) // '_' // buf_identifier
+      field_name = 'CF_CHANGEtime_bnds' // trim(instance) // '_' // buf_identifier
     else
-      field_name = 'time_bnds' // trim(instance)
+      field_name = 'CF_CHANGEtime_bnds' // trim(instance)
     end if
     call mpas_pool_get_array(amPool, field_name, series % buffers(b) % CFtime_bnds, 1)
 
@@ -1279,9 +1278,9 @@ subroutine modify_stream(domain, instance, series, valid_input, err)!{{{
 
     ! CF compliant time, which is the mid-time of the time average period
     if (series % number_of_buffers > 1) then
-      field_name = 'time' // trim(instance) // '_' // buf_identifier
+      field_name = 'CF_CHANGEtime' // trim(instance) // '_' // buf_identifier
     else
-      field_name = 'time' // trim(instance)
+      field_name = 'CF_CHANGEtime' // trim(instance)
     end if
     field_source = 'time'
     call copy_field0DReal(domain % blocklist % allFields, amPool, amPool, &
@@ -1291,9 +1290,9 @@ subroutine modify_stream(domain, instance, series, valid_input, err)!{{{
 
     ! CF compliant time_bnds
     if (series % number_of_buffers > 1) then
-      field_name = 'time_bnds' // trim(instance) // '_' // buf_identifier
+      field_name = 'CF_CHANGEtime_bnds' // trim(instance) // '_' // buf_identifier
     else
-      field_name = 'time_bnds' // trim(instance)
+      field_name = 'CF_CHANGEtime_bnds' // trim(instance)
     end if
     field_source = 'time_bnds'
     call copy_field1DReal(domain % blocklist % allFields, amPool, amPool, &
