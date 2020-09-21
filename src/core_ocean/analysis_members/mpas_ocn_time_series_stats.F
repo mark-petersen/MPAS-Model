@@ -68,7 +68,7 @@ module ocn_time_series_stats
     integer, pointer :: counter
     character (len=StrKIND), pointer :: xtime_start
     character (len=StrKIND), pointer :: xtime_end
-    real (kind=RKIND), pointer :: CFtime_start
+    real (kind=RKIND), dimension(:), pointer :: CFtime_bnds
     !real (kind=RKIND), pointer :: CFtime_mid
     !real (kind=RKIND), pointer :: CFtime_end
   end type time_series_buffer_type
@@ -104,6 +104,8 @@ module ocn_time_series_stats
 
   character (len=11), parameter :: TIME_START_PREFIX = 'xtime_start'
   character (len=9), parameter :: TIME_END_PREFIX = 'xtime_end'
+  character (len=9), parameter :: TIME_BNDS_PREFIX = 'time_bnds'
+  character (len=4), parameter :: TIME_PREFIX = 'time'
 
   character (len=StrKIND), parameter :: TIME_SERIES_STATS_POOL = &
     'timeSeriesStatsAM'
@@ -113,7 +115,8 @@ module ocn_time_series_stats
     'timeSeriesStatsOneInteger'
   character (len=StrKIND), parameter :: ONE_REAL_MEMORY = &
     'timeSeriesStatsOneReal'
-
+  character (len=StrKIND), parameter :: TWO_REAL_MEMORY_BNDS = &
+    'timeSeriesStatsTwoRealBnds'
   character (len=StrKIND), parameter :: CONFIG_PREFIX = &
     'config_AM_timeSeriesStats'
   character (len=StrKIND), parameter :: FRAMEWORK_PREFIX = 'time'
@@ -266,7 +269,8 @@ subroutine ocn_init_time_series_stats(domain, instance, err)!{{{
   do b = 1, series % number_of_buffers
     if (trim(series % buffers(b) % xtime_start) == '') then
       series % buffers(b) % xtime_start = start_xtime
-      series % buffers(b) % CFtime_start = 123.456_RKIND ! mrp dummy for now
+      series % buffers(b) % CFtime_bnds(1)= 123.456_RKIND ! mrp dummy for now
+      series % buffers(b) % CFtime_bnds(2)= 222.456_RKIND ! mrp dummy for now
     end if
   end do
 
@@ -331,10 +335,11 @@ subroutine ocn_compute_time_series_stats(domain, timeLevel, instance, err)!{{{
       if (series % buffers(b) % reset_flag == 1) then
         series % buffers(b) % xtime_start = start_xtime
         series % buffers(b) % counter = 1
-        series % buffers(b) % CFtime_start = 123.456_RKIND ! mrp dummy for now
+        series % buffers(b) % CFtime_bnds(1)= 123.456_RKIND ! mrp dummy for now
       else
         series % buffers(b) % xtime_end = end_xtime
         series % buffers(b) % counter = series % buffers(b) % counter + 1
+        series % buffers(b) % CFtime_bnds(2)= 222.456_RKIND ! mrp dummy for now
         !series % buffers(b) % CFtime_end = 456.456_RKIND ! mrp dummy for now
         !series % buffers(b) % CFtime_mid = 0.5_RKIND*( &
         !   series % buffers(b) % CFtime_end - series % buffers(b) % CFtime_start)
@@ -541,7 +546,6 @@ subroutine add_new_integer(all_fields, inpool, outpool, field_name, target_ptr)
 end subroutine add_new_integer
 
 
-
 !***********************************************************************
 ! routine add_new_real
 !
@@ -574,6 +578,38 @@ subroutine add_new_real(all_fields, inpool, outpool, field_name, target_ptr)
   end if
 end subroutine add_new_real
 
+
+!***********************************************************************
+! routine add_new_1D_real
+!
+!> \brief Allocate a real in the MPAS framework for this AM
+!> \author  Jon Woodring
+!> \date    December 17, 2015
+!> \details
+!> Allocate a new real in the AM pool and return a pointer to it.
+!-----------------------------------------------------------------------
+subroutine add_new_1D_real(all_fields, inpool, outpool, field_name, target_ptr)
+  ! input variables
+  character (len=StrKIND) :: field_name
+
+  ! input/output variables
+  type (mpas_pool_type), pointer, intent(inout) :: all_fields, inpool, outpool
+
+  ! output variables
+  real (kind=RKIND), dimension(:), pointer, optional :: target_ptr
+
+  ! local variables
+  type (field1DReal), pointer :: srcReal, dstReal
+
+  call mpas_pool_get_field(inpool, TWO_REAL_MEMORY_BNDS, srcReal, 1)
+  call mpas_duplicate_field(srcReal, dstReal)
+  dstReal % fieldName = field_name
+  call mpas_pool_add_field(outpool, dstReal % fieldName, dstReal)
+  call mpas_pool_add_field(all_fields, dstReal % fieldName, dstReal)
+  if (present(target_ptr)) then
+    call mpas_pool_get_array(outpool, dstReal % fieldName, target_ptr, 1)
+  end if
+end subroutine add_new_1D_real
 
 
 !***********************************************************************
@@ -803,9 +839,14 @@ subroutine get_state(domain, instance, series)
       field_name, series % buffers(b) % xtime_end, 1)
 
     ! CF time start
-    field_name = 'CF_time_start'
+    if (series % number_of_buffers > 1) then
+      field_name = trim(TIME_BNDS_PREFIX) // trim(instance) // &
+        '_' // buf_identifier
+    else
+      field_name = trim(TIME_BNDS_PREFIX) // trim(instance)
+    end if
     call mpas_pool_get_array(amPool, &
-      field_name, series % buffers(b) % CFtime_start, 1)
+      field_name, series % buffers(b) % CFtime_bnds, 1)
 
   end do
 
@@ -1159,9 +1200,14 @@ subroutine modify_stream(domain, instance, series, valid_input, err)!{{{
     end if
 
     ! CF compliant time start
-    field_name = 'CF_time_start'
-    call add_new_real(domain % blocklist % allFields, amPool, amPool, &
-      field_name, series % buffers(b) % CFtime_start)
+    if (series % number_of_buffers > 1) then
+      field_name = trim(TIME_BNDS_PREFIX) // trim(instance) // &
+        '_' // buf_identifier
+    else
+      field_name = trim(TIME_BNDS_PREFIX) // trim(instance)
+    end if
+    call add_new_1D_real(domain % blocklist % allFields, amPool, amPool, &
+      field_name, series % buffers(b) % CFtime_bnds)
     call mpas_stream_mgr_add_field(domain % streamManager, &
       output_stream_name, field_name, ierr=err)
 

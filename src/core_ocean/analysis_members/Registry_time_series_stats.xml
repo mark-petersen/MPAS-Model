@@ -28,4 +28,10 @@
 			 units="unitless"
 			 packages="forwardMode;analysisMode"
 		/>
+		<var name="timeSeriesStatsTwoRealBnds"
+			 type="real"
+			 dimensions="Time nbnds"
+			 units="unitless"
+			 packages="forwardMode;analysisMode"
+		/>
 	</var_struct>
