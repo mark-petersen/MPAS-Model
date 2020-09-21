@@ -758,13 +758,11 @@ subroutine get_state(domain, instance, series)
   character (len=StrKIND) :: storage_prefix, var_identifier, &
     buf_identifier, var_prefix, buf_prefix, field_name, op_name
   type (mpas_pool_type), pointer :: amPool
-  character (len=StrKIND), pointer :: config_AM_timeSeriesStats_simple_CF_time_bnds
 
   ! start procedure
   storage_prefix = trim(FRAMEWORK_PREFIX) // trim(instance)
   call mpas_pool_get_subpool(domain % blocklist % structs, &
     TIME_SERIES_STATS_POOL, amPool)
-  call mpas_pool_get_config(domain % configs, 'config_AM_timeSeriesStats_simple_CF_time_bnds', config_AM_timeSeriesStats_simple_CF_time_bnds)
 
   !
   ! get the base
@@ -910,17 +908,6 @@ subroutine get_state(domain, instance, series)
     end if
     call mpas_pool_get_array(amPool, field_name, series % buffers(b) % CFtime_bnds, 1)
 
-    if (trim(instance).eq.trim(config_AM_timeSeriesStats_simple_CF_time_bnds)) then
-
-      ! CF compliant time, which is the mid-time of the time average period
-      field_name = 'time'
-      call mpas_pool_get_array(amPool, field_name, series % buffers(b) % CFtime_mid, 1)
-  
-      ! CF compliant time_bnds
-      field_name = 'time_bnds'
-      call mpas_pool_get_array(amPool, field_name, series % buffers(b) % CFtime_bnds, 1)
-
-    end if
   end do
 
 end subroutine get_state
@@ -1157,12 +1144,9 @@ subroutine modify_stream(domain, instance, series, valid_input, err)!{{{
     storage_prefix, buf_identifier, buf_prefix
   type (mpas_pool_field_info_type) :: info
   type (mpas_pool_type), pointer :: amPool
-  character (len=StrKIND), pointer :: config_AM_timeSeriesStats_simple_CF_time_bnds
 
   ! start procedure
   err = 0
-
-  call mpas_pool_get_config(domain % configs, 'config_AM_timeSeriesStats_simple_CF_time_bnds', config_AM_timeSeriesStats_simple_CF_time_bnds)
 
   namelist_prefix = trim(CONFIG_PREFIX) // trim(instance)
   storage_prefix = trim(FRAMEWORK_PREFIX) // trim(instance)
@@ -1317,26 +1301,6 @@ subroutine modify_stream(domain, instance, series, valid_input, err)!{{{
     call mpas_stream_mgr_add_field(domain % streamManager, &
       output_stream_name, field_name, ierr=err)
 
-print *, 'trim(instance)',trim(instance)
-    !if (trim(instance).eq.trim(config_AM_timeSeriesStats_simple_CF_time_bnds)) then
-
-      !! CF compliant time, which is the mid-time of the time average period
-      !field_name = 'time'
-      !call copy_field0DReal(domain % blocklist % allFields, amPool, amPool, &
-      !  field_source, field_name, series % buffers(b) % CFtime_mid)
-      !call mpas_stream_mgr_add_field(domain % streamManager, &
-      !  output_stream_name, field_name, ierr=err)
-  
-      !! CF compliant time_bnds
-      !field_name = 'time_bnds'
-      !call copy_field1DReal(domain % blocklist % allFields, amPool, amPool, &
-      !  field_source, field_name, series % buffers(b) % CFtime_bnds)
-      !call mpas_stream_mgr_add_field(domain % streamManager, &
-      !  output_stream_name, field_name, ierr=err)
-
-     !end if
-print *, 'b, associated(series % buffers(b) % CFtime_bnds)',b, associated(series % buffers(b) % CFtime_bnds)
-print *, 'b, associated(series % buffers(b) % CFtime_mid)',b, associated(series % buffers(b) % CFtime_mid)
   end do
 
   ! set up the variables
