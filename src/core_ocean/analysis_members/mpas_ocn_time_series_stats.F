@@ -69,8 +69,7 @@ module ocn_time_series_stats
     character (len=StrKIND), pointer :: xtime_start
     character (len=StrKIND), pointer :: xtime_end
     real (kind=RKIND), dimension(:), pointer :: CFtime_bnds
-    !real (kind=RKIND), pointer :: CFtime_mid
-    !real (kind=RKIND), pointer :: CFtime_end
+    real (kind=RKIND), pointer :: CFtime_mid
   end type time_series_buffer_type
 
   type time_series_type
@@ -104,8 +103,6 @@ module ocn_time_series_stats
 
   character (len=11), parameter :: TIME_START_PREFIX = 'xtime_start'
   character (len=9), parameter :: TIME_END_PREFIX = 'xtime_end'
-  character (len=9), parameter :: TIME_BNDS_PREFIX = 'time_bnds'
-  character (len=4), parameter :: TIME_PREFIX = 'time'
 
   character (len=StrKIND), parameter :: TIME_SERIES_STATS_POOL = &
     'timeSeriesStatsAM'
@@ -269,6 +266,7 @@ subroutine ocn_init_time_series_stats(domain, instance, err)!{{{
       series % buffers(b) % xtime_start = start_xtime
       series % buffers(b) % CFtime_bnds(1)= 123.456_RKIND ! mrp dummy for now
       series % buffers(b) % CFtime_bnds(2)= 222.456_RKIND ! mrp dummy for now
+      series % buffers(b) % CFtime_mid = 333.456_RKIND ! mrp dummy for now
     end if
   end do
 
@@ -338,9 +336,8 @@ subroutine ocn_compute_time_series_stats(domain, timeLevel, instance, err)!{{{
         series % buffers(b) % xtime_end = end_xtime
         series % buffers(b) % counter = series % buffers(b) % counter + 1
         series % buffers(b) % CFtime_bnds(2)= 222.456_RKIND ! mrp dummy for now
-        !series % buffers(b) % CFtime_end = 456.456_RKIND ! mrp dummy for now
-        !series % buffers(b) % CFtime_mid = 0.5_RKIND*( &
-        !   series % buffers(b) % CFtime_end - series % buffers(b) % CFtime_start)
+        series % buffers(b) % CFtime_mid = 0.5_RKIND*( &
+           series % buffers(b) % CFtime_bnds(2) - series % buffers(b) % CFtime_bnds(1))
       end if
     end if
   end do
@@ -576,6 +573,39 @@ subroutine add_new_real(all_fields, inpool, outpool, field_name, target_ptr)
   end if
 end subroutine add_new_real
 
+
+!***********************************************************************
+! routine copy_field0DReal
+!
+!> \brief   copy an field from an existing field and return a pointer to it.
+!> \author  Mark Petersen
+!> \date    September 2020
+!> \details
+!> copy an field from an existing field and return a pointer to it.
+!-----------------------------------------------------------------------
+subroutine copy_field0DReal(all_fields, inpool, outpool, field_source, field_name, target_ptr)
+  ! input variables
+  character (len=StrKIND), intent(in) :: field_name
+  character (len=StrKIND), intent(in) :: field_source
+
+  ! input/output variables
+  type (mpas_pool_type), pointer, intent(inout) :: all_fields, inpool, outpool
+
+  ! output variables
+  real (kind=RKIND), pointer, optional, intent(out) :: target_ptr
+
+  ! local variables
+  type (field0DReal), pointer :: srcReal, dstReal
+
+  call mpas_pool_get_field(inpool, field_source, srcReal, 1)
+  call mpas_duplicate_field(srcReal, dstReal)
+  dstReal % fieldName = field_name
+  call mpas_pool_add_field(outpool, dstReal % fieldName, dstReal)
+  call mpas_pool_add_field(all_fields, dstReal % fieldName, dstReal)
+  if (present(target_ptr)) then
+    call mpas_pool_get_array(outpool, dstReal % fieldName, target_ptr, 1)
+  end if
+end subroutine copy_field0DReal
 
 !***********************************************************************
 ! routine copy_field1DReal
@@ -837,12 +867,20 @@ subroutine get_state(domain, instance, series)
     call mpas_pool_get_array(amPool, &
       field_name, series % buffers(b) % xtime_end, 1)
 
+    ! CF compliant time, which is the mid-time of the time average period
+    if (series % number_of_buffers > 1) then
+      field_name = 'time' // trim(instance) // '_' // buf_identifier
+    else
+      field_name = 'time' // trim(instance)
+    end if
+    call mpas_pool_get_array(amPool, &
+      field_name, series % buffers(b) % CFtime_mid, 1)
+
     ! CF compliant time_bnds
     if (series % number_of_buffers > 1) then
-      field_name = trim(TIME_BNDS_PREFIX) // trim(instance) // &
-        '_' // buf_identifier
+      field_name = 'time_bnds' // trim(instance) // '_' // buf_identifier
     else
-      field_name = trim(TIME_BNDS_PREFIX) // trim(instance)
+      field_name = 'time_bnds' // trim(instance)
     end if
     call mpas_pool_get_array(amPool, &
       field_name, series % buffers(b) % CFtime_bnds, 1)
@@ -1216,6 +1254,19 @@ subroutine modify_stream(domain, instance, series, valid_input, err)!{{{
         restart_stream_name, field_name, ierr=err)
     end if
 
+    ! CF compliant time, which is the mid-time of the time average period
+    if (series % number_of_buffers > 1) then
+      field_name = trim(TIME_PREFIX) // trim(instance) // &
+        '_' // buf_identifier
+    else
+      field_name = trim(TIME_PREFIX) // trim(instance)
+    end if
+    field_source = 'time'
+    call copy_field0DReal(domain % blocklist % allFields, amPool, amPool, &
+      field_source, field_name, series % buffers(b) % CFtime_mid)
+    call mpas_stream_mgr_add_field(domain % streamManager, &
+      output_stream_name, field_name, ierr=err)
+
     ! CF compliant time_bnds
     if (series % number_of_buffers > 1) then
       field_name = trim(TIME_BNDS_PREFIX) // trim(instance) // &
@@ -1229,6 +1280,8 @@ subroutine modify_stream(domain, instance, series, valid_input, err)!{{{
     call mpas_stream_mgr_add_field(domain % streamManager, &
       output_stream_name, field_name, ierr=err)
 
+print *, 'b, associated(series % buffers(b) % CFtime_bnds)',b, associated(series % buffers(b) % CFtime_bnds)
+print *, 'b, associated(series % buffers(b) % CFtime_mid)',b, associated(series % buffers(b) % CFtime_mid)
   end do
 
   ! set up the variables
