@@ -112,6 +112,7 @@ module ocn_time_series_stats
     'timeSeriesStatsOneInteger'
   character (len=StrKIND), parameter :: ONE_REAL_MEMORY = &
     'timeSeriesStatsOneReal'
+
   character (len=StrKIND), parameter :: CONFIG_PREFIX = &
     'config_AM_timeSeriesStats'
   character (len=StrKIND), parameter :: FRAMEWORK_PREFIX = 'time'
@@ -169,6 +170,7 @@ module ocn_time_series_stats
 
   type (MPAS_Time_type) :: CF_reference_time
   real (kind=RKIND), parameter :: seconds_to_days = 1.0_RKIND/86400.0_RKIND
+  ! mrp These variables may be used for time computations.
   !integer :: CF_YYYY, CF_MM, CF_DD, CF_H, CF_M, CF_S, CF_Sn, CF_Sd
 
 !***********************************************************************
@@ -279,6 +281,7 @@ subroutine ocn_init_time_series_stats(domain, instance, err)!{{{
       series % buffers(b) % xtime_start = start_xtime
       series % buffers(b) % CFtime_bnds(1) = CFtime_start_days
 
+      ! For different time units, we need to compute them ourselves, as follows.
       !series % buffers(b) % CFtime_bnds(1) = YYYY - CF_YYYY + (MM - CF_MM)/12.0_RKIND &
       !   + (DD-CF_DD + (H-CF_H + (M-CF_M + (S-CF_S)/60.0_RKIND)/60.0_RKIND)/24.0_RKIND)/365.0_RKIND
     end if
@@ -321,9 +324,10 @@ subroutine ocn_compute_time_series_stats(domain, timeLevel, instance, err)!{{{
   type (MPAS_Time_type) :: start_intv, end_intv
   character (len=StrKIND) :: start_xtime, end_xtime
   logical :: unset_xtime
-  !integer :: YYYY, MM, DD, H, M, S, Sn, Sd
   type (mpas_timeinterval_type) :: CF_interval_start, CF_interval_end
   real (kind=RKIND) :: CFtime_start_sec, CFtime_end_sec, CFtime_start_days, CFtime_end_days
+  ! mrp These variables may be used for time computations.
+  !integer :: YYYY, MM, DD, H, M, S, Sn, Sd
 
   ! start procedure
   err = 0
@@ -564,6 +568,7 @@ subroutine add_new_integer(all_fields, inpool, outpool, field_name, target_ptr)
 end subroutine add_new_integer
 
 
+
 !***********************************************************************
 ! routine add_new_real
 !
@@ -629,6 +634,7 @@ subroutine copy_field0DReal(all_fields, inpool, outpool, field_source, field_nam
     call mpas_pool_get_array(outpool, dstReal % fieldName, target_ptr, 1)
   end if
 end subroutine copy_field0DReal
+
 
 !***********************************************************************
 ! routine copy_field1DReal
@@ -791,7 +797,6 @@ subroutine get_state(domain, instance, series)
   !
   ! get the instance values for variables
   !
-
 
   do v = 1, series % number_of_variables
     ! identifier
