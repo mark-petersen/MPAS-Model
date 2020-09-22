@@ -1676,6 +1676,7 @@ module mpas_io_streams
       integer :: dimTemp
       character (len=StrKIND), dimension(5) :: dimNamesLocal
       character (len=StrKIND), dimension(:), pointer :: dimNamesInq
+      character (len=StrKIND) :: fieldNameLocal
       integer, dimension(:), pointer :: dimSizesInq
       type (field_list_type), pointer :: field_list_cursor
       type (field_list_type), pointer :: new_field_list_node
@@ -1753,7 +1754,15 @@ module mpas_io_streams
          !
 !call mpas_log_write('... defining var to low-level interface with ndims $i', intArgs=(/ndims/))
 
-         call MPAS_io_def_var(stream % fileHandle, trim(fieldName), fieldType, dimNamesLocal(1:ndims), precision=precision, ierr=io_err)
+         fieldNameLocal = fieldName
+         if (stream % CF_compliant) then
+            if (fieldName(1:9)=='time_bnds') then
+               fieldNameLocal = 'time_bnds'
+            else if (fieldName(1:4)=='time') then
+               fieldNameLocal = 'time'
+            end if
+         end if
+         call MPAS_io_def_var(stream % fileHandle, trim(fieldNameLocal), fieldType, dimNamesLocal(1:ndims), precision=precision, ierr=io_err)
          call MPAS_io_err_mesg(io_err, .false.)
          if (io_err /= MPAS_IO_NOERR) then
             if (present(ierr)) ierr = MPAS_IO_ERR
@@ -3282,6 +3291,7 @@ module mpas_io_streams
       real (kind=RKIND), dimension(:,:,:),     pointer :: real3d_temp
       real (kind=RKIND), dimension(:,:,:,:),   pointer :: real4d_temp
       real (kind=RKIND), dimension(:,:,:,:,:), pointer :: real5d_temp
+      character (len=StrKIND) :: fieldNameLocal
 
       if (present(ierr)) ierr = MPAS_STREAM_NOERR
 
@@ -3546,7 +3556,12 @@ module mpas_io_streams
             real0d_temp = field_cursor % real0dField % scalar
 
 !call mpas_log_write('MGD calling MPAS_io_put_var now...')
-            call MPAS_io_put_var(stream % fileHandle, field_cursor % real0dField % fieldName, real0d_temp, io_err)
+         if (field_cursor % real0dField % fieldName(1:13)=='CF_CHANGEtime') then
+             fieldNameLocal = 'time'
+         else
+             fieldNameLocal = field_cursor % real0dField % fieldName
+         end if
+            call MPAS_io_put_var(stream % fileHandle, fieldNameLocal, real0d_temp, io_err)
             call MPAS_io_err_mesg(io_err, .false.)
             if (io_err /= MPAS_IO_NOERR .and. present(ierr)) ierr = MPAS_IO_ERR
 
@@ -3602,7 +3617,12 @@ module mpas_io_streams
                if (field_cursor % real1dField % isVarArray) then
                   call MPAS_io_put_var(stream % fileHandle, field_cursor % real1dField % constituentNames(j), real0d_temp, io_err)
                else
-                  call MPAS_io_put_var(stream % fileHandle, field_cursor % real1dField % fieldName, real1d_temp, io_err)
+                  if (field_cursor % real1dField % fieldName(1:18)=='CF_CHANGEtime_bnds') then
+                     fieldNameLocal = 'time_bnds'
+                  else
+                     fieldNameLocal = field_cursor % real1dField % fieldName
+                  end if
+                  call MPAS_io_put_var(stream % fileHandle, fieldNameLocal, real1d_temp, io_err)
                end if
                call MPAS_io_err_mesg(io_err, .false.)
                if (io_err /= MPAS_IO_NOERR .and. present(ierr)) ierr = MPAS_IO_ERR

@@ -40,10 +40,5 @@
         type (MPAS_stream_list_type), pointer :: xref => null()
         type (MPAS_stream_list_type), pointer :: next => null()
 
-        ! Used by CF compliant time
-        logical :: writeCFCompliantTime
-        real (kind=RKIND) :: CFtime
-        real (kind=RKIND), dimension(2) :: CFtime_bnds
-
     end type MPAS_stream_list_type
 
