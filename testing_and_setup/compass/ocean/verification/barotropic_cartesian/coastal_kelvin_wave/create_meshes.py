@@ -7,18 +7,27 @@ import shutil
 import glob
 import subprocess
 import numpy as np
+import math
 
-nCellsXMin = 10
-nCellsXMax = 300
-d_nCellsX = 10
-nCases = int((nCellsXMax - nCellsXMin)/d_nCellsX) + 1
-nCellsX = np.linspace(nCellsXMin,nCellsXMax,nCases,dtype=int)
+# replace with flags later
+nCellsXMin = 16
+nCellsXMax = 64
+nCellsFactor = 2
+domainWidthX = 100.0*50000.0
 
-lX = 100.0*50000.0
+nCases = int(round(math.log(nCellsXMax,nCellsFactor) - math.log(nCellsXMin,nCellsFactor) + 1))
+nCellsX = np.zeros(nCases,dtype=np.int8)
 
-for iCase in range(0,nCases):
-    dcEdge = lX/float(nCellsX[iCase])
-    os.system("./planar_hex.py --nx %d --ny %d --npx --dc %f -o base_mesh_%d.nc" 
+nCellsX[0] = nCellsXMin
+nCellsFloat = nCellsXMin
+for iCase in range(nCases-1):
+    nCellsFloat = nCellsFloat * nCellsFactor
+    # ensure nCellsX is an even integer
+    nCellsX[iCase+1] = int(nCellsFloat/2+0.01)*2
+
+for iCase in range(nCases):
+    dcEdge = domainWidthX/float(nCellsX[iCase])
+    os.system("planar_hex.py --nx %d --ny %d --npx --dc %f -o base_mesh_%d.nc" 
               %(nCellsX[iCase],nCellsX[iCase],dcEdge,nCellsX[iCase]))
     os.system("MpasCellCuller.x base_mesh_%d.nc culled_mesh_%d.nc" 
               %(nCellsX[iCase],nCellsX[iCase]))
