@@ -1,5 +1,8 @@
 <?xml version="1.0"?>
 <config case="convergence_test">
+
+    <add_link source_path="script_test_dir" source="create_meshes.py" dest="create_meshes.py"/>
+    <add_link source_path="script_test_dir" source="add_initial_state.py" dest="add_initial_state.py"/>
     <add_link source_path="script_test_dir" source="convergence_test.py" dest="convergence_test.py"/>
 
 	<namelist name="namelist.ocean" mode="forward">
@@ -11,6 +14,12 @@
 		<template file="template_forward.xml" path_base="script_configuration_dir"/>
 		<template file="template_forward.xml" path_base="script_test_dir"/>
 	</streams>
+
+	<run_script name="run.py">
+		<step executable="create_meshes.py">
+			<argument flag="--temp">10</argument>
+		</step>
+	</run_script>
 
 	<run_script name="run.py">
 		<step executable="convergence_test.py">
