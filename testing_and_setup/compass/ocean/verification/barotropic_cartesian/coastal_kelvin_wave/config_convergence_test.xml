@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <config case="convergence_test">
 
-    <add_link source_path="script_test_dir" source="create_meshes.py" dest="create_meshes.py"/>
     <add_link source_path="script_test_dir" source="add_initial_state.py" dest="add_initial_state.py"/>
     <add_link source_path="script_test_dir" source="convergence_test.py" dest="convergence_test.py"/>
 
