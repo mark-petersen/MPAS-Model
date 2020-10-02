@@ -28,13 +28,18 @@ module ocn_vel_tidal_potential
    use mpas_timekeeping
    use mpas_timer
    use ocn_constants
+<<<<<<< HEAD
    use ocn_config
    use ocn_mesh
    use ocn_diagnostics_variables
 
+=======
+   
+>>>>>>> Add shtns submodule
    implicit none
    private
    save
+
 
    !--------------------------------------------------------------------
    !
@@ -283,6 +288,7 @@ contains
       !-----------------------------------------------------------------
 
       type (domain_type), intent(inout) :: domain
+<<<<<<< HEAD
 
       !-----------------------------------------------------------------
       ! output variables
@@ -304,6 +310,24 @@ contains
          lat                ! latitude temporary
 
       ! pointers for pool variables
+=======
+      integer, intent(out) :: err !< Output: error flag
+    
+      logical, pointer :: config_use_tidal_potential_forcing
+      logical, pointer :: config_use_tidal_potential_forcing_M2
+      logical, pointer :: config_use_tidal_potential_forcing_S2
+      logical, pointer :: config_use_tidal_potential_forcing_N2
+      logical, pointer :: config_use_tidal_potential_forcing_K2
+      logical, pointer :: config_use_tidal_potential_forcing_K1
+      logical, pointer :: config_use_tidal_potential_forcing_O1
+      logical, pointer :: config_use_tidal_potential_forcing_Q1
+      logical, pointer :: config_use_tidal_potential_forcing_P1
+      character (len=StrKIND), pointer :: config_tidal_potential_reference_time 
+
+      logical, pointer :: config_use_self_attraction_loading
+      real (kind=RKIND), pointer :: config_self_attraction_and_loading_beta
+
+>>>>>>> Add shtns submodule
       type (block_type), pointer :: block_ptr 
       type (mpas_pool_type), pointer :: forcingPool
       type (mpas_pool_type), pointer :: meshPool
@@ -321,7 +345,47 @@ contains
  
       !*** If tidal potential turned on, set all relevant variables
 
+<<<<<<< HEAD
       if (config_use_tidal_potential_forcing) then
+=======
+      call mpas_pool_get_config(ocnConfigs, 'config_use_tidal_potential_forcing', config_use_tidal_potential_forcing)
+      call mpas_pool_get_config(ocnConfigs, 'config_use_tidal_potential_forcing_M2', config_use_tidal_potential_forcing_M2)
+      call mpas_pool_get_config(ocnConfigs, 'config_use_tidal_potential_forcing_S2', config_use_tidal_potential_forcing_S2)
+      call mpas_pool_get_config(ocnConfigs, 'config_use_tidal_potential_forcing_N2', config_use_tidal_potential_forcing_N2)
+      call mpas_pool_get_config(ocnConfigs, 'config_use_tidal_potential_forcing_K2', config_use_tidal_potential_forcing_K2)
+      call mpas_pool_get_config(ocnConfigs, 'config_use_tidal_potential_forcing_K1', config_use_tidal_potential_forcing_K1)
+      call mpas_pool_get_config(ocnConfigs, 'config_use_tidal_potential_forcing_O1', config_use_tidal_potential_forcing_O1)
+      call mpas_pool_get_config(ocnConfigs, 'config_use_tidal_potential_forcing_Q1', config_use_tidal_potential_forcing_Q1)
+      call mpas_pool_get_config(ocnConfigs, 'config_use_tidal_potential_forcing_P1', config_use_tidal_potential_forcing_P1)
+      call mpas_pool_get_config(ocnConfigs, 'config_tidal_potential_reference_time', config_tidal_potential_reference_time)
+
+      call mpas_pool_get_config(ocnConfigs, 'config_use_self_attraction_loading', config_use_self_attraction_loading)
+      call mpas_pool_get_config(ocnConfigs, 'config_self_attraction_and_loading_beta', config_self_attraction_and_loading_beta)
+
+      block_ptr => domain % blocklist
+      do while(associated(block_ptr))
+        call mpas_pool_get_subpool(block_ptr % structs, 'forcing', forcingPool)
+        call mpas_pool_get_subpool(block_ptr % structs, 'mesh', meshPool)
+        call mpas_pool_get_dimension(meshPool, 'nCells', nCells)
+        call mpas_pool_get_array(forcingPool, 'tidalPotentialEta', eta)
+
+        do iCell = 1,nCells
+          eta(iCell) = 0.0_RKIND
+        end do
+
+        block_ptr => block_ptr % next
+      end do      
+
+      tidalPotentialOn = .false.
+      if (config_use_tidal_potential_forcing) then
+        tidalPotentialOn = .true.
+      else
+        return
+      end if
+      if (config_use_self_attraction_loading) then
+          config_self_attraction_and_loading_beta = 0.0
+      endif
+>>>>>>> Add shtns submodule
 
          tidalPotentialOff = .false.
 

@@ -104,6 +104,8 @@ module ocn_time_integration_rk4
       type (mpas_pool_type), pointer :: scratchPool
       type (mpas_pool_type), pointer :: swForcingPool
 
+      type (dm_info) :: dminfo
+
       integer :: rk_step
 
       type (mpas_pool_type), pointer :: nextProvisPool, prevProvisPool
@@ -371,9 +373,9 @@ module ocn_time_integration_rk4
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       do rk_step = 1, 4
 
-        if (config_disable_thick_all_tend .and. config_disable_vel_all_tend .and. config_disable_tr_all_tend) then
-          exit ! don't compute in loop meant to update velocity, thickness, and tracers
-        end if
+!        if (config_disable_thick_all_tend .and. config_disable_vel_all_tend .and. config_disable_tr_all_tend) then
+!          exit ! don't compute in loop meant to update velocity, thickness, and tracers
+!        end if
 
         ! Update halos for diagnostic variables.
         if (config_use_cvmix_kpp) then
@@ -477,7 +479,7 @@ module ocn_time_integration_rk4
 
         block => domain % blocklist
         do while (associated(block))
-           call ocn_time_integrator_rk4_compute_vel_tends( block, dt, rk_substep_weights(rk_step), err )
+           call ocn_time_integrator_rk4_compute_vel_tends( block, dt, rk_substep_weights(rk_step), domain % dminfo, err )
 
            call ocn_time_integrator_rk4_compute_thick_tends( block, dt, rk_substep_weights(rk_step), err )
            block => block % next
@@ -760,12 +762,13 @@ module ocn_time_integration_rk4
    end subroutine ocn_time_integrator_rk4!}}}
 
    subroutine ocn_time_integrator_rk4_compute_vel_tends(block, dt, &
-     rkSubstepWeight, err)!{{{
+     rkSubstepWeight, dminfo, err)!{{{
 
       type (block_type), intent(in) :: block
       real (kind=RKIND), intent(in) :: dt
       real (kind=RKIND), intent(in) :: rkSubstepWeight
       integer, intent(out) :: err
+      type (dm_info), intent(in) :: dminfo
 
       type (mpas_pool_type), pointer :: meshPool, verticalMeshPool
       type (mpas_pool_type), pointer :: statePool, forcingPool
@@ -811,8 +814,14 @@ module ocn_time_integration_rk4
             sshCur, rkSubstepWeight, &
             vertAleTransportTop, err)
       endif
+<<<<<<< HEAD
 
       call ocn_tend_vel(tendPool, provisStatePool, forcingPool, 1, dt)
+=======
+     
+      call ocn_tend_vel(tendPool, provisStatePool, forcingPool, diagnosticsPool, meshPool, &
+            scratchPool, 1, dminfo, dt)
+>>>>>>> Add shtns submodule
 
    end subroutine ocn_time_integrator_rk4_compute_vel_tends!}}}
 
@@ -933,12 +942,13 @@ module ocn_time_integration_rk4
 
    end subroutine ocn_time_integrator_rk4_compute_tracer_tends!}}}
 
-   subroutine ocn_time_integrator_rk4_compute_tends(block, dt, rkWeight, err)!{{{
+   subroutine ocn_time_integrator_rk4_compute_tends(block, dt, rkWeight, dminfo, err)!{{{
       type (block_type), intent(in) :: block
       real (kind=RKIND), intent(in) :: dt
       real (kind=RKIND), intent(in) :: rkWeight
       integer, intent(out) :: err
 
+      type (dm_info), intent(in) :: dminfo
       type (mpas_pool_type), pointer :: meshPool, verticalMeshPool
       type (mpas_pool_type), pointer :: statePool, forcingPool
       type (mpas_pool_type), pointer :: scratchPool, tendPool, provisStatePool
@@ -984,8 +994,15 @@ module ocn_time_integration_rk4
             sshCur, rkWeight, &
             vertAleTransportTop, err)
       endif
+<<<<<<< HEAD
 
       call ocn_tend_vel(tendPool, provisStatePool, forcingPool, 1, dt)
+=======
+      
+      call ocn_tend_vel(tendPool, provisStatePool, forcingPool, diagnosticsPool, meshPool, &
+            scratchPool, 1, dminfo, dt)
+      call mpas_threading_barrier()
+>>>>>>> Add shtns submodule
 
       if (associated(highFreqThicknessProvis)) then
          call ocn_vert_transport_velocity_top(meshPool, verticalMeshPool, scratchPool, &

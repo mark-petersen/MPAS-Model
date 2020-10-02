@@ -6,12 +6,17 @@ $(info "EXCLUDE_INIT_MODE found")
 endif
 
 OCEAN_SHARED_INCLUDES = -I$(PWD)/../framework -I$(PWD)/../external/esmf_time_f90 -I$(PWD)/../operators
+<<<<<<< HEAD
 OCEAN_SHARED_INCLUDES += -I$(PWD)/BGC -I$(PWD)/shared -I$(PWD)/analysis_members -I$(PWD)/cvmix/src/shared -I$(PWD)/mode_forward -I$(PWD)/mode_analysis
 ifneq "$(EXCLUDE_INIT_MODE)" "true"
 	OCEAN_SHARED_INCLUDES += -I$(PWD)/mode_init
 endif
+=======
+OCEAN_SHARED_INCLUDES += -I$(PWD)/BGC -I$(PWD)/shared -I$(PWD)/analysis_members -I$(PWD)/cvmix/src/shared -I$(PWD)/mode_forward -I$(PWD)/mode_analysis -I$(PWD)/mode_init -I$(PWD)/shtns/
+SHTNS_DIR = $(PWD)/shtns
+>>>>>>> Add shtns submodule
 
-all: shared libcvmix analysis_members libBGC
+all: libfftw libshtns shared libcvmix analysis_members libBGC
 	(cd mode_forward; $(MAKE) FCINCLUDES="$(FCINCLUDES) $(OCEAN_SHARED_INCLUDES)" all )
 	(cd mode_analysis; $(MAKE) FCINCLUDES="$(FCINCLUDES) $(OCEAN_SHARED_INCLUDES)" all )
 ifneq "$(EXCLUDE_INIT_MODE)" "true"
@@ -72,10 +77,16 @@ libBGC:
 		(echo "Missing core_ocean/BGC/.git, did you forget to 'git submodule update --init --recursive' ?"; exit 1) \
 	fi
 
-shared: libcvmix libBGC
+libshtns: libfftw
+	(cd shtns; export CPP=cpp; ./configure --prefix=$(SHTNS_DIR); make; make install; export CPP='cpp -P -traditional';)
+
+libfftw:
+	(cd fftw; export CPP=cpp; ./configure --prefix=$(SHTNS_DIR); make; make install; export CPP='cpp -P -traditional';)
+
+shared: libcvmix libBGC libshtns libfftw
 	(cd shared; $(MAKE) FCINCLUDES="$(FCINCLUDES) $(OCEAN_SHARED_INCLUDES)")
 
-analysis_members: libcvmix shared
+analysis_members: libcvmix shared 
 	( cd analysis_members; $(MAKE) FCINCLUDES="$(FCINCLUDES) $(OCEAN_SHARED_INCLUDES)" CPPFLAGS="$(CPPFLAGS)" CPPINCLUDES="$(CPPINCLUDES)" all ) 
 
 clean:
@@ -94,5 +105,7 @@ clean:
 	(cd driver; $(MAKE) clean)
 	(cd analysis_members; $(MAKE) clean)
 	(cd shared; $(MAKE) clean)
+	(cd shtns; $(MAKE) clean)
+	(cd fftw; $(MAKE) clean)
 	($(RM) *.mod libdycore.a Registry_processed.xml)
 	$(RM) -r default_inputs
