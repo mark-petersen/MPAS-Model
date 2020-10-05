@@ -7,7 +7,6 @@ see:
 Demange, J., Debreu, L., Marchesiello, P., Lemarié, F., Blayo, E., Eldred, C., 2019. Stability analysis of split-explicit free surface ocean models: Implication of the depth-independent barotropic mode approximation. Journal of Computational Physics 398, 108875. https://doi.org/10.1016/j.jcp.2019.108875
 Marsaleix, P., Auclair, F., Floor, J.W., Herrmann, M.J., Estournel, C., Pairaud, I., Ulses, C., 2008. Energy conservation issues in sigma-coordinate free-surface ocean models. Ocean Modelling 20, 61–89. https://doi.org/10.1016/j.ocemod.2007.07.005
 '''
-# import packages {{{
 import os
 import shutil
 import numpy as np
@@ -15,10 +14,9 @@ import netCDF4 as nc
 from netCDF4 import Dataset
 import argparse
 import math
-# }}}
 
 
-def main(): # {{{ 
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input_file', dest='input_file',
                         default='base_mesh.nc',
@@ -46,12 +44,10 @@ def main(): # {{{
     others_init(ds)
 
     ds.close()
-# }}}
 
 
 def vertical_init(ds, nVertLevels):
     maxDepth = 5000.0 
-    # {{{
 
     # create new variables
     ds.createDimension('nVertLevels', nVertLevels)
@@ -126,14 +122,11 @@ def vertical_init(ds, nVertLevels):
     restingThickness[:, :] = layerThickness[0, :, :]
     bottomDepthObserved[:] = bottomDepth[:]
 
-# }}}
-
 
 def tracer_init(ds, thicknessAllLayers):
     rho0 = 1000.0 # kg/m^3
     rhoz = -2.0e-4 # kg/m^3/m in z 
     S0 = 35.0
-# {{{
     h = thicknessAllLayers
     # create new variables
     temperature = ds.createVariable(
@@ -162,29 +155,23 @@ def tracer_init(ds, thicknessAllLayers):
 
             salinity[0, iCell, k] = S0
             temperature[0,iCell,k] = Tx*(x + x0) + Ty + Tz*z
-# }}}
 
 def velocity_init(ds):
-    # {{{
     normalVelocity = ds.createVariable(
         'normalVelocity', np.float64, ('Time', 'nEdges', 'nVertLevels',))
     normalVelocity[:] = 0.0
-# }}}
 
 
 def coriolis_init(ds):
-    # {{{
     fEdge = ds.createVariable('fEdge', np.float64, ('nEdges',))
     fEdge[:] = 0.0
     fVertex = ds.createVariable('fVertex', np.float64, ('nVertices',))
     fVertex[:] = 0.0
     fCell = ds.createVariable('fCell', np.float64, ('nCells',))
     fCell[:] = 0.0
-# }}}
 
 
 def others_init(ds):
-    # {{{
     surfaceStress = ds.createVariable(
         'surfaceStress', np.float64, ('Time', 'nEdges',))
     surfaceStress[:] = 0.0
@@ -194,7 +181,6 @@ def others_init(ds):
     boundaryLayerDepth = ds.createVariable(
         'boundaryLayerDepth', np.float64, ('Time', 'nCells',))
     boundaryLayerDepth[:] = 0.0
-# }}}
 
 
 if __name__ == '__main__':
