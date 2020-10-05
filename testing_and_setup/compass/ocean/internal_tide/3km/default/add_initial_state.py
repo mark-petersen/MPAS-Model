@@ -37,16 +37,7 @@ def main():
     shutil.copy2(input_file, output_file)
     ds = Dataset(output_file, 'a', format='NETCDF3_64BIT_OFFSET')
 
-    vertical_init(ds, nVertLevels)
-    tracer_init(ds)
-    velocity_init(ds)
-    coriolis_init(ds)
-    others_init(ds)
 
-    ds.close()
-
-
-def vertical_init(ds, nVertLevels):
     maxDepth = 5000.0 
 
     # create new variables
@@ -108,10 +99,14 @@ def vertical_init(ds, nVertLevels):
         bottomDepth[iCell] = 5000.0 - 1000.0*math.exp( -(( x - xMid)/15e3)**2 )
         # SSH varies from 0 to 1m across the domain
         ssh[iCell] = xCell[iCell]/4800e3
-        for k in range(nVertLevels,0,-1):
+        #print('iCell',iCell)
+        for k in range(nVertLevels-1,0,-1):
+            # kF is the Fortran index, starts at 1.
+            kF = k+1
+            #print('k',k,'kF',kF)
             if bottomDepth[iCell] > refBottomDepth[k-1]:
                 # Convert python zero-based to Fortran by adding 1
-                maxLevelCell[iCell] = k+1
+                maxLevelCell[iCell] = kF
                 layerThickness[0, iCell, k] = bottomDepth[iCell] - refBottomDepth[k-1]
                 break
             else:
@@ -123,29 +118,15 @@ def vertical_init(ds, nVertLevels):
     bottomDepthObserved[:] = bottomDepth[:]
 
 
-def tracer_init(ds, thicknessAllLayers):
+# initialize tracers
     rho0 = 1000.0 # kg/m^3
     rhoz = -2.0e-4 # kg/m^3/m in z 
     S0 = 35.0
-    h = thicknessAllLayers
     # create new variables
     temperature = ds.createVariable(
         'temperature', np.float64, ('Time', 'nCells', 'nVertLevels',))
     salinity = ds.createVariable(
         'salinity', np.float64, ('Time', 'nCells', 'nVertLevels',))
-    layerThickness = ds.variables['layerThickness']
-
-    # obtain dimensions and mesh variables # {{{
-    nVertLevels = len(ds.dimensions['nVertLevels'])
-    nCells = len(ds.dimensions['nCells'])
-    xCell = ds.variables['xCell']
-    yCell = ds.variables['yCell']
-    # For periodic domains, the max cell coordinate is also the domain width
-    Lx = max(xCell)
-    Ly = max(yCell)
-    refZMid = ds.variables['refZMid']
-    refBottomDepth = ds.variables['refBottomDepth']
-    H = max(refBottomDepth)
 
     for iCell in range(0, nCells):
         x = xCell[iCell]
@@ -154,15 +135,14 @@ def tracer_init(ds, thicknessAllLayers):
             z = refZMid[k]
 
             salinity[0, iCell, k] = S0
-            temperature[0,iCell,k] = Tx*(x + x0) + Ty + Tz*z
+            temperature[0,iCell,k] = 20.0 # replace later
 
-def velocity_init(ds):
+# initialize tracers
     normalVelocity = ds.createVariable(
         'normalVelocity', np.float64, ('Time', 'nEdges', 'nVertLevels',))
     normalVelocity[:] = 0.0
 
-
-def coriolis_init(ds):
+# initialize coriolis terms
     fEdge = ds.createVariable('fEdge', np.float64, ('nEdges',))
     fEdge[:] = 0.0
     fVertex = ds.createVariable('fVertex', np.float64, ('nVertices',))
@@ -170,8 +150,7 @@ def coriolis_init(ds):
     fCell = ds.createVariable('fCell', np.float64, ('nCells',))
     fCell[:] = 0.0
 
-
-def others_init(ds):
+# initialize other fields
     surfaceStress = ds.createVariable(
         'surfaceStress', np.float64, ('Time', 'nEdges',))
     surfaceStress[:] = 0.0
@@ -181,6 +160,8 @@ def others_init(ds):
     boundaryLayerDepth = ds.createVariable(
         'boundaryLayerDepth', np.float64, ('Time', 'nCells',))
     boundaryLayerDepth[:] = 0.0
+
+    ds.close()
 
 
 if __name__ == '__main__':
