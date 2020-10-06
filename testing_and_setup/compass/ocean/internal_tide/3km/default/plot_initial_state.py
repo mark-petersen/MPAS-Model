@@ -36,27 +36,10 @@ except:
     print("Error: Not able to read nx, ny from netcdf history attribute")
     print("history attribute: ",history)
     exit()
-
-#comment('Reduce cartesian dimensions nx,ny if nonperiodic')
-#try:
-#    npx=False
-#    npy=False
-#    for item in history:
-#        if item=='--nonperiodic_x' or item=='--npx':
-#            npx=True
-#        if item=='--nonperiodic_y' or item=='--npy':
-#            npy=True
-#    if npx:
-#        nx-=2
-#    if npy:
-#        ny-=2
-#except:
-#    print("Error: Problem detecting nonperiodic in x and y")
-#    exit()
-
 if nx*ny != nCells:
     print("Error: nx*ny != nCells. nx=%i, ny=%i, nx*ny=%i, nCells=%i"%(nx,ny,nx*ny,nCells))
     exit()
+comment(' nCells = %i, nx = %i, ny = %i, nVertLevels = %i'%(nCells,nx,ny,nVertLevels))
 
 #comment('Read in all variables')
 ncVars = ncfile.variables
@@ -75,21 +58,51 @@ ncVars = ncfile.variables
 #        print('Adding variable %s'%(key))
 #
 #     var = np.reshape(ncfile.variables[tracer + 'Tend'][0, :, iz], [ny, nx])
-varList = ['xCell','yCell']
-xCell = np.reshape(ncfile.variables['xCell'][:], [ny, nx])
+#varList = ['xCell','yCell']
+#xCell = np.reshape(ncfile.variables['xCell'][:], [ny, nx])
 # --- Every other row in y needs to average two neighbors in x on planar hex mesh
-var_avg = var
-for iy in range(0, ny, 2):
-   for ix in range(1, nx - 2):
-       var_avg[iy, ix] = (var[iy, ix + 1] + var[iy, ix]) / 2.0
-print('xCell',xCell)
-print('np.size(xCell)',np.size(xCell))
-print('np.shape(xCell)',np.shape(xCell))
+#var_avg = var
+#for iy in range(0, ny, 2):
+#   for ix in range(1, nx - 2):
+#       var_avg[iy, ix] = (var[iy, ix + 1] + var[iy, ix]) / 2.0
+#print('xCell',xCell)
+#print('np.size(xCell)',np.size(xCell))
+#print('np.shape(xCell)',np.shape(xCell))
 #            var = np.reshape(
 #                ncfile.variables[tracer + 'Tend'][0, :, iz], [ny, nx])
 
+fig = plt.gcf()
+plt.clf()
+fig.set_size_inches(20.0, 20.0)
+iPlt=1
 
 
+
+# 1D variables, function of x
+varList = ['bottomDepth','maxLevelCell']
+for varName in varList:
+    plt.subplot(6, 3, iPlt)
+    iPlt += 1
+    plt.plot(ncVars['xCell'][:]*1e-3, ncVars[varName][:], '.')
+    plt.title(varName)
+    plt.xlabel('x location, km')
+    plt.grid()
+    plt.gca().invert_yaxis()
+
+# 2D variables, function of (x,z)
+varList = ['temperature','salinity','layerThickness']
+for varName in varList:
+    plt.subplot(6, 3, iPlt)
+    iPlt += 1
+    #plt.imshow(ncVars['xCell'][0:nx]*1e-3, ncVars[varName][0,0:nx,:])
+    plt.imshow(ncVars[varName][0,0:nx,:].transpose())
+    plt.title(varName)
+    plt.xlabel('x location, km')
+    plt.ylabel('Depth')
+    plt.grid()
+    plt.colorbar()
+    plt.gca().invert_yaxis()
+plt.savefig('variables.png')
 
 #difL2 = np.zeros([nTests, nGrids, nTracers])
 #errL2 = np.zeros([nTests, nGrids, nTracers])
