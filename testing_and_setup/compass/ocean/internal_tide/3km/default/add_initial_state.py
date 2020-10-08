@@ -151,14 +151,23 @@ def main():
     print(' time 0: %f'%((time.time()-time1)))
 
     time1 = time.time()
-    for iCell in range(0, nCells):
-        for k in range(0, maxLevelCell[iCell]):
+    salinity[:] = S0
+    print(' time 2: %f'%((time.time()-time1)))
+
+    time1 = time.time()
+    for k in range(0, nVertLevels):
+        for iCell in range(0, nCells):
             salinity[0, iCell, k] = S0
     print(' time 1: %f'%((time.time()-time1)))
 
     time1 = time.time()
-    salinity[:] = S0
-    print(' time 2: %f'%((time.time()-time1)))
+    temp = np.zeros([1,nCells,nVertLevels])
+    for k in range(0, nVertLevels):
+        for iCell in range(0, nCells):
+            temp[0, iCell, k] = S0
+    salinity = temp
+    print(' time 4: %f'%((time.time()-time1)))
+
 #test for now end
 
 
