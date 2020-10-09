@@ -37,10 +37,30 @@ def main():
 
     comment('obtain dimensions and mesh variables')
 
+# Added from slack conversation with Xylar
     import numpy as np
-    import netCDF4 as nc
-    from netCDF4 import Dataset
+    import xarray as xr
+    from mpas_tools.io import write_netcdf
+    
+    ds = xr.open_dataset('base_mesh.nc')
+    # I believe this is needed to be able to overwrite the file later
+    ds.load()
+    #maxLevelCell = ds.maxLevelCell.values - 1
+    nVertLevels = 50
+    nCells = 640
+    salinity = np.nan*np.ones((1, nCells, nVertLevels))
+    S0 = 35
+    for k in range(0, nVertLevels):
+        #mask = k >= maxLevelCell
+        #salinity[:, mask, k] = S0
+        salinity[:, :, k] = S0
+    ds['salinity'] = (('Time', 'nCells', 'nVertLevels'), salinity)
+    # If you prefer not to have NaN as the fill value, you should consider using mpas_tools.io.write_netcdf() instead
+    ds.to_netcdf('initial_state.nc', format='NETCDF3_64BIT_OFFSET')
+    write_netcdf(ds,'initial_state.nc')
     ds = Dataset(output_file, 'a', format='NETCDF3_64BIT_OFFSET')
+# END Added from slack conversation with Xylar
+
     nCells = ds.dimensions['nCells'].size 
     ds.createDimension('nVertLevels', nVertLevels)
 
