@@ -9,9 +9,6 @@ Marsaleix, P., Auclair, F., Floor, J.W., Herrmann, M.J., Estournel, C., Pairaud,
 '''
 import os
 import shutil
-import numpy as np
-import netCDF4 as nc
-from netCDF4 import Dataset
 import argparse
 import math
 import time
@@ -37,12 +34,42 @@ def main():
     input_file = parser.parse_args().input_file
     output_file = parser.parse_args().output_file
     shutil.copy2(input_file, output_file)
-    ds = Dataset(output_file, 'a', format='NETCDF3_64BIT_OFFSET')
-
-    maxDepth = 5000.0 
 
     comment('obtain dimensions and mesh variables')
+
+    import numpy as np
+    import netCDF4 as nc
+    from netCDF4 import Dataset
+    ds = Dataset(output_file, 'a', format='NETCDF3_64BIT_OFFSET')
     nCells = ds.dimensions['nCells'].size 
+    ds.createDimension('nVertLevels', nVertLevels)
+
+    S0 = 35.0
+    time1 = time.time()
+    salinity = ds.createVariable('salinity', np.float64, ('Time', 'nCells', 'nVertLevels',))
+    for k in range(0, nVertLevels):
+        for iCell in range(0, nCells):
+            salinity[0, iCell, k] = S0
+    print('method 1, assign to NetCDF4 dataset: %f'%((time.time()-time1)))
+
+    time1 = time.time()
+    temp = np.zeros([1,nCells,nVertLevels])
+    for k in range(0, nVertLevels):
+        for iCell in range(0, nCells):
+            temp[0, iCell, k] = S0
+    salinity2 = ds.createVariable('salinity2', np.float64, ('Time', 'nCells', 'nVertLevels',))
+    salinity2 = temp
+    print('method 2, assign to numpy temp:      %f'%((time.time()-time1)))
+
+    ds.close()
+    exit()
+
+
+
+
+
+
+    maxDepth = 5000.0 
     xCell = ds.variables['xCell']
     xEdge = ds.variables['xEdge']
     xVertex = ds.variables['xVertex']
@@ -59,8 +86,10 @@ def main():
     #print('xEdge',xEdge[:])
 
 
+
+
+
     comment('create new variables')
-    ds.createDimension('nVertLevels', nVertLevels)
     DSrefLayerThickness = ds.createVariable('refLayerThickness', np.float64, ('nVertLevels',))
     DSrefBottomDepth = ds.createVariable('refBottomDepth', np.float64, ('nVertLevels',))
     DSrefZMid = ds.createVariable('refZMid', np.float64, ('nVertLevels',))
