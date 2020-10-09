@@ -61,23 +61,28 @@ def main():
 
     comment('create new variables')
     ds.createDimension('nVertLevels', nVertLevels)
-    refLayerThickness = ds.createVariable(
-        'refLayerThickness', np.float64, ('nVertLevels',))
-    maxLevelCell = ds.createVariable('maxLevelCell', np.int32, ('nCells',))
-    refBottomDepth = ds.createVariable(
-        'refBottomDepth', np.float64, ('nVertLevels',))
-    refZMid = ds.createVariable('refZMid', np.float64, ('nVertLevels',))
-    bottomDepth = ds.createVariable('bottomDepth', np.float64, ('nCells',))
-    ssh = ds.createVariable('ssh', np.float64, ('nCells',))
-    bottomDepthObserved = ds.createVariable(
-        'bottomDepthObserved', np.float64, ('nCells',))
-    layerThickness = ds.createVariable('layerThickness', np.float64, ('Time', 'nCells', 'nVertLevels',))
-    zMid = ds.createVariable('zMid', np.float64, ('Time', 'nCells', 'nVertLevels',))
-    restingThickness = ds.createVariable(
-        'restingThickness', np.float64, ('nCells', 'nVertLevels',))
-    vertCoordMovementWeights = ds.createVariable(
-        'vertCoordMovementWeights', np.float64, ('nVertLevels',))
+    DSrefLayerThickness = ds.createVariable('refLayerThickness', np.float64, ('nVertLevels',))
+    DSrefBottomDepth = ds.createVariable('refBottomDepth', np.float64, ('nVertLevels',))
+    DSrefZMid = ds.createVariable('refZMid', np.float64, ('nVertLevels',))
+    DSvertCoordMovementWeights = ds.createVariable('vertCoordMovementWeights', np.float64, ('nVertLevels',))
+    DSmaxLevelCell = ds.createVariable('maxLevelCell', np.int32, ('nCells',))
+    DSbottomDepth = ds.createVariable('bottomDepth', np.float64, ('nCells',))
+    DSssh = ds.createVariable('ssh', np.float64, ('nCells',))
+    DSbottomDepthObserved = ds.createVariable('bottomDepthObserved', np.float64, ('nCells',))
+    DSlayerThickness = ds.createVariable('layerThickness', np.float64, ('Time', 'nCells', 'nVertLevels',))
+    DSzMid = ds.createVariable('zMid', np.float64, ('Time', 'nCells', 'nVertLevels',))
+    DSrestingThickness = ds.createVariable('restingThickness', np.float64, ('nCells', 'nVertLevels',))
 
+    varNames = vars()
+    type(varNames)
+    print(varNames)
+    for var in varNames:
+        if var[0:2]=='DS':
+            newVar = var[2:]
+            print(newVar)
+            print(vars()[var].shape)
+            #vars()[newVar] = np.zeros(3)
+    
     # Adjust coordinates so first edge is at zero in x and y
     xOffset = min(xEdge)
     xCell -= xOffset
@@ -112,32 +117,32 @@ def main():
         ssh[iCell] = xCell[iCell]/4800e3
         #print('iCell',iCell)
 
-        # z-star: spread layer thicknesses proportionally
-        #layerThickness[0, iCell, :] = refLayerThickness[:]*(maxDepth+ssh[iCell])/maxDepth
+#        # z-star: spread layer thicknesses proportionally
+#        #layerThickness[0, iCell, :] = refLayerThickness[:]*(maxDepth+ssh[iCell])/maxDepth
+#
+#        # z-level: ssh in top layer only
+#        layerThickness[0, iCell, :] = refLayerThickness[:]
+#        layerThickness[0, iCell, 0] += ssh[iCell]
+#
+#        for k in range(nVertLevels-1,0,-1):
+#            # kF is the Fortran index, starts at 1.
+#            kF = k+1
+#            if bottomDepth[iCell] > refBottomDepth[k-1]:
+#                maxLevelCell[iCell] = kF
+#                # Partial bottom cells
+#                layerThickness[0, iCell, k] = bottomDepth[iCell] - refBottomDepth[k-1]
+#                zMid[0, iCell, k] = -bottomDepth[iCell] + 0.5*layerThickness[0, iCell, k]
+#                break
+#            else:
+#                layerThickness[0, iCell, k] = -1.0
+#                zMid[0, iCell, k] = 0.0
+#
+#        for k in range(maxLevelCell[iCell]-2,-1,-1):
+#            zMid[0, iCell, k] = zMid[0, iCell, k+1]  \
+#               + 0.5*(layerThickness[0, iCell, k+1] + layerThickness[0, iCell, k])
 
-        # z-level: ssh in top layer only
-        layerThickness[0, iCell, :] = refLayerThickness[:]
-        layerThickness[0, iCell, 0] += ssh[iCell]
-
-        for k in range(nVertLevels-1,0,-1):
-            # kF is the Fortran index, starts at 1.
-            kF = k+1
-            if bottomDepth[iCell] > refBottomDepth[k-1]:
-                maxLevelCell[iCell] = kF
-                # Partial bottom cells
-                layerThickness[0, iCell, k] = bottomDepth[iCell] - refBottomDepth[k-1]
-                zMid[0, iCell, k] = -bottomDepth[iCell] + 0.5*layerThickness[0, iCell, k]
-                break
-            else:
-                layerThickness[0, iCell, k] = -1.0
-                zMid[0, iCell, k] = 0.0
-
-        for k in range(maxLevelCell[iCell]-2,-1,-1):
-            zMid[0, iCell, k] = zMid[0, iCell, k+1]  \
-               + 0.5*(layerThickness[0, iCell, k+1] + layerThickness[0, iCell, k])
-
-    restingThickness[:, :] = layerThickness[0, :, :]
-    bottomDepthObserved[:] = bottomDepth[:]
+#    restingThickness[:, :] = layerThickness[0, :, :]
+#    bottomDepthObserved[:] = bottomDepth[:]
 
 
     comment('initialize tracers')
@@ -147,7 +152,7 @@ def main():
 
 #test for now:
     time1 = time.time()
-    salinity = ds.createVariable('salinity', np.float64, ('Time', 'nCells', 'nVertLevels',))
+    salinity = np.zeros([1,nCells,nVertLevels])
     print(' time 0: %f'%((time.time()-time1)))
 
     time1 = time.time()
@@ -161,11 +166,11 @@ def main():
     print(' time 1: %f'%((time.time()-time1)))
 
     time1 = time.time()
-    temp = np.zeros([1,nCells,nVertLevels])
     for k in range(0, nVertLevels):
         for iCell in range(0, nCells):
-            temp[0, iCell, k] = S0
-    salinity = temp
+            salinity[0, iCell, k] = S0
+    salinityDS = ds.createVariable('salinity', np.float64, ('Time', 'nCells', 'nVertLevels',))
+    salinityDS[:] = salinity
     print(' time 4: %f'%((time.time()-time1)))
 
 #test for now end
