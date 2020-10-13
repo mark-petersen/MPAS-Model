@@ -15,7 +15,7 @@ from mpas_tools.io import write_netcdf
 import argparse
 import math
 import time
-verbose=True
+verbose = True
 
 
 def main():
@@ -41,7 +41,6 @@ def main():
     nEdges = ds['nEdges'].size
     nVertices = ds['nVertices'].size
 
-    maxDepth = 5000.0 
     xCell = ds['xCell']
     xEdge = ds['xEdge']
     xVertex = ds['xVertex']
@@ -62,22 +61,26 @@ def main():
     comment('create and initialize variables')
     time1 = time.time()
 
-    varsZ = ['refLayerThickness','refBottomDepth','refZMid','vertCoordMovementWeights']
+    varsZ = [ 'refLayerThickness', 'refBottomDepth', 'refZMid', 'vertCoordMovementWeights']
     for var in varsZ:
-        globals()[var] = np.nan*np.ones(nVertLevels)
+        globals()[var] = np.nan * np.ones(nVertLevels)
 
-    vars2D = ['ssh', 'bottomDepth','bottomDepthObserved']
+    vars2D = ['ssh', 'bottomDepth', 'bottomDepthObserved',
+        'surfaceStress', 'atmosphericPressure', 'boundaryLayerDepth']
     for var in vars2D:
-        globals()[var] = np.nan*np.ones(nCells)
+        globals()[var] = np.nan * np.ones(nCells)
     maxLevelCell = np.ones(nCells, dtype=np.int32)
 
-    vars3D = ['temperature', 'salinity','zMid', 'layerThickness', 'restingThickness', 'density',\
-               'surfaceStress', 'atmosphericPressure', 'boundaryLayerDepth']
+    vars3D = [
+        'temperature', 'salinity',
+        'layerThickness', 'restingThickness', 'zMid',
+        'density']
     for var in vars3D:
-        globals()[var] = np.nan*np.ones([1, nCells, nVertLevels])
+        globals()[var] = np.nan * np.ones([1, nCells, nVertLevels])
 
     # reference vertical grid spacing
-    refLayerThickness[:] = maxDepth/nVertLevels
+    maxDepth = 5000.0
+    refLayerThickness[:] = maxDepth / nVertLevels
     refBottomDepth[0] = refLayerThickness[0]
     refZMid[0] = -0.5 * refLayerThickness[0]
     for k in range(1, nVertLevels):
@@ -86,44 +89,45 @@ def main():
 
     # Marsaleix et al 2008 page 81
     # Gaussian function in depth for deep sea ridge
-    xMid = 0.5*(min(xCell) + max(xCell))
-    bottomDepth[:] = 5000.0 - 1000.0*np.exp( -(( xCell[:] - xMid)/150e3)**2 )
+    xMid = 0.5 * (min(xCell) + max(xCell))
+    bottomDepth[:] = 5000.0 - 1000.0 * np.exp(-((xCell[:] - xMid) / 150e3)**2)
     # SSH varies from 0 to 1m across the domain
-    ssh[:] = xCell[:]/4800e3
+    ssh[:] = xCell[:] / 4800e3
 
     # Compute maxLevelCell and layerThickness for z-level (variation only on top)
     vertCoordMovementWeights[:] = 0.0
     vertCoordMovementWeights[0] = 1.0
     for iCell in range(0, nCells):
-        for k in range(nVertLevels-1,0,-1):
-            if bottomDepth[iCell] > refBottomDepth[k-1]:
+        for k in range(nVertLevels - 1, 0, -1):
+            if bottomDepth[iCell] > refBottomDepth[k - 1]:
                 maxLevelCell[iCell] = k
                 # Partial bottom cells
-                layerThickness[0, iCell, k] = bottomDepth[iCell] - refBottomDepth[k-1]
+                layerThickness[0, iCell, k] = bottomDepth[iCell] - refBottomDepth[k - 1]
                 break
-        layerThickness[0, iCell, 0:maxLevelCell[iCell]] = refLayerThickness[0:maxLevelCell[iCell]]
+        layerThickness[0, iCell, 0:maxLevelCell[iCell] ] = refLayerThickness[0:maxLevelCell[iCell]]
         layerThickness[0, iCell, 0] += ssh[iCell]
 
     # Compute zMid (same, regardless of vertical coordinate)
     for iCell in range(0, nCells):
         k = maxLevelCell[iCell]
-        zMid[0, iCell, k] = -bottomDepth[iCell] + 0.5*layerThickness[0, iCell, k]
-        for k in range(maxLevelCell[iCell]-1,-1,-1):
-            zMid[0, iCell, k] = zMid[0, iCell, k+1]  \
-               + 0.5*(layerThickness[0, iCell, k+1] + layerThickness[0, iCell, k])
+        zMid[0, iCell, k] = -bottomDepth[iCell] + \
+            0.5 * layerThickness[0, iCell, k]
+        for k in range(maxLevelCell[iCell] - 1, -1, -1):
+            zMid[0, iCell, k] = zMid[0, iCell, k + 1] + 0.5 * \
+                (layerThickness[0, iCell, k + 1] + layerThickness[0, iCell, k])
     restingThickness[:, :] = layerThickness[0, :, :]
     restingThickness[:, 0] = refLayerThickness[0]
     bottomDepthObserved[:] = bottomDepth[:]
 
     # initialize tracers
-    rho0 = 1000.0 # kg/m^3
-    rhoz = -2.0e-4 # kg/m^3/m in z 
+    rho0 = 1000.0  # kg/m^3
+    rhoz = -2.0e-4  # kg/m^3/m in z
     S0 = 35.0
-    
+
     # linear equation of state
     # rho = rho0 - alpha*(T-Tref) + beta*(S-Sref)
     # set S=Sref
-    # T = Tref - (rho - rhoRef)/alpha 
+    # T = Tref - (rho - rhoRef)/alpha
     config_eos_linear_alpha = 0.2
     config_eos_linear_beta = 0.8
     config_eos_linear_Tref = 10.0
@@ -133,10 +137,11 @@ def main():
     for k in range(0, nVertLevels):
         activeCells = k <= maxLevelCell
         salinity[0, activeCells, k] = S0
-        density[0,activeCells,k] = rho0 + rhoz*zMid[0, activeCells, k]
-        # T = Tref - (rho - rhoRef)/alpha 
-        temperature[0,activeCells,k] = config_eos_linear_Tref \
-            - (density[0,activeCells,k] - config_eos_linear_densityref)/config_eos_linear_alpha
+        density[0, activeCells, k] = rho0 + rhoz * zMid[0, activeCells, k]
+        # T = Tref - (rho - rhoRef)/alpha
+        temperature[0, activeCells, k] = config_eos_linear_Tref \
+            - (density[0, activeCells, k] - config_eos_linear_densityref) / \
+              config_eos_linear_alpha
 
     # initial velocity on edges
     normalVelocity = (('Time', 'nEdges', 'nVertLevels',), 0.0)
@@ -150,7 +155,7 @@ def main():
     surfaceStress[:] = 0.0
     atmosphericPressure[:] = 0.0
     boundaryLayerDepth[:] = 0.0
-    print('   time: %f'%((time.time()-time1)))
+    print('   time: %f' % ((time.time() - time1)))
 
     comment('finalize and write file')
     time1 = time.time()
@@ -160,16 +165,19 @@ def main():
     for var in vars2D:
         ds[var] = (['nCells'], globals()[var])
     for var in vars3D:
-        ds[var] = (['Time','nCells','nVertLevels'], globals()[var])
-    # If you prefer not to have NaN as the fill value, you should consider using mpas_tools.io.write_netcdf() instead
+        ds[var] = (['Time', 'nCells', 'nVertLevels'], globals()[var])
+    # If you prefer not to have NaN as the fill value, you should consider
+    # using mpas_tools.io.write_netcdf() instead
     ds.to_netcdf('initial_state.nc', format='NETCDF3_64BIT_OFFSET')
-    #write_netcdf(ds,'initial_state.nc')
-    print('   time: %f'%((time.time()-time1)))
-    print('Total time: %f'%((time.time()-timeStart)))
+    # write_netcdf(ds,'initial_state.nc')
+    print('   time: %f' % ((time.time() - time1)))
+    print('Total time: %f' % ((time.time() - timeStart)))
+
 
 def comment(string):
     if verbose:
-        print('***   '+string)
+        print('***   ' + string)
+
 
 if __name__ == '__main__':
     # If called as a primary module, run main
