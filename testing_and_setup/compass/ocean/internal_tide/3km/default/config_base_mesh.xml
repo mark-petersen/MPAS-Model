@@ -3,9 +3,9 @@
 
 	<run_script name="run.py">
 		<step executable="planar_hex">
-			<argument flag="--nx">160</argument>
+			<argument flag="--nx">1600</argument>
 			<argument flag="--ny">4</argument>
-			<argument flag="--dc">30e3</argument>
+			<argument flag="--dc">3e3</argument>
 			<argument flag="--nonperiodic_x"></argument>
 			<argument flag="-o">planar_hex_mesh.nc</argument>
 		</step>
