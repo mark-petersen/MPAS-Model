@@ -74,20 +74,15 @@ def main():
     vars3D = ['temperature', 'salinity','zMid', 'layerThickness', 'restingThickness', 'density',\
                'surfaceStress', 'atmosphericPressure', 'boundaryLayerDepth']
     for var in vars3D:
-        globals()[var] = -9*np.ones([1, nCells, nVertLevels])
-        #globals()[var] = np.nan*np.ones([1, nCells, nVertLevels])
+        globals()[var] = np.nan*np.ones([1, nCells, nVertLevels])
 
-    #comment('create reference variables for z-level grid')
-    # equally-spaced layers
+    # reference vertical grid spacing
     refLayerThickness[:] = maxDepth/nVertLevels
     refBottomDepth[0] = refLayerThickness[0]
     refZMid[0] = -0.5 * refLayerThickness[0]
     for k in range(1, nVertLevels):
         refBottomDepth[k] = refBottomDepth[k - 1] + refLayerThickness[k]
         refZMid[k] = -refBottomDepth[k - 1] - 0.5 * refLayerThickness[k]
-    #comment('z-level: ssh in top layer only')
-    vertCoordMovementWeights[:] = 0.0
-    vertCoordMovementWeights[0] = 1.0
 
     # Marsaleix et al 2008 page 81
     # Gaussian function in depth for deep sea ridge
@@ -95,42 +90,36 @@ def main():
     bottomDepth[:] = 5000.0 - 1000.0*np.exp( -(( xCell[:] - xMid)/150e3)**2 )
     # SSH varies from 0 to 1m across the domain
     ssh[:] = xCell[:]/4800e3
-    # z-level: ssh in top layer only
-    layerThickness[0, :, 0] += ssh[:]
 
+    # Compute maxLevelCell and layerThickness for z-level (variation only on top)
+    vertCoordMovementWeights[:] = 0.0
+    vertCoordMovementWeights[0] = 1.0
     for iCell in range(0, nCells):
-        # z-star: spread layer thicknesses proportionally
-        #layerThickness[0, iCell, :] = refLayerThickness[:]*(maxDepth+ssh[iCell])/maxDepth
-
         for k in range(nVertLevels-1,0,-1):
             if bottomDepth[iCell] > refBottomDepth[k-1]:
                 maxLevelCell[iCell] = k
                 # Partial bottom cells
                 layerThickness[0, iCell, k] = bottomDepth[iCell] - refBottomDepth[k-1]
-                zMid[0, iCell, k] = -bottomDepth[iCell] + 0.5*layerThickness[0, iCell, k]
                 break
-        for k in range(maxLevelCell[iCell]-1,1,-1):
-            layerThickness[0, iCell, k] = refLayerThickness[k]
+        layerThickness[0, iCell, 0:maxLevelCell[iCell]] = refLayerThickness[0:maxLevelCell[iCell]]
+        layerThickness[0, iCell, 0] += ssh[iCell]
+
+    # Compute zMid (same, regardless of vertical coordinate)
+    for iCell in range(0, nCells):
+        k = maxLevelCell[iCell]
+        zMid[0, iCell, k] = -bottomDepth[iCell] + 0.5*layerThickness[0, iCell, k]
+        for k in range(maxLevelCell[iCell]-1,-1,-1):
             zMid[0, iCell, k] = zMid[0, iCell, k+1]  \
                + 0.5*(layerThickness[0, iCell, k+1] + layerThickness[0, iCell, k])
-
-    k = 0
-    layerThickness[0, :, k] = refLayerThickness[k] + ssh[:]
-    zMid[0, :, k] = zMid[0, :, k+1]  \
-        + 0.5*(layerThickness[0, :, k+1] + layerThickness[0, :, k])
-
     restingThickness[:, :] = layerThickness[0, :, :]
     restingThickness[:, 0] = refLayerThickness[0]
     bottomDepthObserved[:] = bottomDepth[:]
 
-    #comment('initialize tracers')
+    # initialize tracers
     rho0 = 1000.0 # kg/m^3
     rhoz = -2.0e-4 # kg/m^3/m in z 
     S0 = 35.0
     
-    # I believe this is needed to be able to overwrite the file later
-    #ds.load()
-    #maxLevelCell = ds.maxLevelCell.values - 1
     # linear equation of state
     # rho = rho0 - alpha*(T-Tref) + beta*(S-Sref)
     # set S=Sref
@@ -149,14 +138,15 @@ def main():
         temperature[0,activeCells,k] = config_eos_linear_Tref \
             - (density[0,activeCells,k] - config_eos_linear_densityref)/config_eos_linear_alpha
 
+    # initial velocity on edges
     normalVelocity = (('Time', 'nEdges', 'nVertLevels',), 0.0)
 
-    #comment('initialize coriolis terms')
+    # Coriolis parameter
     ds['fCell'] = (('nCells', 'nVertLevels',), np.zeros([nCells, nVertLevels]))
     ds['fEdge'] = (('nEdges', 'nVertLevels',), np.zeros([nEdges, nVertLevels]))
     ds['fVertex'] = (('nVertices', 'nVertLevels',), np.zeros([nVertices, nVertLevels]))
 
-    #comment('initialize other fields')
+    # surface fields
     surfaceStress[:] = 0.0
     atmosphericPressure[:] = 0.0
     boundaryLayerDepth[:] = 0.0
@@ -172,9 +162,8 @@ def main():
     for var in vars3D:
         ds[var] = (['Time','nCells','nVertLevels'], globals()[var])
     # If you prefer not to have NaN as the fill value, you should consider using mpas_tools.io.write_netcdf() instead
-    #ds.to_netcdf('initial_state.nc', format='NETCDF3_64BIT_OFFSET')
-    #ds = Dataset(parser.parse_args().output_file, 'a', format='NETCDF3_64BIT_OFFSET')
-    write_netcdf(ds,'initial_state.nc')
+    ds.to_netcdf('initial_state.nc', format='NETCDF3_64BIT_OFFSET')
+    #write_netcdf(ds,'initial_state.nc')
     print('   time: %f'%((time.time()-time1)))
     print('Total time: %f'%((time.time()-timeStart)))
 
@@ -185,5 +174,3 @@ def comment(string):
 if __name__ == '__main__':
     # If called as a primary module, run main
     main()
-
-# vim: foldmethod=marker ai ts=4 sts=4 et sw=4 ft=python
