@@ -58,6 +58,11 @@ def main():
     yEdge -= yOffset
     yVertex -= yOffset
 
+    # x values for convenience
+    xMax = max(xCell)
+    xMin = min(xCell)
+    xMid = 0.5 * (xMin + xMax)
+
     comment('create and initialize variables')
     time1 = time.time()
 
@@ -71,12 +76,15 @@ def main():
         globals()[var] = np.nan * np.ones(nCells)
     maxLevelCell = np.ones(nCells, dtype=np.int32)
 
-    vars3D = [
-        'temperature', 'salinity',
-        'layerThickness', 'restingThickness', 'zMid',
-        'density']
+    vars3D = [ 'layerThickness','temperature', 'salinity',
+         'restingThickness', 'zMid', 'density']
     for var in vars3D:
         globals()[var] = np.nan * np.ones([1, nCells, nVertLevels])
+
+    # Note that this line shouldn't be required, but if layerThickness is
+    # initialized with nans, the simulation dies. It must multiply by that on a
+    # land cell on an edge, and then multiply by zero.
+    layerThickness[:] = -1e34
 
     # reference vertical grid spacing
     maxDepth = 5000.0
@@ -89,19 +97,23 @@ def main():
 
     # Marsaleix et al 2008 page 81
     # Gaussian function in depth for deep sea ridge
-    xMid = 0.5 * (min(xCell) + max(xCell))
-    bottomDepth[:] = 5000.0 - 1000.0 * np.exp(-((xCell[:] - xMid) / 150e3)**2)
-    # SSH varies from 0 to 1m across the domain
-    ssh[:] = xCell[:] / 4800e3
+    bottomDepthObserved[:] = maxDepth - 1000.0 * np.exp(-((xCell[:] - xMid) / 150e3)**2)
+    # SSH varies from -0.5 to 0.5m across the domain
+    ssh[:] = (xCell[:] - xMid)/ (xMax - xMin) 
 
     # Compute maxLevelCell and layerThickness for z-level (variation only on top)
     vertCoordMovementWeights[:] = 0.0
     vertCoordMovementWeights[0] = 1.0
     for iCell in range(0, nCells):
         for k in range(nVertLevels - 1, 0, -1):
-            if bottomDepth[iCell] > refBottomDepth[k - 1]:
+            if bottomDepthObserved[iCell] > refBottomDepth[k - 1]:
+
                 maxLevelCell[iCell] = k
                 # Partial bottom cells
+                #bottomDepth[iCell] = bottomDepthObserved[iCell]
+                # No partial bottom cells
+                bottomDepth[iCell] = refBottomDepth[k]
+
                 layerThickness[0, iCell, k] = bottomDepth[iCell] - refBottomDepth[k - 1]
                 break
         layerThickness[0, iCell, 0:maxLevelCell[iCell] ] = refLayerThickness[0:maxLevelCell[iCell]]
@@ -117,7 +129,6 @@ def main():
                 (layerThickness[0, iCell, k + 1] + layerThickness[0, iCell, k])
     restingThickness[:, :] = layerThickness[0, :, :]
     restingThickness[:, 0] = refLayerThickness[0]
-    bottomDepthObserved[:] = bottomDepth[:]
 
     # initialize tracers
     rho0 = 1000.0  # kg/m^3
@@ -144,7 +155,7 @@ def main():
               config_eos_linear_alpha
 
     # initial velocity on edges
-    normalVelocity = (('Time', 'nEdges', 'nVertLevels',), 0.0)
+    ds['normalVelocity'] = (('Time', 'nEdges', 'nVertLevels',), np.zeros([1, nEdges, nVertLevels]))
 
     # Coriolis parameter
     ds['fCell'] = (('nCells', 'nVertLevels',), np.zeros([nCells, nVertLevels]))
