@@ -82,12 +82,13 @@ def main():
         globals()[var] = np.nan * np.ones([1, nCells, nVertLevels])
 
     # Note that this line shouldn't be required, but if layerThickness is
-    # initialized with nans, the simulation dies. It must multiply by that on a
-    # land cell on an edge, and then multiply by zero.
+    # initialized with nans, the simulation dies. It must multiply by a nan on
+    # a land cell on an edge, and then multiply by zero.
     layerThickness[:] = -1e34
 
     # reference vertical grid spacing
     maxDepth = 5000.0
+    # equally spaced layers
     refLayerThickness[:] = maxDepth / nVertLevels
     refBottomDepth[0] = refLayerThickness[0]
     refZMid[0] = -0.5 * refLayerThickness[0]
@@ -110,9 +111,9 @@ def main():
 
                 maxLevelCell[iCell] = k
                 # Partial bottom cells
-                #bottomDepth[iCell] = bottomDepthObserved[iCell]
+                bottomDepth[iCell] = bottomDepthObserved[iCell]
                 # No partial bottom cells
-                bottomDepth[iCell] = refBottomDepth[k]
+                #bottomDepth[iCell] = refBottomDepth[k]
 
                 layerThickness[0, iCell, k] = bottomDepth[iCell] - refBottomDepth[k - 1]
                 break

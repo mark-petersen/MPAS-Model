@@ -1,9 +1,0 @@
-<template>
-	<namelist>
-		<option name="config_disable_tr_sflux">.true.</option>
-	</namelist>
-
-	<streams>
-	</streams>
-
-</template>
