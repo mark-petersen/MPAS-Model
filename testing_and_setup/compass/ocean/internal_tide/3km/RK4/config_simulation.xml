@@ -2,17 +2,13 @@
 <config case="simulation">
 	<add_link source="../initial_state/initial_state.nc" dest="init.nc"/>
 	<add_link source="../base_mesh/graph.info" dest="graph.info"/>
-	<add_link source="../prep_spin_up1/Restart_timestamp" dest="Restart_timestamp"/>
-	<add_link source="../prep_spin_up1/restarts" dest="restarts"/>
 
 	<namelist name="namelist.ocean" mode="forward">
 		<template file="template_forward.xml" path_base="script_configuration_dir"/>
 		<template file="template_forward.xml" path_base="script_test_dir"/>
-		<option name="config_run_duration">'00-00-02_06:00:00'</option>
-		<option name="config_dt">'00:03:00'</option>
-		<option name="config_btr_dt">'00:00:30'</option>
-		<option name="config_do_restart">.true.</option>
-		<option name="config_start_time">'file'</option>
+		<option name="config_run_duration">'00-00-10_00:00:00'</option>
+		<option name="config_dt">'00:00:10'</option>
+		<option name="config_time_integrator">'RK4'</option>
 	</namelist>
 
 	<streams name="streams.ocean" keep="immutable" mode="forward">
