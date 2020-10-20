@@ -98,9 +98,9 @@ def main():
 
     # Marsaleix et al 2008 page 81
     # Gaussian function in depth for deep sea ridge
-    bottomDepthObserved[:] = maxDepth - 1000.0 * np.exp(-((xCell[:] - xMid) / 150e3)**2)
-    # SSH varies from -0.5 to 0.5m across the domain
-    ssh[:] = (xCell[:] - xMid)/ (xMax - xMin) 
+    bottomDepthObserved[:] = maxDepth - 1000.0 * np.exp(-((xCell[:] - xMid) / 15e3)**2)
+    # SSH varies from -1.0 to 1.0m across the domain
+    ssh[:] = (xCell[:] - xMid)/ xMid
 
     # Compute maxLevelCell and layerThickness for z-level (variation only on top)
     vertCoordMovementWeights[:] = 0.0
