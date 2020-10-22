@@ -15,6 +15,7 @@
 #include "Registry_isomip.xml"
 #include "Registry_isomip_plus.xml"
 #include "Registry_hurricane.xml"
+#include "Registry_verification.xml"
 #include "Registry_tidal_boundary.xml"
 // #include "Registry_TEMPLATE.xml"
 

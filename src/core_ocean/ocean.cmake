@@ -41,6 +41,7 @@ list(APPEND RAW_SOURCES
   core_ocean/mode_init/mpas_ocn_init_global_ocean.F
   core_ocean/mode_init/mpas_ocn_init_isomip.F
   core_ocean/mode_init/mpas_ocn_init_hurricane.F
+  core_ocean/mode_init/mpas_ocn_init_verification.F
   core_ocean/mode_init/mpas_ocn_init_isomip_plus.F
   core_ocean/mode_init/mpas_ocn_init_tidal_boundary.F
   core_ocean/mode_init/mpas_ocn_init_smoothing.F

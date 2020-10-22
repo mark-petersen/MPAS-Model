@@ -7,35 +7,19 @@
 !
 !|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 !
-!  ocn_init_TEMPLATE
+!  ocn_init_verification
 !
-!> \brief MPAS ocean initialize case -- TEMPLATE
-!> \author FILL_IN_AUTHOR
-!> \date   FILL_IN_DATE
+!> \brief MPAS ocean initialize case -- verification
+!> \author Mark Petersen
+!> \date   October 2020
 !> \details
 !>  This module contains the routines for initializing the
-!>  TEMPLATE initial condition
+!>  verification initial condition
 !>
-!>  In order to add a new initial condition, do the following:
-!>  1. In src/core_ocean/mode_init, copy these to your new initial condition name:
-!>     cp mpas_ocn_init_TEMPLATE.F mpas_ocn_init_your_new_name.F
-!>     cp Registry_TEMPLATE.xml Registry_ocn_your_new_name.xml
-!>
-!>  2. In those two new files, replace the following text:
-!>     TEMPLATE, FILL_IN_AUTHOR, FILL_IN_DATE
-!>     TEMPLATE uses underscores (subroutine names), like your_new_name.
-!>
-!>  3. Add a #include line for your registry to
-!>     src/core_ocean/mode_init/Registry.xml
-!>
-!>  4. Copy and change TEMPLATE lines in src/core_ocean/mode_init/mpas_ocn_init_mode.F
-!>
-!>  5. Add these dependency lines by following TEMPLATE examples in:
-!>     in src/core_ocean/mode_init/Makefile
 !
 !-----------------------------------------------------------------------
 
-module ocn_init_TEMPLATE
+module ocn_init_verification
 
    use mpas_kind_types
    use mpas_io_units
@@ -64,8 +48,8 @@ module ocn_init_TEMPLATE
    !
    !--------------------------------------------------------------------
 
-   public :: ocn_init_setup_TEMPLATE, &
-             ocn_init_validate_TEMPLATE
+   public :: ocn_init_setup_verification, &
+             ocn_init_validate_verification
 
    !--------------------------------------------------------------------
    !
@@ -79,17 +63,17 @@ contains
 
 !***********************************************************************
 !
-!  routine ocn_init_setup_TEMPLATE
+!  routine ocn_init_setup_verification
 !
 !> \brief   Setup for this initial condition
-!> \author  FILL_IN_AUTHOR
-!> \date    FILL_IN_DATE
+!> \author  Mark Petersen
+!> \date    October 2020
 !> \details
 !>  This routine sets up the initial conditions for this case.
 !
 !-----------------------------------------------------------------------
 
-  subroutine ocn_init_setup_TEMPLATE(domain, iErr)!{{{
+  subroutine ocn_init_setup_verification(domain, iErr)!{{{
 
     !--------------------------------------------------------------------
 
@@ -124,16 +108,15 @@ contains
 
     iErr = 0
 
-    if(config_init_configuration .ne. trim('TEMPLATE')) return
+    if(config_init_configuration .ne. trim('verification')) return
 
     ! Determine vertical grid for configuration
     call mpas_pool_get_subpool(domain % blocklist % structs, 'mesh', meshPool)
     call mpas_pool_get_dimension(meshPool, 'nVertLevelsP1', nVertLevelsP1)
     call mpas_pool_get_config(meshPool, 'on_a_sphere', on_a_sphere)
 
-    ! you may restrict your case geometry as follows:
-    ! if ( on_a_sphere ) call mpas_log_write('The TEMPLATE configuration can only be applied ' &
-    !     // 'to a planar mesh. Exiting...', MPAS_LOG_CRIT)
+     if ( on_a_sphere ) call mpas_log_write('The verification configuration can only be applied ' &
+         // 'to a planar mesh. Exiting...', MPAS_LOG_CRIT)
 
     allocate(interfaceLocations(nVertLevelsP1))
     call ocn_generate_vertical_grid( config_vertical_grid, interfaceLocations )
@@ -177,16 +160,6 @@ contains
     call mpas_dmpar_max_real(domain % dminfo, xMax, xMaxGlobal)
     call mpas_dmpar_min_real(domain % dminfo, dcEdgeMin, dcEdgeMinGlobal)
 
-    block_ptr => domain % blocklist
-    do while(associated(block_ptr))
-       call mpas_pool_get_subpool(block_ptr % structs, 'mesh', meshPool)
-
-       call ocn_mark_north_boundary(meshPool, yMaxGlobal, dcEdgeMinGlobal, iErr)
-       call ocn_mark_south_boundary(meshPool, yMinGlobal, dcEdgeMinGlobal, iErr)
-
-       block_ptr => block_ptr % next
-    end do
-
     !--------------------------------------------------------------------
     ! Use this section to set initial values
     !--------------------------------------------------------------------
@@ -223,8 +196,8 @@ contains
 
        ! ! Set refBottomDepth and refZMid
        do k = 1, nVertLevels
-          refBottomDepth(k) = config_TEMPLATE_bottom_depth * interfaceLocations(k+1)
-          refZMid(k) = - 0.5_RKIND * (interfaceLocations(k+1) + interfaceLocations(k)) * config_TEMPLATE_bottom_depth
+          refBottomDepth(k) = config_verification_bottom_depth * interfaceLocations(k+1)
+          refZMid(k) = - 0.5_RKIND * (interfaceLocations(k+1) + interfaceLocations(k)) * config_verification_bottom_depth
        end do
 
        ! Set vertCoordMovementWeights
@@ -235,13 +208,13 @@ contains
           ! Set temperature
           idx = index_temperature
           do k = 1, nVertLevels
-             ! activeTracers(idx, k, iCell) =
+             activeTracers(idx, k, iCell) = 20.0_RKIND
           end do
 
           ! Set salinity
           idx = index_salinity
           do k = 1, nVertLevels
-             ! activeTracers(idx, k, iCell) =
+             activeTracers(idx, k, iCell) = 35.0_RKIND
           end do
 
           ! Set layerThickness and restingThickness
@@ -257,9 +230,9 @@ contains
           ! maxLevelCell(iCell) =
 
           ! Set Coriolis parameters, if other than zero
-          fCell(iCell) = config_TEMPLATE_coriolis_parameter
-          fEdge(iCell) = config_TEMPLATE_coriolis_parameter
-          fVertex(iCell) = config_TEMPLATE_coriolis_parameter
+          fCell(iCell) = config_verification_coriolis_parameter
+          fEdge(iCell) = config_verification_coriolis_parameter
+          fVertex(iCell) = config_verification_coriolis_parameter
 
        end do
 
@@ -269,21 +242,21 @@ contains
     deallocate(interfaceLocations)
     !--------------------------------------------------------------------
 
-  end subroutine ocn_init_setup_TEMPLATE!}}}
+  end subroutine ocn_init_setup_verification!}}}
 
 !***********************************************************************
 !
-!  routine ocn_init_validate_TEMPLATE
+!  routine ocn_init_validate_verification
 !
 !> \brief   Validation for this initial condition
-!> \author  FILL_IN_AUTHOR
-!> \date    FILL_IN_DATE
+!> \author  Mark Petersen
+!> \date    October 2020
 !> \details
 !>  This routine validates the configuration options for this case.
 !
 !-----------------------------------------------------------------------
 
-   subroutine ocn_init_validate_TEMPLATE(configPool, packagePool, iocontext, iErr)!{{{
+   subroutine ocn_init_validate_verification(configPool, packagePool, iocontext, iErr)!{{{
 
    !--------------------------------------------------------------------
       type (mpas_pool_type), intent(inout) :: configPool, packagePool
@@ -292,32 +265,32 @@ contains
       integer, intent(out) :: iErr
 
       character (len=StrKIND), pointer :: config_init_configuration
-      integer, pointer :: config_vert_levels, config_TEMPLATE_vert_levels
+      integer, pointer :: config_vert_levels, config_verification_vert_levels
 
       iErr = 0
 
       call mpas_pool_get_config(configPool, 'config_init_configuration', config_init_configuration)
 
-      if(config_init_configuration .ne. trim('TEMPLATE')) return
+      if(config_init_configuration .ne. trim('verification')) return
 
       call mpas_pool_get_config(configPool, 'config_vert_levels', config_vert_levels)
-      call mpas_pool_get_config(configPool, 'config_TEMPLATE_vert_levels', config_TEMPLATE_vert_levels)
+      call mpas_pool_get_config(configPool, 'config_verification_vert_levels', config_verification_vert_levels)
 
-      if(config_vert_levels <= 0 .and. config_TEMPLATE_vert_levels > 0) then
-         config_vert_levels = config_TEMPLATE_vert_levels
+      if(config_vert_levels <= 0 .and. config_verification_vert_levels > 0) then
+         config_vert_levels = config_verification_vert_levels
       else if (config_vert_levels <= 0) then
-         call mpas_log_write( 'Validation failed for TEMPLATE. Not given a usable value for vertical levels.', MPAS_LOG_CRIT)
+         call mpas_log_write( 'Validation failed for verification. Not given a usable value for vertical levels.', MPAS_LOG_CRIT)
          iErr = 1
       end if
 
    !--------------------------------------------------------------------
 
-   end subroutine ocn_init_validate_TEMPLATE!}}}
+   end subroutine ocn_init_validate_verification!}}}
 
 
 !***********************************************************************
 
-end module ocn_init_TEMPLATE
+end module ocn_init_verification
 
 !|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ! vim: foldmethod=marker
