@@ -1401,6 +1401,7 @@ module ocn_time_integration_split
                call mpas_pool_get_array(diagnosticsPool, 'BtrAvgOfBaroclinicVelocity', BtrAvgOfBaroclinicVelocity)
                call mpas_pool_get_array(diagnosticsPool, 'BtrAvgOfGMBolusVelocity', BtrAvgOfGMBolusVelocity)
 
+               call mpas_pool_get_array(statePool, 'normalBarotropicVelocitySubcycle', normalBarotropicVelocitySubcycleNew, oldBtrSubcycleTime)
                call mpas_pool_get_array(meshPool, 'maxLevelEdgeTop', maxLevelEdgeTop)
                call mpas_pool_get_array(meshPool, 'edgeMask', edgeMask)
 
@@ -1424,14 +1425,16 @@ module ocn_time_integration_split
                   BtrAvgOfBaroclinicVelocity(iEdge) = BtrAvgOfBaroclinicVelocity(iEdge) / thicknessSum
                   BtrAvgOfGMBolusVelocity(iEdge) = BtrAvgOfGMBolusVelocity(iEdge) / thicknessSum
 
-                  ! Compute barotropic velocity from thickness flux.
-                  normalBarotropicVelocityNew(iEdge) = barotropicThicknessFlux(iEdge) / thicknessSum
+                  ! Set barotropic velocity to end of subcycling
+                  ! mrp note: if this stays, then change the usage of this
+                  ! variable above.
+                  normalBarotropicVelocityNew(iEdge) = normalBarotropicVelocitySubcycleNew(iEdge)
 
                   do k = 1, nVertLevels
 
                      ! Compute transport velocity, used to transport thickness and tracers.
                      normalTransportVelocity(k,iEdge) = edgeMask(k,iEdge) &
-                          *(  normalBarotropicVelocityNew(iEdge) &
+                          *(  barotropicThicknessFlux(iEdge) / thicknessSum &
                             + normalBaroclinicVelocityNew(k,iEdge) - BtrAvgOfBaroclinicVelocity(iEdge) &
                             + normalGMBolusVelocity(k,iEdge) - BtrAvgOfGMBolusVelocity(iEdge) )
                   enddo
