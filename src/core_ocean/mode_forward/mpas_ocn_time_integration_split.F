@@ -863,8 +863,7 @@ module ocn_time_integration_split
                        call mpas_pool_get_array(forcingPool, 'sshSubcycleCurWithTides', sshSubcycleCur)
                      end if
 
-                     nEdges = nEdgesPtr
-                     ! mrp temp nEdges = nEdgesArray( edgeHaloComputeCounter )
+                     nEdges = nEdgesArray( edgeHaloComputeCounter )
 
                      !$omp parallel
                      !$omp do schedule(runtime) &
@@ -1105,8 +1104,7 @@ module ocn_time_integration_split
                    !$omp end do
                    !$omp end parallel
 
-                   ! mrp temp nEdges = nEdgesArray( edgeHaloComputeCounter )
-                   nEdges = nEdgesPtr
+                   nEdges = nEdgesArray( edgeHaloComputeCounter )
 
                    !$omp parallel
                    !$omp do schedule(runtime) &
@@ -1355,8 +1353,7 @@ module ocn_time_integration_split
                   barotropicThicknessFlux(iEdge) = barotropicThicknessFlux(iEdge) &
                       / (nBtrSubcycles * config_btr_subcycle_loop_factor)
 
-                  !normalBarotropicVelocityNew(iEdge) = normalBarotropicVelocityNew(iEdge) &
-                  !   / (nBtrSubcycles * config_btr_subcycle_loop_factor + 1)
+                  ! Set barotropic velocity to end of subcycling
                   normalBarotropicVelocityNew(iEdge) = normalBarotropicVelocitySubcycleNew(iEdge)
                end do
                !$omp end do
@@ -1394,7 +1391,6 @@ module ocn_time_integration_split
                call mpas_pool_get_subpool(block % structs, 'diagnostics', diagnosticsPool)
                call mpas_pool_get_subpool(block % structs, 'mesh', meshPool)
 
-               call mpas_pool_get_array(statePool, 'normalBarotropicVelocity', normalBarotropicVelocityNew, 2)
                call mpas_pool_get_array(statePool, 'normalBaroclinicVelocity', normalBaroclinicVelocityNew, 2)
 
                call mpas_pool_get_array(diagnosticsPool, 'normalTransportVelocity', normalTransportVelocity)
@@ -1404,12 +1400,10 @@ module ocn_time_integration_split
                call mpas_pool_get_array(diagnosticsPool, 'BtrAvgOfBaroclinicVelocity', BtrAvgOfBaroclinicVelocity)
                call mpas_pool_get_array(diagnosticsPool, 'BtrAvgOfGMBolusVelocity', BtrAvgOfGMBolusVelocity)
 
-               !call mpas_pool_get_array(statePool, 'normalBarotropicVelocitySubcycle', normalBarotropicVelocitySubcycleNew, oldBtrSubcycleTime)
                call mpas_pool_get_array(meshPool, 'maxLevelEdgeTop', maxLevelEdgeTop)
                call mpas_pool_get_array(meshPool, 'edgeMask', edgeMask)
 
-               ! mrp temp nEdges = min(nEdgesPtr, nEdgesArray( config_num_halos + 1 ))
-               nEdges = nEdgesPtr
+               nEdges = min(nEdgesPtr, nEdgesArray( config_num_halos + 1 ))
 
                !$omp parallel
                !$omp do schedule(runtime) private(k, thicknessSum)
@@ -1428,12 +1422,6 @@ module ocn_time_integration_split
                   enddo
                   BtrAvgOfBaroclinicVelocity(iEdge) = BtrAvgOfBaroclinicVelocity(iEdge) / thicknessSum
                   BtrAvgOfGMBolusVelocity(iEdge) = BtrAvgOfGMBolusVelocity(iEdge) / thicknessSum
-
-                  ! Set barotropic velocity to end of subcycling
-                  ! mrp note: if this stays, then change the usage of this
-                  ! variable above.
-                  ! see above mrp
-                  !normalBarotropicVelocityNew(iEdge) = normalBarotropicVelocitySubcycleNew(iEdge)
 
                   do k = 1, nVertLevels
 
