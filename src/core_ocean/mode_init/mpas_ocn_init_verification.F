@@ -83,15 +83,18 @@ contains
     type (block_type), pointer :: block_ptr
     type (mpas_pool_type), pointer :: meshPool
     type (mpas_pool_type), pointer :: statePool
+    type (mpas_pool_type), pointer :: diagnosticsPool
     type (mpas_pool_type), pointer :: tracersPool
     type (mpas_pool_type), pointer :: verticalMeshPool
 
     ! local variables
-    integer :: iCell, k, idx
+    integer :: iCell, iEdge, k, idx
     real (kind=RKIND) :: yMin, yMax, xMin, xMax, dcEdgeMin, dcEdgeMinGlobal
     real (kind=RKIND) :: yMinGlobal, yMaxGlobal, yMidGlobal, xMinGlobal, xMaxGlobal
     real (kind=RKIND) :: localVar1, localVar2
     real (kind=RKIND), dimension(:), pointer :: interfaceLocations
+    real (kind=RKIND) :: f0, beta, maxDepth, phaseSpeed, Rinv, etaHat, kY, T0, S0, v, timeInSec
+    logical :: flatBottom
 
     ! Define dimension pointers
     integer, pointer :: nCellsSolve, nEdgesSolve, nVertLevels, nVertLevelsP1
@@ -100,11 +103,14 @@ contains
     ! Define variable pointers
     logical, pointer :: on_a_sphere
     integer, dimension(:), pointer :: maxLevelCell
-    real (kind=RKIND), dimension(:), pointer :: xCell, yCell,refBottomDepth, refZMid, &
-         vertCoordMovementWeights, bottomDepth, &
-         fCell, fEdge, fVertex, dcEdge
-    real (kind=RKIND), dimension(:,:), pointer :: layerThickness, restingThickness
+    real (kind=RKIND), dimension(:), pointer :: xCell, yCell, xEdge, yEdge, yVertex, dcEdge, angleEdge
+    real (kind=rkind), dimension(:), pointer :: fCell, fEdge, fVertex
+    real (kind=rkind), dimension(:), pointer :: vertCoordMovementWeights, bottomDepth
+    real (kind=RKIND), dimension(:), pointer :: refBottomDepth, refZMid, refLayerThickness
+    real (kind=RKIND), dimension(:), pointer :: ssh
+    real (kind=RKIND), dimension(:,:), pointer :: layerThickness, restingThickness, normalVelocity
     real (kind=RKIND), dimension(:,:,:), pointer :: activeTracers
+    real (kind=RKIND), pointer :: daysSinceStartOfSim
 
     iErr = 0
 
@@ -136,6 +142,7 @@ contains
     block_ptr => domain % blocklist
     do while(associated(block_ptr))
        call mpas_pool_get_subpool(block_ptr % structs, 'mesh', meshPool)
+       call mpas_pool_get_subpool(block_ptr % structs, 'diagnostics', diagnosticsPool)
 
        call mpas_pool_get_dimension(meshPool, 'nCellsSolve', nCellsSolve)
        call mpas_pool_get_dimension(meshPool, 'nEdgesSolve', nEdgesSolve)
@@ -143,6 +150,9 @@ contains
        call mpas_pool_get_array(meshPool, 'xCell', xCell)
        call mpas_pool_get_array(meshPool, 'yCell', yCell)
        call mpas_pool_get_array(meshPool, 'dcEdge', dcEdge)
+       call mpas_pool_get_array(meshPool, 'angleEdge', angleEdge)
+       call mpas_pool_get_array(diagnosticsPool, 'daysSinceStartOfSim',daysSinceStartOfSim)
+       timeInSec = daysSinceStartOfSim * 86400.0_RKIND
 
        yMin = min( yMin, minval(yCell(1:nCellsSolve)))
        yMax = max( yMax, maxval(yCell(1:nCellsSolve)))
@@ -179,6 +189,8 @@ contains
 
        call mpas_pool_get_array(meshPool, 'xCell', xCell)
        call mpas_pool_get_array(meshPool, 'yCell', yCell)
+       call mpas_pool_get_array(meshPool, 'yEdge', yEdge)
+       call mpas_pool_get_array(meshPool, 'yVertex', yVertex)
        call mpas_pool_get_array(meshPool, 'refBottomDepth', refBottomDepth)
        call mpas_pool_get_array(meshPool, 'vertCoordMovementWeights', vertCoordMovementWeights)
        call mpas_pool_get_array(meshPool, 'bottomDepth', bottomDepth)
@@ -189,52 +201,75 @@ contains
 
        call mpas_pool_get_array(tracersPool, 'activeTracers', activeTracers, 1)
        call mpas_pool_get_array(statePool, 'layerThickness', layerThickness, 1)
+       call mpas_pool_get_array(statePool, 'ssh', ssh, 1)
+       call mpas_pool_get_array(statePool, 'normalVelocity', normalVelocity, 1)
 
        call mpas_pool_get_array(verticalMeshPool, 'refZMid', refZMid)
        call mpas_pool_get_array(verticalMeshPool, 'restingThickness', restingThickness)
+       call mpas_pool_get_array(verticalMeshPool, 'refLayerThickness', refLayerThickness)
+       call mpas_pool_get_array(verticalMeshPool, 'refZMid', refZMid)
 
+       maxDepth = 3000.0_RKIND ! H [m]
 
-       ! ! Set refBottomDepth and refZMid
+       ! Set refBottomDepth and refZMid
        do k = 1, nVertLevels
-          refBottomDepth(k) = config_verification_bottom_depth * interfaceLocations(k+1)
-          refZMid(k) = - 0.5_RKIND * (interfaceLocations(k+1) + interfaceLocations(k)) * config_verification_bottom_depth
+          refBottomDepth(k) = maxDepth * interfaceLocations(k+1)
+          refZMid(k) = - 0.5_RKIND * (interfaceLocations(k+1) + interfaceLocations(k)) * maxDepth
        end do
+       ! Compute refLayerThickness and refZMid
+       call ocn_compute_layerThickness_zMid_from_bottomDepth(refLayerThickness,refZMid, &
+               refBottomDepth,refBottomDepth(nVertLevels), nVertLevels,nVertLevels,iErr)
 
        ! Set vertCoordMovementWeights
        vertCoordMovementWeights(:) = 1.0_RKIND
 
+       select case (config_verification_case)
+       case (1) ! coastal Kelvin wave
+          f0 = 1.0e-4_RKIND ! coriolis parameter [1/s]
+          beta = 0.0 ! beta parameter
+          flatBottom = .true.
+          phaseSpeed = sqrt(gravity*maxDepth) ! c=sqrt(gH)
+          Rinv = f0 / phaseSpeed ! R = sqrt(gH)/f0
+          etaHat = 0.001
+          kY = 1.0_RKIND
+          T0 = 20.0_RKIND ! constant temperature
+          S0 = 35.0_RKIND ! constant salinity
+
+          do iCell = 1, nCellsSolve
+              ssh(iCell) = - maxDepth &
+                 * etaHat*sin(Ky*(yCell(iCell) + phaseSpeed*timeInSec)) &
+                 * exp(-xCell(iCell) * Rinv)
+          end do
+          do iEdge = 1, nEdgesSolve
+              ! u = 0.0
+              v = phaseSpeed &
+                 * etaHat*sin(Ky*(yEdge(iEdge) + phaseSpeed*timeInSec)) &
+                 * exp(-xEdge(iEdge) * Rinv) 
+             ! angleEdge=0: edge normal points in positive x
+             ! angleEdge=pi/2: edge normal points in positive y
+             ! normalVelocity = -u*sin(angleEdge) + v*cos(angleEdge)
+             !normalVelocity(:, iEdge) = u*cos(angleEdge(iEdge)) + v*sin(angleEdge(iEdge))
+             normalVelocity(:, iEdge) = v*sin(angleEdge(iEdge))
+          end do
+       end select
+
+       if (flatBottom) then
+          bottomDepth(:) = maxDepth
+          maxLevelCell(:) = nVertLevels
+       endif
+
        do iCell = 1, nCellsSolve
-
-          ! Set temperature
-          idx = index_temperature
-          do k = 1, nVertLevels
-             activeTracers(idx, k, iCell) = 20.0_RKIND
+          do k = 1, maxLevelCell(iCell)
+             layerThickness(k, iCell) = refLayerThickness(k) + ssh(iCell)/maxLevelCell(iCell)
+             restingThickness(k, iCell) = refLayerThickness(k)
+             activeTracers(index_temperature, k, iCell) = T0
+             activeTracers(index_salinity, k, iCell) = S0
           end do
-
-          ! Set salinity
-          idx = index_salinity
-          do k = 1, nVertLevels
-             activeTracers(idx, k, iCell) = 35.0_RKIND
-          end do
-
-          ! Set layerThickness and restingThickness
-          do k = 1, nVertLevels
-             ! layerThickness(k, iCell) =
-             ! restingThickness(k, iCell) =
-          end do
-
-          ! Set bottomDepth
-          ! bottomDepth(iCell) =
-
-          ! Set maxLevelCell
-          ! maxLevelCell(iCell) =
-
-          ! Set Coriolis parameters, if other than zero
-          fCell(iCell) = config_verification_coriolis_parameter
-          fEdge(iCell) = config_verification_coriolis_parameter
-          fVertex(iCell) = config_verification_coriolis_parameter
-
        end do
+
+       fCell(:) = f0 + beta*yCell(:)
+       fEdge(:) = f0 + beta*yEdge(:)
+       fVertex(:) = f0 + beta*yVertex(:)
 
        block_ptr => block_ptr % next
     end do
@@ -243,6 +278,39 @@ contains
     !--------------------------------------------------------------------
 
   end subroutine ocn_init_setup_verification!}}}
+
+!***********************************************************************
+!
+!  routine interp_vert_velocity_to_zlevel
+!
+!> \brief   Interpolate the vertical velcity to a z level
+!> \author  Phillip Wolfram
+!> \date    05/08/2014
+!> \details
+!>  This routine interpolates the vertical velocity to a particular
+!>  z-level.
+!
+!-----------------------------------------------------------------------
+!real (kind=RKIND) function CoastalKelvinWaveFunctionalForm( etaHat, kY, y) {{{
+!
+!     !-----------------------------------------------------------------
+!     ! input variables
+!     !-----------------------------------------------------------------
+!     real (kind=RKIND), intent(in) :: etaHat ! coefficient
+!     real (kind=RKIND), intent(in) :: kY ! coefficient
+!     real (kind=RKIND), intent(in) :: y ! coefficient
+!
+!     !-----------------------------------------------------------------
+!     ! output variables
+!     !-----------------------------------------------------------------
+!     !real (kind=RKIND), intent(out) :: interp_vert_velocity_to_zlevel
+!
+!     !-----------------------------------------------------------------
+!     ! local variables
+!     !-----------------------------------------------------------------
+!     real (kind=RKIND) :: alpha
+!
+!     eta = etaHat*sin(kY*y)
 
 !***********************************************************************
 !

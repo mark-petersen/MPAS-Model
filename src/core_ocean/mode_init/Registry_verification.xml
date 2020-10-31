@@ -1,7 +1,7 @@
 	<nml_record name="verification" mode="init" configuration=="verification">
-		<nml_option name="config_verification_case" type="character" default_value="none" units="unitless"
-					description="Name of configuration to create."
-					possible_values="Any configuration name"
+		<nml_option name="config_verification_case" type="integer" default_value="1" units="unitless"
+					description="Case number: 1. coastal Kelvin wave "
+					possible_values="1 through 12"
 		/>
 		<nml_option name="config_verification_vert_levels" type="integer" default_value="3" units="unitless"
 			description="Number of vertical levels in verification. Typical value is 3."
