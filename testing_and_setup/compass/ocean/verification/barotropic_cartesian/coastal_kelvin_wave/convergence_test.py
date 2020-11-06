@@ -36,6 +36,23 @@ for iCase in range(nCases):
               %(nCellsX[iCase],nCellsX[iCase],dcEdge))
     os.system("MpasCellCuller.x base_mesh.nc culled_mesh.nc")
     os.system("MpasMeshConverter.x culled_mesh.nc mesh.nc")
+
+    os.symlink('../namelist.ocean.init','namelist.ocean.init')
+    os.symlink('../streams.ocean.init','streams.ocean.init')
+    os.symlink('../ocean_model','ocean_model')
+
+    # mpirun -n 4 ./ocean_model -n namelist.ocean -s streams.ocean
+    subprocess.check_call(['mpirun', '-n', '1', './ocean_model', 
+        '-n', 'namelist.ocean.init', '-s', 'streams.ocean.init'])
+
+    os.symlink('../namelist.ocean.forward','namelist.ocean.forward')
+    os.symlink('../streams.ocean.forward','streams.ocean.forward')
+    os.symlink('../ocean_model','ocean_model')
+
+    # mpirun -n 4 ./ocean_model -n namelist.ocean -s streams.ocean
+    subprocess.check_call(['mpirun', '-n', '1', './ocean_model', 
+        '-n', 'namelist.ocean.forward', '-s', 'streams.ocean.forward'])
+
     os.chdir("..")
 
 
