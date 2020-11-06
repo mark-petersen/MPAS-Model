@@ -91,7 +91,7 @@ contains
     ! local variables
     integer :: iCell, iEdge, k, idx
     real (kind=RKIND) :: yMin, yMax, xMin, xMax, dcEdgeMin, dcEdgeMinGlobal
-    real (kind=RKIND) :: yMinGlobal, yMaxGlobal, yMidGlobal, xMinGlobal, xMaxGlobal
+    real (kind=RKIND) :: yMinGlobal, yMaxGlobal, yMidGlobal, xMinGlobal, xMaxGlobal, LY, LX
     real (kind=RKIND) :: localVar1, localVar2
     real (kind=RKIND), dimension(:), pointer :: interfaceLocations
     real (kind=RKIND) :: f0, beta, maxDepth, phaseSpeed, Rinv, etaHat, kY, T0, S0, v, timeInSec
@@ -157,10 +157,10 @@ contains
        call mpas_pool_get_array(diagnosticsPool, 'daysSinceStartOfSim',daysSinceStartOfSim)
        timeInSec = daysSinceStartOfSim * 86400.0_RKIND
 
-       yMin = min( yMin, minval(yCell(1:nCellsSolve)))
-       yMax = max( yMax, maxval(yCell(1:nCellsSolve)))
-       xMin = min( xMin, minval(xCell(1:nCellsSolve)))
-       xMax = max( xMax, maxval(xCell(1:nCellsSolve)))
+       yMin = min( yMin, minval(yEdge(1:nEdgesSolve)))
+       yMax = max( yMax, maxval(yEdge(1:nEdgesSolve)))
+       xMin = min( xMin, minval(xEdge(1:nEdgesSolve)))
+       xMax = max( xMax, maxval(xEdge(1:nEdgesSolve)))
        dcEdgeMin = min( dcEdgeMin, minval(dcEdge(1:nEdgesSolve)))
 
        block_ptr => block_ptr % next
@@ -172,6 +172,8 @@ contains
     call mpas_dmpar_min_real(domain % dminfo, xMin, xMinGlobal)
     call mpas_dmpar_max_real(domain % dminfo, xMax, xMaxGlobal)
     call mpas_dmpar_min_real(domain % dminfo, dcEdgeMin, dcEdgeMinGlobal)
+    LY = yMaxGlobal - yMinGlobal
+    LX = xMaxGlobal - xMinGlobal
 
     !--------------------------------------------------------------------
     ! Use this section to set initial values
@@ -235,7 +237,9 @@ contains
           phaseSpeed = sqrt(gravity*maxDepth) ! c=sqrt(gH)
           Rinv = f0 / phaseSpeed ! R = sqrt(gH)/f0
           etaHat = 0.001
-          kY = 1.0_RKIND
+          print *, 'LY',LY
+          print *, 'kY',kY
+          kY = 2.0_RKIND*pii/LY
           T0 = 20.0_RKIND ! constant temperature
           S0 = 35.0_RKIND ! constant salinity
 

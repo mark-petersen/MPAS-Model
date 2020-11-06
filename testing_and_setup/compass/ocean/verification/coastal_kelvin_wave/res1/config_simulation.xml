@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <config case="simulation">
-	<add_link source="../initial_state/init_test1_res1.nc" dest="init.nc"/>
+	<add_link source="../initial_state/initial_state.nc" dest="initial_state.nc"/>
+	<add_link source="../base_mesh/planar_hex.nc" dest="planar_hex.nc"/>
+    <add_link source="../base_mesh/graph.info" dest="graph.info"/>
+	<add_link source="plot.py" source_path="script_test_dir" dest="plot.py"/>
 
 	<namelist name="namelist.ocean" mode="forward">
 		<template file="template_forward.xml" path_base="script_configuration_dir"/>
@@ -13,6 +16,11 @@
 	</streams>
 
 	<run_script name="run.py">
-		<model_run procs="1" threads="1" namelist="namelist.ocean" streams="streams.ocean"/>
+        <step executable="gpmetis">
+            <argument flag="graph.info">36</argument>
+        </step>
+		<model_run procs="36" threads="1" namelist="namelist.ocean" streams="streams.ocean"/>
+		<step executable="./plot.py">
+		</step>
 	</run_script>
 </config>

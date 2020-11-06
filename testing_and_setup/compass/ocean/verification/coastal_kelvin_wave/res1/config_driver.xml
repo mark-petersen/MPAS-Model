@@ -6,6 +6,6 @@
         <step executable="./run.py" quiet="true" pre_message=" * Initializing ocean state with bathymetry and tracers..." post_message="     complete!  Created file:  initial_state/initial_state.nc"/>
     </case>
     <case name="simulation">
-        <step executable="./run.py" quiet="true" pre_message=" * running simulation..." post_message="     complete!  Created file:  simulation/output.nc"/>
+        <step executable="./run.py" quiet="true" pre_message=" * Running simulation..." post_message="     complete!  Created file:  simulation/output.nc"/>
     </case>
 </driver_script>
