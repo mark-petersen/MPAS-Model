@@ -1,0 +1,5 @@
+<template>
+	<namelist>
+		<option name="config_init_configuration">'verification'</option>
+	</namelist>
+</template>

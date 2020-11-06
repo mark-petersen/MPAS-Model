@@ -26,6 +26,7 @@ module ocn_init_verification
    use mpas_derived_types
    use mpas_pool_routines
    use mpas_constants
+   use mpas_dmpar
 
    use ocn_constants
    use ocn_config
@@ -149,6 +150,8 @@ contains
 
        call mpas_pool_get_array(meshPool, 'xCell', xCell)
        call mpas_pool_get_array(meshPool, 'yCell', yCell)
+       call mpas_pool_get_array(meshPool, 'xEdge', xEdge)
+       call mpas_pool_get_array(meshPool, 'yEdge', yEdge)
        call mpas_pool_get_array(meshPool, 'dcEdge', dcEdge)
        call mpas_pool_get_array(meshPool, 'angleEdge', angleEdge)
        call mpas_pool_get_array(diagnosticsPool, 'daysSinceStartOfSim',daysSinceStartOfSim)
@@ -225,6 +228,7 @@ contains
 
        select case (config_verification_case)
        case (1) ! coastal Kelvin wave
+       print *, 'coastal Kelvin wave'
           f0 = 1.0e-4_RKIND ! coriolis parameter [1/s]
           beta = 0.0 ! beta parameter
           flatBottom = .true.

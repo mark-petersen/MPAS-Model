@@ -45,6 +45,7 @@ module ocn_init_mode
    use ocn_init_lock_exchange
    use ocn_init_internal_waves
    use ocn_init_overflow
+   use ocn_init_verification
    use ocn_init_dam_break
    use ocn_init_global_ocean
    use ocn_init_cvmix_WSwSBF
@@ -273,6 +274,7 @@ module ocn_init_mode
       call ocn_init_setup_lock_exchange(domain, ierr)
       call ocn_init_setup_internal_waves(domain, ierr)
       call ocn_init_setup_overflow(domain, ierr)
+      call ocn_init_setup_verification(domain, ierr)
       call ocn_init_setup_dam_break(domain, ierr)
       call ocn_init_setup_global_ocean(domain, ierr)
       call ocn_init_setup_cvmix_WSwSBF(domain, ierr)
@@ -367,6 +369,8 @@ module ocn_init_mode
       call ocn_init_validate_internal_waves(configPool, packagePool, iocontext, iErr=err_tmp)
       iErr = ior(iErr, err_tmp)
       call ocn_init_validate_overflow(configPool, packagePool, iocontext, iErr=err_tmp)
+      iErr = ior(iErr, err_tmp)
+      call ocn_init_validate_verification(configPool, packagePool, iocontext, iErr=err_tmp)
       iErr = ior(iErr, err_tmp)
       call ocn_init_validate_dam_break(configPool, packagePool, iErr=err_tmp)
       iErr = ior(iErr, err_tmp)

@@ -1,0 +1,65 @@
+<template>
+	<streams>
+		<stream name="input_init">
+			<attribute name="filename_template">base_mesh.nc</attribute>
+		</stream>
+		<stream name="output_init">
+			<attribute name="type">output</attribute>
+			<attribute name="output_interval">0000_00:00:01</attribute>
+			<attribute name="clobber_mode">truncate</attribute>
+			<attribute name="filename_template">initial_state.nc</attribute>
+			<add_contents>
+				<member name="input_init" type="stream"/>
+				<member name="tracers" type="var_struct"/>
+				<member name="refZMid" type="var"/>
+				<member name="normalVelocity" type="var"/>
+				<member name="layerThickness" type="var"/>
+				<member name="restingThickness" type="var"/>
+				<member name="seaIcePressure" type="var"/>
+				<member name="atmosphericPressure" type="var"/>
+				<member name="boundaryLayerDepth" type="var"/>
+				<member name="refBottomDepth" type="var"/>
+				<member name="bottomDepth" type="var"/>
+				<member name="bottomDepthObserved" type="var"/>
+				<member name="oceanFracObserved" type="var"/>
+				<member name="maxLevelCell" type="var"/>
+				<member name="vertCoordMovementWeights" type="var"/>
+				<member name="edgeMask" type="var"/>
+				<member name="cullCell" type="var"/>
+				<member name="ssh" type="var"/>
+				<member name="density" type="var"/>
+				<member name="verticalStretch" type="var"/>
+			</add_contents>
+		</stream>
+		<stream name="forcing_data_init">
+			<attribute name="type">output</attribute>
+			<attribute name="output_interval">0000_00:00:01</attribute>
+			<attribute name="clobber_mode">truncate</attribute>
+			<attribute name="filename_template">init_mode_forcing_data.nc</attribute>
+			<add_contents>
+				<member name="tracersSurfaceRestoringFields" type="var_struct"/>
+				<member name="tracersInteriorRestoringFields" type="var_struct"/>
+				<member name="tracersExponentialDecayFields" type="var_struct"/>
+				<member name="tracersIdealAgeFields" type="var_struct"/>
+				<member name="tracersTTDFields" type="var_struct"/>
+				<member name="windStressZonal" type="var"/>
+				<member name="windStressMeridional" type="var"/>
+				<member name="landIceSurfaceTemperature" type="var"/>
+				<member name="seaIcePressure" type="var"/>
+				<member name="atmosphericPressure" type="var"/>
+			</add_contents>
+		</stream>
+		<stream name="shortwave_forcing_data_init">
+			<attribute name="type">output</attribute>
+			<attribute name="output_interval">0000-00-00_00:00:01</attribute>
+			<attribute name="clobber_mode">truncate</attribute>
+			<attribute name="filename_template">init_mode_shortwaveData.nc</attribute>
+			<add_contents>
+				<member name="chlorophyllData" type="var" />
+				<member name="zenithAngle" type="var"/>
+				<member name="clearSkyRadiation" type="var"/>
+				<member name="xtime" type="var"/>
+			</add_contents>
+		</stream>
+	</streams>
+</template>

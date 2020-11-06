@@ -1,5 +1,0 @@
-<driver_script name="run.py">
-	<case name="convergence_test">
-		<step executable="./run.py" quiet="true" pre_message=" * Running convergence test ..." post_message="     complete!  "/>
-	</case>
-</driver_script>
