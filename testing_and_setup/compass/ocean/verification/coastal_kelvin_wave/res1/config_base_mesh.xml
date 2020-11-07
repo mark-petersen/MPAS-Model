@@ -6,10 +6,15 @@
 			<argument flag="--nx">50</argument>
 			<argument flag="--ny">50</argument>
 			<argument flag="--dc">100e3</argument>
+			<argument flag="--npx"></argument>
 			<argument flag="-o">planar_hex.nc</argument>
 		</step>
-		<step executable="MpasMeshConverter.x">
+		<step executable="MpasCellCuller.x">
 			<argument flag="">planar_hex.nc</argument>
+			<argument flag="">culled_mesh.nc</argument>
+		</step>
+		<step executable="MpasMeshConverter.x">
+			<argument flag="">culled_mesh.nc</argument>
 			<argument flag="">base_mesh.nc</argument>
 		</step>
 	</run_script>

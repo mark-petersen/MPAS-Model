@@ -169,12 +169,16 @@ contains
       !                                units: s^{-1} m^{-1}
       real (kind=RKIND), dimension(:,:), allocatable :: vorticityGradientTangentialComponent
 
-
       real (kind=RKIND), dimension(:), pointer :: surfaceFluxAttenuationCoefficient
       real (kind=RKIND), dimension(:), pointer :: surfaceFluxAttenuationCoefficientRunoff
       real (kind=RKIND) :: areaTri1, layerThicknessVertexInv, tempRiVal, dcEdge_temp, dvEdge_temp, weightsOnEdge_temp
       real (kind=RKIND), dimension(:), allocatable:: layerThicknessVertexVec
       integer :: edgeSignOnCell_temp
+
+      real (kind=RKIND), dimension(:), pointer :: xCell, yCell, xEdge, yEdge, angleEdge
+      real (kind=RKIND), dimension(:), pointer :: sshSolution, normalVelocitySolution, velocityMeridionalSolution, velocityZonalSolution
+      real (kind=RKIND) :: f0, beta, maxDepth, phaseSpeed, Rinv, etaHat, kY, v, timeInSec
+      real (kind=RKIND) :: xMin,xMax,yMin,yMax,yMinGlobal,yMaxGlobal,xMinGlobal,xMaxGlobal, LX, LY
 
       call mpas_timer_start('diagnostic solve')
 
@@ -908,6 +912,50 @@ contains
       end do
       !$omp end do
       !$omp end parallel
+
+      if (config_verification_enable) then
+       call mpas_pool_get_array(diagnosticsPool, 'sshSolution', sshSolution)
+       call mpas_pool_get_array(diagnosticsPool, 'normalVelocitySolution', normalVelocitySolution)
+       call mpas_pool_get_array(diagnosticsPool, 'velocityMeridionalSolution', velocityMeridionalSolution)
+       call mpas_pool_get_array(diagnosticsPool, 'velocityZonalSolution', velocityZonalSolution)
+       call mpas_pool_get_array(meshPool, 'xCell', xCell)
+       call mpas_pool_get_array(meshPool, 'yCell', yCell)
+       call mpas_pool_get_array(meshPool, 'xEdge', xEdge)
+       call mpas_pool_get_array(meshPool, 'yEdge', yEdge)
+       call mpas_pool_get_array(meshPool, 'angleEdge', angleEdge)
+       call mpas_pool_get_array(diagnosticsPool, 'daysSinceStartOfSim',daysSinceStartOfSim)
+       timeInSec = daysSinceStartOfSim * 86400.0_RKIND
+
+       select case (config_verification_case)
+       case (1) ! coastal Kelvin wave
+          f0 = 1.0e-4_RKIND ! coriolis parameter [1/s]
+          beta = 0.0 ! beta parameter
+          phaseSpeed = sqrt(gravity*maxDepth) ! c=sqrt(gH)
+          Rinv = f0 / phaseSpeed ! R = sqrt(gH)/f0
+          etaHat = 0.001
+          kY = 2.0_RKIND*pii/LY
+
+          do iCell = 1, nCells
+              sshSolution(iCell) = - maxDepth &
+                 * etaHat*sin(Ky*(yCell(iCell) + phaseSpeed*timeInSec)) &
+                 * exp(-xCell(iCell) * Rinv)
+              velocityMeridionalSolution(iCell) = phaseSpeed &
+                 * etaHat*sin(Ky*(yEdge(iEdge) + phaseSpeed*timeInSec)) &
+                 * exp(-xEdge(iEdge) * Rinv) 
+          end do
+          do iEdge = 1, nEdges
+              ! u = 0.0
+              v = phaseSpeed &
+                 * etaHat*sin(Ky*(yEdge(iEdge) + phaseSpeed*timeInSec)) &
+                 * exp(-xEdge(iEdge) * Rinv) 
+             ! angleEdge=0: edge normal points in positive x
+             ! angleEdge=pi/2: edge normal points in positive y
+             ! normalVelocity = -u*sin(angleEdge) + v*cos(angleEdge)
+             !normalVelocity(:, iEdge) = u*cos(angleEdge(iEdge)) + v*sin(angleEdge(iEdge))
+             normalVelocitySolution(iEdge) = v*sin(angleEdge(iEdge))
+          end do
+       end select
+      endif
 
       call mpas_timer_stop('diagnostic solve')
 

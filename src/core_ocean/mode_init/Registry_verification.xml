@@ -1,4 +1,8 @@
-	<nml_record name="verification" mode="init" configuration=="verification">
+	<nml_record name="verification" configuration=="verification">
+		<nml_option name="config_verification_enable" type="logical" default_value=".true." units="unitless"
+					description="If true, fill in exact solution and enforce boundaries."
+					possible_values=".true. or .false."
+		/>
 		<nml_option name="config_verification_case" type="integer" default_value="1" units="unitless"
 					description="Case number: 1. coastal Kelvin wave "
 					possible_values="1 through 12"
@@ -8,3 +12,24 @@
 			possible_values="Any positive integer number greater than 0."
 		/>
 	</nml_record>
+	<packages>
+		<package name="verificationPKG" description="package for verification variables"/>
+	</packages>
+	<var_struct name="diagnostics" time_levs="1">
+		<var name="sshSolution" type="real" dimensions="nCells Time" units="m"
+			 description="component of horizontal velocity in the northward direction"
+			 packages="verificationPKG"
+		/>
+		<var name="normalVelocitySolution" type="real" dimensions="nEdges Time" units="m s^{-1}"
+			 description="component of horizontal velocity in the northward direction"
+			 packages="verificationPKG"
+		/>
+		<var name="velocityZonalSolution" type="real" dimensions="nCells Time" units="m s^{-1}"
+			 description="component of horizontal velocity in the eastward direction"
+			 packages="verificationPKG"
+		/>
+		<var name="velocityMeridionalSolution" type="real" dimensions="nCells Time" units="m s^{-1}"
+			 description="component of horizontal velocity in the northward direction"
+			 packages="verificationPKG"
+		/>
+	</var_struct>

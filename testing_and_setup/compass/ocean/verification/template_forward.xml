@@ -1,9 +1,8 @@
 <template>
 	<namelist>
 		<option name="config_run_duration">'00-00-00_01:00:00'</option>
-		<option name="config_write_output_on_startup">.false.</option>
-		<option name="config_use_debugTracers">.true.</option>
-		<option name="config_n_ts_iter">1</option>
+		<option name="config_write_output_on_startup">.true.</option>
+		<option name="config_time_integrator">'RK4'</option>
 	</namelist>
 	<streams name="streams.ocean" keep="immutable" mode="forward">
 		<stream name="mesh">
@@ -17,7 +16,10 @@
 			<attribute name="output_interval">00-00-00_00:30:00</attribute>
 			<attribute name="filename_template">output.nc</attribute>
 			<add_contents>
-				<member type="var" name="ssh"/>
+				<member type="var" name="sshSolution"/>
+				<member type="var" name="normalVelocitySolution"/>
+				<member type="var" name="velocityZonalSolution"/>
+				<member type="var" name="velocityMeridionalSolution"/>
 			</add_contents>
 		</stream>
 		<stream name="restart">

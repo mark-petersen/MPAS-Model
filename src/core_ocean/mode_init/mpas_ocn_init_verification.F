@@ -237,8 +237,6 @@ contains
           phaseSpeed = sqrt(gravity*maxDepth) ! c=sqrt(gH)
           Rinv = f0 / phaseSpeed ! R = sqrt(gH)/f0
           etaHat = 0.001
-          print *, 'LY',LY
-          print *, 'kY',kY
           kY = 2.0_RKIND*pii/LY
           T0 = 20.0_RKIND ! constant temperature
           S0 = 35.0_RKIND ! constant salinity
