@@ -67,6 +67,7 @@ module ocn_init_routines
       ocn_init_routines_compute_mesh_scaling, &
       ocn_init_routines_setup_sign_and_index_fields, &
       ocn_init_routines_vert_coord, &
+      ocn_init_routines_verification, &
       ocn_init_routines_block, &
       ocn_init_metadata
 
@@ -583,6 +584,86 @@ end subroutine ocn_init_routines_compute_max_level!}}}
       end do
 
    end subroutine ocn_init_routines_vert_coord!}}}
+
+!***********************************************************************
+!
+!  routine ocn_init_routines_verification
+!
+!> \brief  initialize vertical coordinate variables
+!> \author Mark Petersen
+!> \date   November 2020
+!> \details
+!>  This routine initializes information needed for verifiction tests
+!
+!-----------------------------------------------------------------------
+   subroutine ocn_init_routines_verification(domain)!{{{
+
+      type (domain_type), intent(inout) :: domain
+
+      type (mpas_pool_type), pointer :: meshPool
+      type (mpas_pool_type), pointer :: diagnosticsPool
+      type (block_type), pointer :: block
+      type (dm_info) :: dminfo
+
+      integer, pointer :: nCellsSolve, nEdgesSolve
+      real (kind=RKIND) :: xCellMin, xCellMax, yCellMin, yCellMax
+      real (kind=RKIND) :: xEdgeMin, xEdgeMax, yEdgeMin, yEdgeMax
+      real (kind=RKIND), pointer :: xCellGlobalMin, xCellGlobalMax, yCellGlobalMin, yCellGlobalMax
+      real (kind=RKIND), pointer :: xEdgeGlobalMin, xEdgeGlobalMax, yEdgeGlobalMin, yEdgeGlobalMax
+      real (kind=RKIND), dimension(:), pointer :: xCell, yCell, xEdge, yEdge
+
+    ! Determine vertical grid for configuration
+    call mpas_pool_get_subpool(domain % blocklist % structs, 'mesh', meshPool)
+    call mpas_pool_get_subpool(domain % blocklist % structs, 'diagnostics', diagnosticsPool)
+
+    ! Determine local min and max values.
+    block => domain % blocklist
+    do while(associated(block))
+       call mpas_pool_get_subpool(block % structs, 'mesh', meshPool)
+       call mpas_pool_get_subpool(block % structs, 'diagnostics', diagnosticsPool)
+
+       call mpas_pool_get_dimension(meshPool, 'nCellsSolve', nCellsSolve)
+       call mpas_pool_get_dimension(meshPool, 'nEdgesSolve', nEdgesSolve)
+
+       call mpas_pool_get_array(meshPool, 'xCell', xCell)
+       call mpas_pool_get_array(meshPool, 'yCell', yCell)
+       call mpas_pool_get_array(meshPool, 'xEdge', xEdge)
+       call mpas_pool_get_array(meshPool, 'yEdge', yEdge)
+
+       xCellMin = minval(xCell(1:nCellsSolve))
+       xCellMax = maxval(xCell(1:nCellsSolve))
+       yCellMin = minval(yCell(1:nCellsSolve))
+       yCellMax = maxval(yCell(1:nCellsSolve))
+       xEdgeMin = minval(xEdge(1:nEdgesSolve))
+       xEdgeMax = maxval(xEdge(1:nEdgesSolve))
+       yEdgeMin = minval(yEdge(1:nEdgesSolve))
+       yEdgeMax = maxval(yEdge(1:nEdgesSolve))
+
+       block => block % next
+    end do
+
+    ! Determine global min and max values.
+    call mpas_pool_get_array(diagnosticsPool, 'xCellGlobalMin', xCellGlobalMin)
+    call mpas_pool_get_array(diagnosticsPool, 'xCellGlobalMax', xCellGlobalMax)
+    call mpas_pool_get_array(diagnosticsPool, 'yCellGlobalMin', yCellGlobalMin)
+    call mpas_pool_get_array(diagnosticsPool, 'yCellGlobalMax', yCellGlobalMax)
+    call mpas_pool_get_array(diagnosticsPool, 'xEdgeGlobalMin', xEdgeGlobalMin)
+    call mpas_pool_get_array(diagnosticsPool, 'xEdgeGlobalMax', xEdgeGlobalMax)
+    call mpas_pool_get_array(diagnosticsPool, 'yEdgeGlobalMin', yEdgeGlobalMin)
+    call mpas_pool_get_array(diagnosticsPool, 'yEdgeGlobalMax', yEdgeGlobalMax)
+    call mpas_dmpar_min_real(domain % dminfo, xCellMin, xCellGlobalMin)
+    call mpas_dmpar_max_real(domain % dminfo, xCellMax, xCellGlobalMax)
+    call mpas_dmpar_min_real(domain % dminfo, yCellMin, yCellGlobalMin)
+    call mpas_dmpar_max_real(domain % dminfo, yCellMax, yCellGlobalMax)
+    call mpas_dmpar_min_real(domain % dminfo, xEdgeMin, xEdgeGlobalMin)
+    call mpas_dmpar_max_real(domain % dminfo, xEdgeMax, xEdgeGlobalMax)
+    call mpas_dmpar_min_real(domain % dminfo, yEdgeMin, yEdgeGlobalMin)
+    call mpas_dmpar_max_real(domain % dminfo, yEdgeMax, yEdgeGlobalMax)
+
+    ! LY = yMaxGlobal - yMinGlobal
+    ! LX = xMaxGlobal - xMinGlobal
+
+   end subroutine ocn_init_routines_verification!}}}
 
 !***********************************************************************
 !

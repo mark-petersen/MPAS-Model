@@ -179,6 +179,7 @@ contains
       real (kind=RKIND), dimension(:), pointer :: sshSolution, normalVelocitySolution, velocityMeridionalSolution, velocityZonalSolution
       real (kind=RKIND) :: f0, beta, maxDepth, phaseSpeed, Rinv, etaHat, kY, v, timeInSec
       real (kind=RKIND) :: xMin,xMax,yMin,yMax,yMinGlobal,yMaxGlobal,xMinGlobal,xMaxGlobal, LX, LY
+      real (kind=RKIND), pointer :: daysSinceStartOfSim
 
       call mpas_timer_start('diagnostic solve')
 

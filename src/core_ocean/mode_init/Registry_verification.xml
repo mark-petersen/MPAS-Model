@@ -32,4 +32,36 @@
 			 description="component of horizontal velocity in the northward direction"
 			 packages="verificationPKG"
 		/>
+		<var name="xCellGlobalMin" type="real" dimensions="" units="m"
+			description="Global minimum of cell locations"
+			 packages="verificationPKG"
+		/>
+		<var name="xCellGlobalMax" type="real" dimensions="" units="m"
+			description="Global minimum of cell locations"
+			 packages="verificationPKG"
+		/>
+		<var name="yCellGlobalMin" type="real" dimensions="" units="m"
+			description="Global minimum of cell locations"
+			 packages="verificationPKG"
+		/>
+		<var name="yCellGlobalMax" type="real" dimensions="" units="m"
+			description="Global minimum of cell locations"
+			 packages="verificationPKG"
+		/>
+		<var name="xEdgeGlobalMin" type="real" dimensions="" units="m"
+			description="Global minimum of edge locations"
+			 packages="verificationPKG"
+		/>
+		<var name="xEdgeGlobalMax" type="real" dimensions="" units="m"
+			description="Global minimum of edge locations"
+			 packages="verificationPKG"
+		/>
+		<var name="yEdgeGlobalMin" type="real" dimensions="" units="m"
+			description="Global minimum of edge locations"
+			 packages="verificationPKG"
+		/>
+		<var name="yEdgeGlobalMax" type="real" dimensions="" units="m"
+			description="Global minimum of edge locations"
+			 packages="verificationPKG"
+		/>
 	</var_struct>

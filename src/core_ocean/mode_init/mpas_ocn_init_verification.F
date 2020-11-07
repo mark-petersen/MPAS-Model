@@ -139,39 +139,42 @@ contains
     xMax = -1.0E10_RKIND
     dcEdgeMin = 1.0E10_RKIND
 
-    ! Determine local min and max values.
-    block_ptr => domain % blocklist
-    do while(associated(block_ptr))
-       call mpas_pool_get_subpool(block_ptr % structs, 'mesh', meshPool)
-       call mpas_pool_get_subpool(block_ptr % structs, 'diagnostics', diagnosticsPool)
+!    ! Determine local min and max values.
+!    block_ptr => domain % blocklist
+!    do while(associated(block_ptr))
+!       call mpas_pool_get_subpool(block_ptr % structs, 'mesh', meshPool)
+!       call mpas_pool_get_subpool(block_ptr % structs, 'diagnostics', diagnosticsPool)
+!
+!       call mpas_pool_get_dimension(meshPool, 'nCellsSolve', nCellsSolve)
+!       call mpas_pool_get_dimension(meshPool, 'nEdgesSolve', nEdgesSolve)
+!
+!       call mpas_pool_get_array(meshPool, 'xCell', xCell)
+!       call mpas_pool_get_array(meshPool, 'yCell', yCell)
+!       call mpas_pool_get_array(meshPool, 'xEdge', xEdge)
+!       call mpas_pool_get_array(meshPool, 'yEdge', yEdge)
+!
+!       xCellMin = minval(xCell(1:nCellsSolve))
+!       xCellMax = maxval(xCell(1:nCellsSolve))
+!       yCellMin = minval(yCell(1:nCellsSolve))
+!       yCellMax = maxval(yCell(1:nCellsSolve))
+!       xEdgeMin = minval(xEdge(1:nEdgesSolve))
+!       xEdgeMax = maxval(xEdge(1:nEdgesSolve))
+!       yEdgeMin = minval(yEdge(1:nEdgesSolve))
+!       yEdgeMax = maxval(yEdge(1:nEdgesSolve))
+!
+!       block_ptr => block_ptr % next
+!    end do
+!
+!    ! Determine global min and max values.
+!    call mpas_dmpar_min_real(domain % dminfo, xCellMin, xCellGlobalMin)
+!    call mpas_dmpar_max_real(domain % dminfo, xCellMax, xCellGlobalMax)
+!    call mpas_dmpar_min_real(domain % dminfo, yCellMin, yCellGlobalMin)
+!    call mpas_dmpar_max_real(domain % dminfo, yCellMax, yCellGlobalMax)
+!    call mpas_dmpar_min_real(domain % dminfo, xEdgeMin, xEdgeGlobalMin)
+!    call mpas_dmpar_max_real(domain % dminfo, xEdgeMax, xEdgeGlobalMax)
+!    call mpas_dmpar_min_real(domain % dminfo, yEdgeMin, yEdgeGlobalMin)
+!    call mpas_dmpar_max_real(domain % dminfo, yEdgeMax, yEdgeGlobalMax)
 
-       call mpas_pool_get_dimension(meshPool, 'nCellsSolve', nCellsSolve)
-       call mpas_pool_get_dimension(meshPool, 'nEdgesSolve', nEdgesSolve)
-
-       call mpas_pool_get_array(meshPool, 'xCell', xCell)
-       call mpas_pool_get_array(meshPool, 'yCell', yCell)
-       call mpas_pool_get_array(meshPool, 'xEdge', xEdge)
-       call mpas_pool_get_array(meshPool, 'yEdge', yEdge)
-       call mpas_pool_get_array(meshPool, 'dcEdge', dcEdge)
-       call mpas_pool_get_array(meshPool, 'angleEdge', angleEdge)
-       call mpas_pool_get_array(diagnosticsPool, 'daysSinceStartOfSim',daysSinceStartOfSim)
-       timeInSec = daysSinceStartOfSim * 86400.0_RKIND
-
-       yMin = min( yMin, minval(yEdge(1:nEdgesSolve)))
-       yMax = max( yMax, maxval(yEdge(1:nEdgesSolve)))
-       xMin = min( xMin, minval(xEdge(1:nEdgesSolve)))
-       xMax = max( xMax, maxval(xEdge(1:nEdgesSolve)))
-       dcEdgeMin = min( dcEdgeMin, minval(dcEdge(1:nEdgesSolve)))
-
-       block_ptr => block_ptr % next
-    end do
-
-    ! Determine global min and max values.
-    call mpas_dmpar_min_real(domain % dminfo, yMin, yMinGlobal)
-    call mpas_dmpar_max_real(domain % dminfo, yMax, yMaxGlobal)
-    call mpas_dmpar_min_real(domain % dminfo, xMin, xMinGlobal)
-    call mpas_dmpar_max_real(domain % dminfo, xMax, xMaxGlobal)
-    call mpas_dmpar_min_real(domain % dminfo, dcEdgeMin, dcEdgeMinGlobal)
     LY = yMaxGlobal - yMinGlobal
     LX = xMaxGlobal - xMinGlobal
 
