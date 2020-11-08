@@ -262,6 +262,8 @@ module ocn_forward_mode
 
       call ocn_init_routines_compute_max_level(domain)
 
+      call ocn_init_routines_verification(domain)
+
       call ocn_time_integration_split_init(domain)
 
       call mpas_log_write(' Vertical coordinate movement is: ' // trim(config_vert_coord_movement))

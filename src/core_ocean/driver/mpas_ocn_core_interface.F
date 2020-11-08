@@ -126,6 +126,7 @@ module ocn_core_interface
       logical, pointer :: inSituEOSActive
       logical, pointer :: variableShortwaveActive
       logical, pointer :: gmActive
+      logical, pointer :: verificationPKGActive
       logical, pointer :: timeVaryingAtmosphericForcingPKGActive
       logical, pointer :: timeVaryingLandIceForcingPKGActive
 
@@ -154,6 +155,7 @@ module ocn_core_interface
       logical, pointer :: config_use_tidal_potential_forcing
       logical, pointer :: config_use_GM
       logical, pointer :: config_use_Redi
+      logical, pointer :: config_verification_enable
       logical, pointer :: config_use_vegetation_drag
       logical, pointer :: config_use_time_varying_atmospheric_forcing
       logical, pointer :: config_use_time_varying_land_ice_forcing
@@ -326,6 +328,15 @@ module ocn_core_interface
       call mpas_pool_get_config(configPool, 'config_use_Redi', config_use_Redi)
       if (config_use_GM.or.config_use_Redi) then
          gmActive = .true.
+      end if
+
+      !
+      ! test for use of verification
+      !
+      call mpas_pool_get_package(packagePool, 'verificationPKGActive', verificationPKGActive)
+      call mpas_pool_get_config(configPool, 'config_verification_enable', config_verification_enable)
+      if (config_verification_enable) then
+         verificationPKGActive = .true.
       end if
 
       ! test for time-varying forcing

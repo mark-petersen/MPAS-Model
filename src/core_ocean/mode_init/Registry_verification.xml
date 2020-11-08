@@ -45,23 +45,23 @@
 			 packages="verificationPKG"
 		/>
 		<var name="yCellGlobalMax" type="real" dimensions="" units="m"
-			description="Global minimum of cell locations"
+			description="Global maximum of cell locations"
 			 packages="verificationPKG"
 		/>
-		<var name="xEdgeGlobalMin" type="real" dimensions="" units="m"
-			description="Global minimum of edge locations"
+		<var name="dcEdgeGlobalMin" type="real" dimensions="" units="m"
+			description="Global minimum of edge width"
 			 packages="verificationPKG"
 		/>
-		<var name="xEdgeGlobalMax" type="real" dimensions="" units="m"
-			description="Global minimum of edge locations"
+		<var name="dcEdgeGlobalMax" type="real" dimensions="" units="m"
+			description="Global maximum of edge width"
 			 packages="verificationPKG"
 		/>
-		<var name="yEdgeGlobalMin" type="real" dimensions="" units="m"
-			description="Global minimum of edge locations"
+		<var name="xPlanarDomainWidth" type="real" dimensions="" units="m"
+			description="periodic width of domain"
 			 packages="verificationPKG"
 		/>
-		<var name="yEdgeGlobalMax" type="real" dimensions="" units="m"
-			description="Global minimum of edge locations"
+		<var name="yPlanarDomainWidth" type="real" dimensions="" units="m"
+			description="periodic width of domain"
 			 packages="verificationPKG"
 		/>
 	</var_struct>

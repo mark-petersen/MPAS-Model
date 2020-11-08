@@ -178,8 +178,8 @@ contains
       real (kind=RKIND), dimension(:), pointer :: xCell, yCell, xEdge, yEdge, angleEdge
       real (kind=RKIND), dimension(:), pointer :: sshSolution, normalVelocitySolution, velocityMeridionalSolution, velocityZonalSolution
       real (kind=RKIND) :: f0, beta, maxDepth, phaseSpeed, Rinv, etaHat, kY, v, timeInSec
-      real (kind=RKIND) :: xMin,xMax,yMin,yMax,yMinGlobal,yMaxGlobal,xMinGlobal,xMaxGlobal, LX, LY
-      real (kind=RKIND), pointer :: daysSinceStartOfSim
+      real (kind=RKIND) :: xMin,xMax,yMin,yMax,yMinGlobal,yMaxGlobal,xMinGlobal,xMaxGlobal
+      real (kind=RKIND), pointer :: daysSinceStartOfSim, yPlanarDomainWidth
 
       call mpas_timer_start('diagnostic solve')
 
@@ -925,8 +925,10 @@ contains
        call mpas_pool_get_array(meshPool, 'yEdge', yEdge)
        call mpas_pool_get_array(meshPool, 'angleEdge', angleEdge)
        call mpas_pool_get_array(diagnosticsPool, 'daysSinceStartOfSim',daysSinceStartOfSim)
+       call mpas_pool_get_array(diagnosticsPool, 'yPlanarDomainWidth', yPlanarDomainWidth)
        timeInSec = daysSinceStartOfSim * 86400.0_RKIND
 
+       maxDepth = 3000.0_RKIND ! H [m]
        select case (config_verification_case)
        case (1) ! coastal Kelvin wave
           f0 = 1.0e-4_RKIND ! coriolis parameter [1/s]
@@ -934,15 +936,15 @@ contains
           phaseSpeed = sqrt(gravity*maxDepth) ! c=sqrt(gH)
           Rinv = f0 / phaseSpeed ! R = sqrt(gH)/f0
           etaHat = 0.001
-          kY = 2.0_RKIND*pii/LY
+          kY = 2.0_RKIND*pii/yPlanarDomainWidth
 
           do iCell = 1, nCells
               sshSolution(iCell) = - maxDepth &
                  * etaHat*sin(Ky*(yCell(iCell) + phaseSpeed*timeInSec)) &
                  * exp(-xCell(iCell) * Rinv)
               velocityMeridionalSolution(iCell) = phaseSpeed &
-                 * etaHat*sin(Ky*(yEdge(iEdge) + phaseSpeed*timeInSec)) &
-                 * exp(-xEdge(iEdge) * Rinv) 
+                 * etaHat*sin(Ky*(yCell(iCell) + phaseSpeed*timeInSec)) &
+                 * exp(-xCell(iCell) * Rinv) 
           end do
           do iEdge = 1, nEdges
               ! u = 0.0

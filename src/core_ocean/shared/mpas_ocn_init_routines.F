@@ -67,8 +67,8 @@ module ocn_init_routines
       ocn_init_routines_compute_mesh_scaling, &
       ocn_init_routines_setup_sign_and_index_fields, &
       ocn_init_routines_vert_coord, &
-      ocn_init_routines_verification, &
       ocn_init_routines_block, &
+      ocn_init_routines_verification, &
       ocn_init_metadata
 
    !--------------------------------------------------------------------
@@ -607,12 +607,13 @@ end subroutine ocn_init_routines_compute_max_level!}}}
 
       integer, pointer :: nCellsSolve, nEdgesSolve
       real (kind=RKIND) :: xCellMin, xCellMax, yCellMin, yCellMax
-      real (kind=RKIND) :: xEdgeMin, xEdgeMax, yEdgeMin, yEdgeMax
+      real (kind=RKIND) :: dcEdgeMin, dcEdgeMax, yEdgeMin, yEdgeMax
       real (kind=RKIND), pointer :: xCellGlobalMin, xCellGlobalMax, yCellGlobalMin, yCellGlobalMax
-      real (kind=RKIND), pointer :: xEdgeGlobalMin, xEdgeGlobalMax, yEdgeGlobalMin, yEdgeGlobalMax
-      real (kind=RKIND), dimension(:), pointer :: xCell, yCell, xEdge, yEdge
+      real (kind=RKIND), pointer :: dcEdgeGlobalMin, dcEdgeGlobalMax, xPlanarDomainWidth, yPlanarDomainWidth
+      real (kind=RKIND), dimension(:), pointer :: xCell, yCell, dcEdge, yEdge
 
-    ! Determine vertical grid for configuration
+    if (.not.config_verification_enable) return
+
     call mpas_pool_get_subpool(domain % blocklist % structs, 'mesh', meshPool)
     call mpas_pool_get_subpool(domain % blocklist % structs, 'diagnostics', diagnosticsPool)
 
@@ -627,15 +628,15 @@ end subroutine ocn_init_routines_compute_max_level!}}}
 
        call mpas_pool_get_array(meshPool, 'xCell', xCell)
        call mpas_pool_get_array(meshPool, 'yCell', yCell)
-       call mpas_pool_get_array(meshPool, 'xEdge', xEdge)
+       call mpas_pool_get_array(meshPool, 'dcEdge', dcEdge)
        call mpas_pool_get_array(meshPool, 'yEdge', yEdge)
 
        xCellMin = minval(xCell(1:nCellsSolve))
        xCellMax = maxval(xCell(1:nCellsSolve))
        yCellMin = minval(yCell(1:nCellsSolve))
        yCellMax = maxval(yCell(1:nCellsSolve))
-       xEdgeMin = minval(xEdge(1:nEdgesSolve))
-       xEdgeMax = maxval(xEdge(1:nEdgesSolve))
+       dcEdgeMin = minval(dcEdge(1:nEdgesSolve))
+       dcEdgeMax = maxval(dcEdge(1:nEdgesSolve))
        yEdgeMin = minval(yEdge(1:nEdgesSolve))
        yEdgeMax = maxval(yEdge(1:nEdgesSolve))
 
@@ -647,21 +648,24 @@ end subroutine ocn_init_routines_compute_max_level!}}}
     call mpas_pool_get_array(diagnosticsPool, 'xCellGlobalMax', xCellGlobalMax)
     call mpas_pool_get_array(diagnosticsPool, 'yCellGlobalMin', yCellGlobalMin)
     call mpas_pool_get_array(diagnosticsPool, 'yCellGlobalMax', yCellGlobalMax)
-    call mpas_pool_get_array(diagnosticsPool, 'xEdgeGlobalMin', xEdgeGlobalMin)
-    call mpas_pool_get_array(diagnosticsPool, 'xEdgeGlobalMax', xEdgeGlobalMax)
-    call mpas_pool_get_array(diagnosticsPool, 'yEdgeGlobalMin', yEdgeGlobalMin)
-    call mpas_pool_get_array(diagnosticsPool, 'yEdgeGlobalMax', yEdgeGlobalMax)
+    call mpas_pool_get_array(diagnosticsPool, 'dcEdgeGlobalMin', dcEdgeGlobalMin)
+    call mpas_pool_get_array(diagnosticsPool, 'dcEdgeGlobalMax', dcEdgeGlobalMax)
+    call mpas_pool_get_array(diagnosticsPool, 'xPlanarDomainWidth', xPlanarDomainWidth)
+    call mpas_pool_get_array(diagnosticsPool, 'yPlanarDomainWidth', yPlanarDomainWidth)
     call mpas_dmpar_min_real(domain % dminfo, xCellMin, xCellGlobalMin)
     call mpas_dmpar_max_real(domain % dminfo, xCellMax, xCellGlobalMax)
     call mpas_dmpar_min_real(domain % dminfo, yCellMin, yCellGlobalMin)
     call mpas_dmpar_max_real(domain % dminfo, yCellMax, yCellGlobalMax)
-    call mpas_dmpar_min_real(domain % dminfo, xEdgeMin, xEdgeGlobalMin)
-    call mpas_dmpar_max_real(domain % dminfo, xEdgeMax, xEdgeGlobalMax)
-    call mpas_dmpar_min_real(domain % dminfo, yEdgeMin, yEdgeGlobalMin)
-    call mpas_dmpar_max_real(domain % dminfo, yEdgeMax, yEdgeGlobalMax)
+    call mpas_dmpar_min_real(domain % dminfo, dcEdgeMin, dcEdgeGlobalMin)
+    call mpas_dmpar_max_real(domain % dminfo, dcEdgeMax, dcEdgeGlobalMax)
 
-    ! LY = yMaxGlobal - yMinGlobal
-    ! LX = xMaxGlobal - xMinGlobal
+    if ((dcEdgeGlobalMax-dcEdgeGlobalMin)/dcEdgeGlobalMin>1e-8) then
+       call mpas_log_write('Verification can only be done on a regular planar mesh', &
+           messageType=MPAS_LOG_CRIT)
+    endif
+
+    xPlanarDomainWidth = xCellGlobalMax - xCellGlobalMin + dcEdgeGlobalMax*0.5_RKIND
+    yPlanarDomainWidth = yCellGlobalMax - yCellGlobalMin + dcEdgeGlobalMax*0.5_RKIND*sqrt(3.0_RKIND)
 
    end subroutine ocn_init_routines_verification!}}}
 

@@ -91,7 +91,7 @@ contains
     ! local variables
     integer :: iCell, iEdge, k, idx
     real (kind=RKIND) :: yMin, yMax, xMin, xMax, dcEdgeMin, dcEdgeMinGlobal
-    real (kind=RKIND) :: yMinGlobal, yMaxGlobal, yMidGlobal, xMinGlobal, xMaxGlobal, LY, LX
+    real (kind=RKIND) :: yMinGlobal, yMaxGlobal, yMidGlobal, xMinGlobal, xMaxGlobal
     real (kind=RKIND) :: localVar1, localVar2
     real (kind=RKIND), dimension(:), pointer :: interfaceLocations
     real (kind=RKIND) :: f0, beta, maxDepth, phaseSpeed, Rinv, etaHat, kY, T0, S0, v, timeInSec
@@ -111,7 +111,7 @@ contains
     real (kind=RKIND), dimension(:), pointer :: ssh
     real (kind=RKIND), dimension(:,:), pointer :: layerThickness, restingThickness, normalVelocity
     real (kind=RKIND), dimension(:,:,:), pointer :: activeTracers
-    real (kind=RKIND), pointer :: daysSinceStartOfSim
+    real (kind=RKIND), pointer :: yPlanarDomainWidth
 
     iErr = 0
 
@@ -144,9 +144,7 @@ contains
 !    do while(associated(block_ptr))
 !       call mpas_pool_get_subpool(block_ptr % structs, 'mesh', meshPool)
 !       call mpas_pool_get_subpool(block_ptr % structs, 'diagnostics', diagnosticsPool)
-!
-!       call mpas_pool_get_dimension(meshPool, 'nCellsSolve', nCellsSolve)
-!       call mpas_pool_get_dimension(meshPool, 'nEdgesSolve', nEdgesSolve)
+
 !
 !       call mpas_pool_get_array(meshPool, 'xCell', xCell)
 !       call mpas_pool_get_array(meshPool, 'yCell', yCell)
@@ -175,9 +173,6 @@ contains
 !    call mpas_dmpar_min_real(domain % dminfo, yEdgeMin, yEdgeGlobalMin)
 !    call mpas_dmpar_max_real(domain % dminfo, yEdgeMax, yEdgeGlobalMax)
 
-    LY = yMaxGlobal - yMinGlobal
-    LX = xMaxGlobal - xMinGlobal
-
     !--------------------------------------------------------------------
     ! Use this section to set initial values
     !--------------------------------------------------------------------
@@ -186,9 +181,12 @@ contains
     do while(associated(block_ptr))
        call mpas_pool_get_subpool(block_ptr % structs, 'mesh', meshPool)
        call mpas_pool_get_subpool(block_ptr % structs, 'state', statePool)
+       call mpas_pool_get_subpool(block_ptr % structs, 'diagnostics', diagnosticsPool)
        call mpas_pool_get_subpool(block_ptr % structs, 'verticalMesh', verticalMeshPool)
        call mpas_pool_get_subpool(statePool, 'tracers', tracersPool)
 
+       call mpas_pool_get_dimension(meshPool, 'nCellsSolve', nCellsSolve)
+       call mpas_pool_get_dimension(meshPool, 'nEdgesSolve', nEdgesSolve)
        call mpas_pool_get_dimension(meshPool, 'nVertLevels', nVertLevels)
        call mpas_pool_get_dimension(meshPool, 'nCellsSolve', nCellsSolve)
 
@@ -197,8 +195,10 @@ contains
 
        call mpas_pool_get_array(meshPool, 'xCell', xCell)
        call mpas_pool_get_array(meshPool, 'yCell', yCell)
+       call mpas_pool_get_array(meshPool, 'xEdge', xEdge)
        call mpas_pool_get_array(meshPool, 'yEdge', yEdge)
        call mpas_pool_get_array(meshPool, 'yVertex', yVertex)
+       call mpas_pool_get_array(meshPool, 'angleEdge', angleEdge)
        call mpas_pool_get_array(meshPool, 'refBottomDepth', refBottomDepth)
        call mpas_pool_get_array(meshPool, 'vertCoordMovementWeights', vertCoordMovementWeights)
        call mpas_pool_get_array(meshPool, 'bottomDepth', bottomDepth)
@@ -215,7 +215,8 @@ contains
        call mpas_pool_get_array(verticalMeshPool, 'refZMid', refZMid)
        call mpas_pool_get_array(verticalMeshPool, 'restingThickness', restingThickness)
        call mpas_pool_get_array(verticalMeshPool, 'refLayerThickness', refLayerThickness)
-       call mpas_pool_get_array(verticalMeshPool, 'refZMid', refZMid)
+
+       call mpas_pool_get_array(diagnosticsPool, 'yPlanarDomainWidth', yPlanarDomainWidth)
 
        maxDepth = 3000.0_RKIND ! H [m]
 
@@ -233,14 +234,13 @@ contains
 
        select case (config_verification_case)
        case (1) ! coastal Kelvin wave
-       print *, 'coastal Kelvin wave'
           f0 = 1.0e-4_RKIND ! coriolis parameter [1/s]
           beta = 0.0 ! beta parameter
           flatBottom = .true.
           phaseSpeed = sqrt(gravity*maxDepth) ! c=sqrt(gH)
           Rinv = f0 / phaseSpeed ! R = sqrt(gH)/f0
           etaHat = 0.001
-          kY = 2.0_RKIND*pii/LY
+          kY = 2.0_RKIND*pii/yPlanarDomainWidth
           T0 = 20.0_RKIND ! constant temperature
           S0 = 35.0_RKIND ! constant salinity
 

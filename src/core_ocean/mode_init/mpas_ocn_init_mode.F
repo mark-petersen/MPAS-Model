@@ -168,6 +168,8 @@ module ocn_init_mode
       ! Expand sphere if it needs to be expanded
       call ocn_init_expand_sphere(domain, domain % streamManager, a, ierr)
 
+      call ocn_init_routines_verification(domain)
+
    end function ocn_init_mode_init!}}}
 
 !***********************************************************************
