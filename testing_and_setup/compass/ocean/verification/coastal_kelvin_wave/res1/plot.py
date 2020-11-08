@@ -26,22 +26,43 @@ ncfile = Dataset('output.nc', 'r')
 #difL2[i, j, k] = np.sqrt(np.mean(dif[:]**2))
 #errL2[i, j, k] = np.sqrt(np.mean(err[:]**2))
 
+fig = plt.gcf()
+plt.clf()
+fig.set_size_inches(20.0, 20.0)
+
 varNames = ['ssh','sshSolution']
+varName='ssh'
 for iTime in range(3):
-    for iVar, varName in enumerate(varNames):
+      #for iVar, varName in enumerate(varNames):
       var = np.reshape(ncfile.variables[varName][iTime, :], [ny, nx])
+      sol = np.reshape(ncfile.variables[varName+'Solution'][iTime, :], [ny, nx])
+      dif = var-sol
       var_avg = var
-      #sol_avg = sol
+      sol_avg = sol
+      dif_avg = dif
       for iy in range(0, ny, 2):
           for ix in range(1, nx - 2):
               var_avg[iy, ix] = (var[iy, ix + 1] + var[iy, ix]) / 2.0
-              #sol_avg[iy, ix] = (sol[iy, ix + 1] + sol[iy, ix]) / 2.0
+              sol_avg[iy, ix] = (sol[iy, ix + 1] + sol[iy, ix]) / 2.0
+              dif_avg[iy, ix] = (dif[iy, ix + 1] + dif[iy, ix]) / 2.0
       
-      ax1 = plt.subplot(3, 4, 4 * iTime + iVar + 1)
+      ax1 = plt.subplot(3, 3, 3 * iTime + 0 + 1)
       plt.imshow(var_avg)
+      plt.title('model' + ' time = '+str(iTime))
       plt.colorbar()
       plt.set_cmap('bwr')
-      plt.title(varName + 'time = '+str(iTime))
+
+      ax1 = plt.subplot(3, 3, 3 * iTime + 1 + 1)
+      plt.imshow(sol_avg)
+      plt.title('sol' + ' time = '+str(iTime))
+      plt.colorbar()
+      plt.set_cmap('bwr')
+
+      ax1 = plt.subplot(3, 3, 3 * iTime + 2 + 1)
+      plt.imshow(dif_avg)
+      plt.title('dif' + ' time = '+str(iTime))
+      plt.colorbar()
+      plt.set_cmap('bwr')
 #
 #ax2 = plt.subplot(nGrids, 3, 3 * iTime + 2)
 #plt.imshow(sol_avg[1:ny - 1, 1:nx - 2])
