@@ -666,10 +666,6 @@ end subroutine ocn_init_routines_compute_max_level!}}}
 
     xPlanarDomainWidth = xCellGlobalMax - xCellGlobalMin + dcEdgeGlobalMax*0.5_RKIND
     yPlanarDomainWidth = yCellGlobalMax - yCellGlobalMin + dcEdgeGlobalMax*0.5_RKIND*sqrt(3.0_RKIND)
-    print *, 'yCellGlobalMin',yCellGlobalMin
-    print *, 'yCellGlobalMax',yCellGlobalMax
-    print *, 'dcEdgeGlobalMax',dcEdgeGlobalMax
-    print *, 'yPlanarDomainWidth',yPlanarDomainWidth
 
    end subroutine ocn_init_routines_verification!}}}
 

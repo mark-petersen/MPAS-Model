@@ -6,8 +6,7 @@
 
 import numpy as np
 import os
-import netCDF4 as nc
-from netCDF4 import Dataset
+import xarray as xr
 import shutil
 import argparse
 
@@ -21,15 +20,12 @@ def main():
                         default='base_mesh_fixed_angleEdge.nc',
                         help='Output file, containing corrected AngleEdge'
                         )
-    input_file = parser.parse_args().input_file
-    output_file = parser.parse_args().output_file
-    shutil.copy2(input_file, output_file)
-    ds = Dataset(output_file, 'a', format='NETCDF3_64BIT_OFFSET')
+    ds = xr.open_dataset(parser.parse_args().input_file)
 
     fix_angleEdge(ds,determineYCellAlongLatitude=True,printOutput=False,
                                            printRelevantMeshData=False)
 
-    ds.close()
+    ds.to_netcdf(parser.parse_args().output_file, format='NETCDF3_64BIT_OFFSET')
 
 def returnTanInverseInProperQuadrant(DeltaX,DeltaY,printAngle=False):
     if DeltaX != 0.0:
@@ -73,11 +69,24 @@ def testAngle():
 
 def fix_angleEdge(ds,determineYCellAlongLatitude=True,printOutput=False,
                   printRelevantMeshData=False):
-    dcEdge = round(max(ds.variables['dcEdge'][:]))  
-    DeltaXMax = max(ds.variables['dcEdge'][:])
-    xCell = ds.variables['xCell'][:]        
-    yCell = ds.variables['yCell'][:]  
-    nCells = np.size(yCell)
+
+    nCells = ds['nCells'].size
+    nEdges = ds['nEdges'].size
+    nVertices = ds['nVertices'].size
+
+    xCell = ds['xCell']
+    xEdge = ds['xEdge']
+    xVertex = ds['xVertex']
+    yCell = ds['yCell']
+    yEdge = ds['yEdge']
+    yVertex = ds['yVertex']
+    dcEdge = ds['dcEdge']
+    angleEdge = ds['angleEdge']
+    cellsOnEdge = ds['cellsOnEdge']
+
+    dcEdgeGlobal = max(dcEdge[:])
+    DeltaXMax = max(dcEdge[:])
+
     # The determination of yCellAlongLatitude in the following lines only holds for rectangular structured meshes 
     # with equal number of cells in each direction. However, for a problem with non-periodic boundary conditions,
     # it will work for the culled mesh and the final mesh, but not the base mesh.
@@ -92,11 +101,6 @@ def fix_angleEdge(ds,determineYCellAlongLatitude=True,printOutput=False,
         DeltaYMax = max(np.diff(yCellAlongLatitude))
     else:
         DeltaYMax = DeltaXMax*np.sqrt(3.0)/2.0
-    xEdge = ds.variables['xEdge'][:]        
-    yEdge = ds.variables['yEdge'][:] 
-    angleEdge = ds.variables['angleEdge'][:]
-    cellsOnEdge = ds.variables['cellsOnEdge'][:]
-    nEdges = np.size(angleEdge)
     computed_angleEdge = np.zeros(nEdges)
     tolerance = 10.0**(-3.0) 
     if printOutput and printRelevantMeshData:
@@ -116,73 +120,71 @@ def fix_angleEdge(ds,determineYCellAlongLatitude=True,printOutput=False,
         DeltaY = yCell2 - yCell1
         if cellID2 == 0:
             if thisXEdge > xCell1 and abs(thisYEdge - yCell1) < tolerance:
-                DeltaX = dcEdge
+                DeltaX = dcEdgeGlobal
                 DeltaY = 0.0
             elif thisXEdge > xCell1 and thisYEdge > yCell1:
-                DeltaX = dcEdge/2.0
-                DeltaY = np.sqrt(3.0)/2.0*dcEdge   
+                DeltaX = dcEdgeGlobal/2.0
+                DeltaY = np.sqrt(3.0)/2.0*dcEdgeGlobal   
             elif thisXEdge > xCell1 and thisYEdge < yCell1:
-                DeltaX = dcEdge/2.0
-                DeltaY = -np.sqrt(3.0)/2.0*dcEdge                   
+                DeltaX = dcEdgeGlobal/2.0
+                DeltaY = -np.sqrt(3.0)/2.0*dcEdgeGlobal                   
             elif thisXEdge < xCell1 and abs(thisYEdge - yCell1) < tolerance:
-                DeltaX = -dcEdge
+                DeltaX = -dcEdgeGlobal
                 DeltaY = 0.0                
             elif thisXEdge < xCell1 and thisYEdge > yCell1:
-                DeltaX = -dcEdge/2.0
-                DeltaY = np.sqrt(3.0)/2.0*dcEdge
+                DeltaX = -dcEdgeGlobal/2.0
+                DeltaY = np.sqrt(3.0)/2.0*dcEdgeGlobal
             elif thisXEdge < xCell1 and thisYEdge < yCell1:
-                DeltaX = -dcEdge/2.0
-                DeltaY = -np.sqrt(3.0)/2.0*dcEdge                 
+                DeltaX = -dcEdgeGlobal/2.0
+                DeltaY = -np.sqrt(3.0)/2.0*dcEdgeGlobal                 
         else:
             if abs(DeltaY) < tolerance and DeltaX < 0.0 and abs(DeltaX) > DeltaXMax:
             # cells [{4,1},{8,5},{12,9},{16,13}] for a regular structured 4 x 4 mesh
-                DeltaX = dcEdge
+                DeltaX = dcEdgeGlobal
             elif abs(DeltaY) < tolerance and DeltaX > 0.0 and abs(DeltaX) > DeltaXMax:
             # cells [{1,4},{5,8},{9,12},{13,16}] for a regular structured 4 x 4 mesh
-                DeltaX = -dcEdge
+                DeltaX = -dcEdgeGlobal
             elif DeltaX < 0.0 and DeltaY < 0.0 and abs(DeltaX) > DeltaXMax and abs(DeltaY) > DeltaYMax:
             # cells [{16,1}] for a regular structured 4 x 4 mesh
-                DeltaX = dcEdge/2.0
-                DeltaY = np.sqrt(3.0)/2.0*dcEdge
+                DeltaX = dcEdgeGlobal/2.0
+                DeltaY = np.sqrt(3.0)/2.0*dcEdgeGlobal
             elif DeltaX < 0.0 and DeltaY < 0.0 and abs(DeltaX) > DeltaXMax and abs(DeltaY) <= DeltaYMax:
             # cells [{8,1},{16,9}] for a regular structured 4 x 4 mesh    
-                DeltaX = dcEdge/2.0
-                DeltaY = -np.sqrt(3.0)/2.0*dcEdge                   
+                DeltaX = dcEdgeGlobal/2.0
+                DeltaY = -np.sqrt(3.0)/2.0*dcEdgeGlobal                   
             elif DeltaX < 0.0 and DeltaY < 0.0 and abs(DeltaX) < DeltaXMax and abs(DeltaY) > DeltaYMax:
             # cells [{13,1},{14,2},{15,3},{16,4}] for a regular structured 4 x 4 mesh
-                DeltaX = -dcEdge/2.0
-                DeltaY = np.sqrt(3.0)/2.0*dcEdge
+                DeltaX = -dcEdgeGlobal/2.0
+                DeltaY = np.sqrt(3.0)/2.0*dcEdgeGlobal
             elif DeltaX < 0.0 and DeltaY > 0.0 and abs(DeltaX) < DeltaXMax and abs(DeltaY) > DeltaYMax:
             # cells [{2,13},{3,14},{4,15}] for a regular structured 4 x 4 mesh    
-                DeltaX = -dcEdge/2.0
-                DeltaY = -np.sqrt(3.0)/2.0*dcEdge       
+                DeltaX = -dcEdgeGlobal/2.0
+                DeltaY = -np.sqrt(3.0)/2.0*dcEdgeGlobal       
             elif DeltaX < 0.0 and DeltaY > 0.0 and abs(DeltaX) > DeltaXMax and abs(DeltaY) <= DeltaYMax:
             # cells [{8,9}] for a regular structured 4 x 4 mesh
-                DeltaX = dcEdge/2.0
-                DeltaY = np.sqrt(3.0)/2.0*dcEdge                   
+                DeltaX = dcEdgeGlobal/2.0
+                DeltaY = np.sqrt(3.0)/2.0*dcEdgeGlobal                   
             elif DeltaX > 0.0 and DeltaY < 0.0 and abs(DeltaX) > DeltaXMax and abs(DeltaY) <= DeltaYMax:
             # cells [{9,8}] for a regular structured 4 x 4 mesh
-                DeltaX = -dcEdge/2.0
-                DeltaY = -np.sqrt(3.0)/2.0*dcEdge                   
+                DeltaX = -dcEdgeGlobal/2.0
+                DeltaY = -np.sqrt(3.0)/2.0*dcEdgeGlobal                   
             elif DeltaX > 0.0 and DeltaY < 0.0 and abs(DeltaX) < DeltaXMax and abs(DeltaY) > DeltaYMax:
             # cells [{13,2},{14,3},{15,4}] for a regular structured 4 x 4 mesh
-                DeltaX = dcEdge/2.0
-                DeltaY = np.sqrt(3.0)/2.0*dcEdge                
+                DeltaX = dcEdgeGlobal/2.0
+                DeltaY = np.sqrt(3.0)/2.0*dcEdgeGlobal                
             elif DeltaX > 0.0 and DeltaY > 0.0 and abs(DeltaX) < DeltaXMax and abs(DeltaY) > DeltaYMax:
             # cells [{1,13},{2,14},{3,15},{4,16}] for a regular structured 4 x 4 mesh            
-                DeltaX = dcEdge/2.0
-                DeltaY = -np.sqrt(3.0)/2.0*dcEdge    
+                DeltaX = dcEdgeGlobal/2.0
+                DeltaY = -np.sqrt(3.0)/2.0*dcEdgeGlobal    
             elif DeltaX > 0.0 and DeltaY > 0.0 and abs(DeltaX) > DeltaXMax and abs(DeltaY) <= DeltaYMax:
             # cells [{1,8},{9,16}] for a regular structured 4 x 4 mesh    
-                DeltaX = -dcEdge/2.0
-                DeltaY = np.sqrt(3.0)/2.0*dcEdge    
+                DeltaX = -dcEdgeGlobal/2.0
+                DeltaY = np.sqrt(3.0)/2.0*dcEdgeGlobal    
             elif DeltaX > 0.0 and DeltaY > 0.0 and abs(DeltaX) > DeltaXMax and abs(DeltaY) > DeltaYMax:
             # cells [{1,16}] for a regular structured 4 x 4 mesh    
-                DeltaX = -dcEdge/2.0
-                DeltaY = -np.sqrt(3.0)/2.0*dcEdge   
-        computed_angleEdge[iEdge] = -99.0 #returnTanInverseInProperQuadrant(DeltaX,DeltaY)
-        angleEdge[iEdge] = -99.0 #returnTanInverseInProperQuadrant(DeltaX,DeltaY)
-        print('computed_angleEdge[iEdge] = -99.0',iEdge,computed_angleEdge[iEdge]) #returnTanInverseInProperQuadrant(DeltaX,DeltaY)
+                DeltaX = -dcEdgeGlobal/2.0
+                DeltaY = -np.sqrt(3.0)/2.0*dcEdgeGlobal   
+        computed_angleEdge[iEdge] = returnTanInverseInProperQuadrant(DeltaX,DeltaY)
         if printOutput:
             # printOutput should be specified as True only for small meshes consisting of 4 x 4 cells.
             if printRelevantMeshData: 
@@ -194,9 +196,8 @@ def fix_angleEdge(ds,determineYCellAlongLatitude=True,printOutput=False,
                 print(
                 'For edge %2d with cellsOnEdge = {%2d,%2d}, {angleEdge, computed_angleEdge} is {%.2f, %.2f}.'
                 %(iEdge+1,cellID1,cellID2,angleEdge[iEdge],computed_angleEdge[iEdge]))
+
     angleEdge[:] = computed_angleEdge[:]
-    print ('angleEdge[:]',computed_angleEdge)
-    print ('angleEdge[:]',angleEdge[:])
 
 def test_fix_AngleEdge():
 

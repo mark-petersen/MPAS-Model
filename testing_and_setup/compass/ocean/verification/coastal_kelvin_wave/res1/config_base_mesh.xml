@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <config case="base_mesh">
 
+    <add_link source_path="script_test_dir" source="fixAngleEdge.py" dest="fixAngleEdge.py"/>
+
 	<run_script name="run.py">
 		<step executable="planar_hex">
 			<argument flag="--nx">50</argument>
@@ -15,7 +17,12 @@
 		</step>
 		<step executable="MpasMeshConverter.x">
 			<argument flag="">culled_mesh.nc</argument>
-			<argument flag="">base_mesh.nc</argument>
+			<argument flag="">mesh_bad_angleEdge.nc</argument>
+		</step>
+		<step executable="python">
+			<argument flag="">./fixAngleEdge.py</argument>
+			<argument flag="-i">mesh_bad_angleEdge.nc</argument>
+			<argument flag="-o">base_mesh.nc</argument>
 		</step>
 	</run_script>
 
