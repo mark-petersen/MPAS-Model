@@ -2265,10 +2265,10 @@ module ocn_time_integration_split
                   enddo
 
                   ! normalBaroclinicVelocity=0, normalVelocity=0 on land cells
-                  do k = maxLevelEdgeTop(iEdge)+1, nVertLevels
-                     normalBaroclinicVelocity(k,iEdge) = 0.0_RKIND
-                     normalVelocity(k,iEdge) = 0.0_RKIND
-                  enddo
+                  !do k = maxLevelEdgeTop(iEdge)+1, nVertLevels
+                  !   normalBaroclinicVelocity(k,iEdge) = 0.0_RKIND
+                  !   normalVelocity(k,iEdge) = 0.0_RKIND
+                  !enddo
                enddo
 
                if (config_filter_btr_mode) then

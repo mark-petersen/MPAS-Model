@@ -30,6 +30,19 @@ fig = plt.gcf()
 plt.clf()
 fig.set_size_inches(20.0, 20.0)
 
+#iTime=0
+#xEdge = ncfile.variables['xEdge'][:]
+#yEdge = ncfile.variables['yEdge'][:]
+#angleEdge = ncfile.variables['angleEdge'][:]
+#normalVelocity = ncfile.variables['normalVelocity'][0,:,0]
+#print(np.size(normalVelocity))
+#print(np.shape(normalVelocity))
+#plt.scatter(xEdge,yEdge,s=80, c=normalVelocity, marker='.')
+##plt.scatter(xEdge,yEdge,s=80, c=angleEdge, marker='.')
+#plt.colorbar()
+#plt.set_cmap('jet')
+
+
 varNames = ['ssh','sshSolution']
 varName='ssh'
 for iTime in range(3):

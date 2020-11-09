@@ -197,6 +197,8 @@ module ocn_time_integration_rk4
       real (kind=RKIND), dimension(:), pointer :: tidalInputMask, tidalBCValue
       real (kind=RKIND), dimension(:,:), pointer :: restingThickness
       real (kind=RKIND) :: totalDepth
+      real (kind=RKIND), dimension(:), pointer :: normalVelocitySolution
+      integer, dimension(:,:), pointer :: boundaryEdge
 
       ! Get config options
       call mpas_pool_get_config(domain % configs, 'config_mom_del4', config_mom_del4)
@@ -548,6 +550,22 @@ module ocn_time_integration_rk4
               block => block % next
            end do
         end if
+         if (config_verification_enable) then
+            call mpas_pool_get_array(diagnosticsPool, 'normalVelocitySolution', normalVelocitySolution)
+            call mpas_pool_get_array(meshPool, 'boundaryEdge', boundaryEdge)
+            !$omp parallel
+            !$omp do schedule(runtime) 
+            do iEdge = 1, nEdges
+               do k = 1, maxLevelEdgeTop(iEdge)
+                  if (boundaryEdge(k,iEdge).eq.1) then 
+                     normalVelocityNew(k, iEdge) = normalVelocitySolution(iEdge)
+                  endif
+               end do
+            end do
+            !$omp end do
+            !$omp end parallel
+         end if
+
 
         call mpas_timer_stop("RK4-update diagnostic variables")
 
@@ -685,6 +703,22 @@ module ocn_time_integration_rk4
             !$omp do schedule(runtime) 
             do iCell = 1, nCells
                layerThicknessNew(:, iCell) = layerThicknessCur(:, iCell)
+            end do
+            !$omp end do
+            !$omp end parallel
+         end if
+
+         if (config_verification_enable) then
+            call mpas_pool_get_array(diagnosticsPool, 'normalVelocitySolution', normalVelocitySolution)
+            call mpas_pool_get_array(meshPool, 'boundaryEdge', boundaryEdge)
+            !$omp parallel
+            !$omp do schedule(runtime) 
+            do iEdge = 1, nEdges
+               do k = 1, maxLevelEdgeTop(iEdge)
+                  if (boundaryEdge(k,iEdge).eq.1) then 
+                     normalVelocityNew(k, iEdge) = normalVelocitySolution(iEdge)
+                  endif
+               end do
             end do
             !$omp end do
             !$omp end parallel
