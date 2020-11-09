@@ -1,19 +1,35 @@
-
 # coding: utf-8
 
 # Name: fixAngleEdge.ipynb <br/>
 # Author: Siddhartha Bishnu <br/>
 # Details: This code fixes the values of the angleEdge, defined by the angle made by the vector directed from the center of cellsOnEdge[0] to that of cellsOnEdge[1] with the positive eastward direction, along the boundaries of the domain. <br/>
 
-# In[1]:
-
 import numpy as np
 import os
 import netCDF4 as nc
 from netCDF4 import Dataset
+import shutil
+import argparse
 
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--input_file', dest='input_file',
+                        default='base_mesh.nc',
+                        help='Input file, containing mpas mesh and incorrect AngleEdge'
+                        )
+    parser.add_argument('-o', '--output_file', dest='output_file',
+                        default='base_mesh_fixed_angleEdge.nc',
+                        help='Output file, containing corrected AngleEdge'
+                        )
+    input_file = parser.parse_args().input_file
+    output_file = parser.parse_args().output_file
+    shutil.copy2(input_file, output_file)
+    ds = Dataset(output_file, 'a', format='NETCDF3_64BIT_OFFSET')
 
-# In[2]:
+    fix_angleEdge(ds,determineYCellAlongLatitude=True,printOutput=False,
+                                           printRelevantMeshData=False)
+
+    ds.close()
 
 def returnTanInverseInProperQuadrant(DeltaX,DeltaY,printAngle=False):
     if DeltaX != 0.0:
@@ -46,56 +62,21 @@ def returnTanInverseInProperQuadrant(DeltaX,DeltaY,printAngle=False):
             print('The trigonometric tangent of the angle is %.15f.' %np.tan(angle))
     return angle
 
+def testAngle():
+    angle = returnTanInverseInProperQuadrant(np.sqrt(3.0),1.0,True)
+    angle = returnTanInverseInProperQuadrant(-np.sqrt(3.0),1.0,True)
+    angle = returnTanInverseInProperQuadrant(-np.sqrt(3.0),-1.0,True)
+    angle = returnTanInverseInProperQuadrant(np.sqrt(3.0),-1.0,True)
+    angle = returnTanInverseInProperQuadrant(0.0,1.0,True)
+    angle = returnTanInverseInProperQuadrant(0.0,-1.0,True)
+    returnTanInverseInProperQuadrant(0.0,0.0,True)
 
-# In[3]:
-
-angle = returnTanInverseInProperQuadrant(np.sqrt(3.0),1.0,True)
-
-
-# In[4]:
-
-angle = returnTanInverseInProperQuadrant(-np.sqrt(3.0),1.0,True)
-
-
-# In[5]:
-
-angle = returnTanInverseInProperQuadrant(-np.sqrt(3.0),-1.0,True)
-
-
-# In[6]:
-
-angle = returnTanInverseInProperQuadrant(np.sqrt(3.0),-1.0,True)
-
-
-# In[7]:
-
-angle = returnTanInverseInProperQuadrant(0.0,1.0,True)
-
-
-# In[8]:
-
-angle = returnTanInverseInProperQuadrant(0.0,-1.0,True)
-
-
-# In[9]:
-
-returnTanInverseInProperQuadrant(0.0,0.0,True)
-
-
-# In[10]:
-
-def fix_angleEdge(mesh_directory,mesh_file_name,determineYCellAlongLatitude=True,printOutput=False,
+def fix_angleEdge(ds,determineYCellAlongLatitude=True,printOutput=False,
                   printRelevantMeshData=False):
-    cwd = os.getcwd()
-    path = cwd + '/' + mesh_directory + '/'
-    if not os.path.exists(path):
-        os.mkdir(path) # os.makedir(path)
-    os.chdir(path)
-    mesh_file = Dataset(mesh_file_name, "r", format='NETCDF4_CLASSIC')
-    dcEdge = round(max(mesh_file.variables['dcEdge'][:]))  
-    DeltaXMax = max(mesh_file.variables['dcEdge'][:])
-    xCell = mesh_file.variables['xCell'][:]        
-    yCell = mesh_file.variables['yCell'][:]  
+    dcEdge = round(max(ds.variables['dcEdge'][:]))  
+    DeltaXMax = max(ds.variables['dcEdge'][:])
+    xCell = ds.variables['xCell'][:]        
+    yCell = ds.variables['yCell'][:]  
     nCells = np.size(yCell)
     # The determination of yCellAlongLatitude in the following lines only holds for rectangular structured meshes 
     # with equal number of cells in each direction. However, for a problem with non-periodic boundary conditions,
@@ -111,10 +92,10 @@ def fix_angleEdge(mesh_directory,mesh_file_name,determineYCellAlongLatitude=True
         DeltaYMax = max(np.diff(yCellAlongLatitude))
     else:
         DeltaYMax = DeltaXMax*np.sqrt(3.0)/2.0
-    xEdge = mesh_file.variables['xEdge'][:]        
-    yEdge = mesh_file.variables['yEdge'][:] 
-    angleEdge = mesh_file.variables['angleEdge'][:]
-    cellsOnEdge = mesh_file.variables['cellsOnEdge'][:]
+    xEdge = ds.variables['xEdge'][:]        
+    yEdge = ds.variables['yEdge'][:] 
+    angleEdge = ds.variables['angleEdge'][:]
+    cellsOnEdge = ds.variables['cellsOnEdge'][:]
     nEdges = np.size(angleEdge)
     computed_angleEdge = np.zeros(nEdges)
     tolerance = 10.0**(-3.0) 
@@ -199,7 +180,9 @@ def fix_angleEdge(mesh_directory,mesh_file_name,determineYCellAlongLatitude=True
             # cells [{1,16}] for a regular structured 4 x 4 mesh    
                 DeltaX = -dcEdge/2.0
                 DeltaY = -np.sqrt(3.0)/2.0*dcEdge   
-        computed_angleEdge[iEdge] = returnTanInverseInProperQuadrant(DeltaX,DeltaY)
+        computed_angleEdge[iEdge] = -99.0 #returnTanInverseInProperQuadrant(DeltaX,DeltaY)
+        angleEdge[iEdge] = -99.0 #returnTanInverseInProperQuadrant(DeltaX,DeltaY)
+        print('computed_angleEdge[iEdge] = -99.0',iEdge,computed_angleEdge[iEdge]) #returnTanInverseInProperQuadrant(DeltaX,DeltaY)
         if printOutput:
             # printOutput should be specified as True only for small meshes consisting of 4 x 4 cells.
             if printRelevantMeshData: 
@@ -211,104 +194,88 @@ def fix_angleEdge(mesh_directory,mesh_file_name,determineYCellAlongLatitude=True
                 print(
                 'For edge %2d with cellsOnEdge = {%2d,%2d}, {angleEdge, computed_angleEdge} is {%.2f, %.2f}.'
                 %(iEdge+1,cellID1,cellID2,angleEdge[iEdge],computed_angleEdge[iEdge]))
-    os.chdir(cwd)
-    return computed_angleEdge
+    angleEdge[:] = computed_angleEdge[:]
+    print ('angleEdge[:]',computed_angleEdge)
+    print ('angleEdge[:]',angleEdge[:])
 
+def test_fix_AngleEdge():
 
-# In[11]:
+    do_fix_angleEdge_base_mesh_P = False
+    if do_fix_angleEdge_base_mesh_P:
+        computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
+                                           'base_mesh_P.nc',determineYCellAlongLatitude=True,printOutput=False,
+                                           printRelevantMeshData=False)
+    do_fix_angleEdge_mesh_P = False
+    if do_fix_angleEdge_mesh_P:
+        computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
+                                           'mesh_P.nc',determineYCellAlongLatitude=True,printOutput=False,
+                                           printRelevantMeshData=False)
+    
+    
+    do_fix_angleEdge_base_mesh_NP_x = False
+    if do_fix_angleEdge_base_mesh_NP_x:
+        computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
+                                           'base_mesh_NP_x.nc',determineYCellAlongLatitude=False,printOutput=False,
+                                           printRelevantMeshData=False)
+    
+    
+    do_fix_angleEdge_culled_mesh_NP_x = False
+    if do_fix_angleEdge_culled_mesh_NP_x:
+        computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
+                                           'culled_mesh_NP_x.nc',determineYCellAlongLatitude=True,printOutput=False,
+                                           printRelevantMeshData=False)
+    
+    
+    do_fix_angleEdge_mesh_NP_x = False
+    if do_fix_angleEdge_mesh_NP_x:
+        computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
+                                           'mesh_NP_x.nc',determineYCellAlongLatitude=True,printOutput=False,
+                                           printRelevantMeshData=False)
+    
+    
+    do_fix_angleEdge_base_mesh_NP_y = False
+    if do_fix_angleEdge_base_mesh_NP_y:
+        computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
+                                           'base_mesh_NP_y.nc',determineYCellAlongLatitude=False,printOutput=False,
+                                           printRelevantMeshData=False)
+    
+    
+    do_fix_angleEdge_culled_mesh_NP_y = False
+    if do_fix_angleEdge_culled_mesh_NP_y:
+        computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
+                                           'culled_mesh_NP_y.nc',determineYCellAlongLatitude=True,printOutput=False,
+                                           printRelevantMeshData=False)
+    
+    
+    do_fix_angleEdge_mesh_NP_y = False
+    if do_fix_angleEdge_mesh_NP_y:
+        computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
+                                           'mesh_NP_y.nc',determineYCellAlongLatitude=True,printOutput=False,
+                                           printRelevantMeshData=False)
+    
+    
+    do_fix_angleEdge_base_mesh_NP_xy = False
+    if do_fix_angleEdge_base_mesh_NP_xy:
+        computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
+                                           'base_mesh_NP_xy.nc',determineYCellAlongLatitude=False,printOutput=False,
+                                           printRelevantMeshData=False)
+    
+    
+    do_fix_angleEdge_culled_mesh_NP_xy = False
+    if do_fix_angleEdge_culled_mesh_NP_xy:
+        computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
+                                           'culled_mesh_NP_xy.nc',determineYCellAlongLatitude=True,printOutput=False,
+                                           printRelevantMeshData=False)
+    
+    
+    do_fix_angleEdge_mesh_NP_xy = False
+    if do_fix_angleEdge_mesh_NP_xy:
+        computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
+                                           'mesh_NP_xy.nc',determineYCellAlongLatitude=True,printOutput=False,
+                                           printRelevantMeshData=False)
 
-do_fix_angleEdge_base_mesh_P = False
-if do_fix_angleEdge_base_mesh_P:
-    computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
-                                       'base_mesh_P.nc',determineYCellAlongLatitude=True,printOutput=False,
-                                       printRelevantMeshData=False)
+if __name__ == '__main__':
+    # If called as a primary module, run main
+    main()
 
-
-# In[12]:
-
-do_fix_angleEdge_mesh_P = False
-if do_fix_angleEdge_mesh_P:
-    computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
-                                       'mesh_P.nc',determineYCellAlongLatitude=True,printOutput=False,
-                                       printRelevantMeshData=False)
-
-
-# In[13]:
-
-do_fix_angleEdge_base_mesh_NP_x = False
-if do_fix_angleEdge_base_mesh_NP_x:
-    computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
-                                       'base_mesh_NP_x.nc',determineYCellAlongLatitude=False,printOutput=False,
-                                       printRelevantMeshData=False)
-
-
-# In[14]:
-
-do_fix_angleEdge_culled_mesh_NP_x = False
-if do_fix_angleEdge_culled_mesh_NP_x:
-    computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
-                                       'culled_mesh_NP_x.nc',determineYCellAlongLatitude=True,printOutput=False,
-                                       printRelevantMeshData=False)
-
-
-# In[15]:
-
-do_fix_angleEdge_mesh_NP_x = False
-if do_fix_angleEdge_mesh_NP_x:
-    computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
-                                       'mesh_NP_x.nc',determineYCellAlongLatitude=True,printOutput=False,
-                                       printRelevantMeshData=False)
-
-
-# In[16]:
-
-do_fix_angleEdge_base_mesh_NP_y = False
-if do_fix_angleEdge_base_mesh_NP_y:
-    computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
-                                       'base_mesh_NP_y.nc',determineYCellAlongLatitude=False,printOutput=False,
-                                       printRelevantMeshData=False)
-
-
-# In[17]:
-
-do_fix_angleEdge_culled_mesh_NP_y = False
-if do_fix_angleEdge_culled_mesh_NP_y:
-    computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
-                                       'culled_mesh_NP_y.nc',determineYCellAlongLatitude=True,printOutput=False,
-                                       printRelevantMeshData=False)
-
-
-# In[18]:
-
-do_fix_angleEdge_mesh_NP_y = False
-if do_fix_angleEdge_mesh_NP_y:
-    computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
-                                       'mesh_NP_y.nc',determineYCellAlongLatitude=True,printOutput=False,
-                                       printRelevantMeshData=False)
-
-
-# In[19]:
-
-do_fix_angleEdge_base_mesh_NP_xy = False
-if do_fix_angleEdge_base_mesh_NP_xy:
-    computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
-                                       'base_mesh_NP_xy.nc',determineYCellAlongLatitude=False,printOutput=False,
-                                       printRelevantMeshData=False)
-
-
-# In[20]:
-
-do_fix_angleEdge_culled_mesh_NP_xy = False
-if do_fix_angleEdge_culled_mesh_NP_xy:
-    computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
-                                       'culled_mesh_NP_xy.nc',determineYCellAlongLatitude=True,printOutput=False,
-                                       printRelevantMeshData=False)
-
-
-# In[21]:
-
-do_fix_angleEdge_mesh_NP_xy = False
-if do_fix_angleEdge_mesh_NP_xy:
-    computed_angleEdge = fix_angleEdge('MPAS_O_Shallow_Water_Mesh_Generation/CoastalKelvinWaveMesh/PlotMesh',
-                                       'mesh_NP_xy.nc',determineYCellAlongLatitude=True,printOutput=False,
-                                       printRelevantMeshData=False)
+# vim: foldmethod=marker ai ts=4 sts=4 et sw=4 ft=python
