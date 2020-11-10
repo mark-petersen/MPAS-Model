@@ -48,6 +48,14 @@
 			description="Global maximum of cell locations"
 			 packages="verificationPKG"
 		/>
+		<var name="xEdgeGlobalMin" type="real" dimensions="" units="m"
+			description="Global minimum of edge locations"
+			 packages="verificationPKG"
+		/>
+		<var name="xEdgeGlobalMax" type="real" dimensions="" units="m"
+			description="Global maximum of edge locations"
+			 packages="verificationPKG"
+		/>
 		<var name="dcEdgeGlobalMin" type="real" dimensions="" units="m"
 			description="Global minimum of edge width"
 			 packages="verificationPKG"

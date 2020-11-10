@@ -111,7 +111,7 @@ contains
     real (kind=RKIND), dimension(:), pointer :: ssh
     real (kind=RKIND), dimension(:,:), pointer :: layerThickness, restingThickness, normalVelocity
     real (kind=RKIND), dimension(:,:,:), pointer :: activeTracers
-    real (kind=RKIND), pointer :: yPlanarDomainWidth
+    real (kind=RKIND), pointer :: yPlanarDomainWidth, xEdgeGlobalMin
 
     iErr = 0
 
@@ -217,6 +217,7 @@ contains
        call mpas_pool_get_array(verticalMeshPool, 'refLayerThickness', refLayerThickness)
 
        call mpas_pool_get_array(diagnosticsPool, 'yPlanarDomainWidth', yPlanarDomainWidth)
+       call mpas_pool_get_array(diagnosticsPool, 'xEdgeGlobalMin', xEdgeGlobalMin)
 
        maxDepth = 3000.0_RKIND ! H [m]
 
@@ -247,13 +248,13 @@ contains
           do iCell = 1, nCellsSolve
               ssh(iCell) = - maxDepth &
                  * etaHat*sin(Ky*(yCell(iCell) + phaseSpeed*timeInSec)) &
-                 * exp(-xCell(iCell) * Rinv)
+                 * exp(-(xCell(iCell) - xEdgeGlobalMin) * Rinv)
           end do
           do iEdge = 1, nEdgesSolve
               ! u = 0.0
               v = phaseSpeed &
                  * etaHat*sin(Ky*(yEdge(iEdge) + phaseSpeed*timeInSec)) &
-                 * exp(-xEdge(iEdge) * Rinv) 
+                 * exp(-(xEdge(iEdge) - xEdgeGlobalMin) * Rinv) 
              ! angleEdge=0: edge normal points in positive x
              ! angleEdge=pi/2: edge normal points in positive y
              ! normalVelocity = -u*sin(angleEdge) + v*cos(angleEdge)

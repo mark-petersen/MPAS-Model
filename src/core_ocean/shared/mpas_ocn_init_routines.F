@@ -609,6 +609,7 @@ end subroutine ocn_init_routines_compute_max_level!}}}
       real (kind=RKIND) :: xCellMin, xCellMax, yCellMin, yCellMax
       real (kind=RKIND) :: dcEdgeMin, dcEdgeMax, yEdgeMin, yEdgeMax
       real (kind=RKIND), pointer :: xCellGlobalMin, xCellGlobalMax, yCellGlobalMin, yCellGlobalMax
+      real (kind=RKIND), pointer :: xEdgeGlobalMin, xEdgeGlobalMax
       real (kind=RKIND), pointer :: dcEdgeGlobalMin, dcEdgeGlobalMax, xPlanarDomainWidth, yPlanarDomainWidth
       real (kind=RKIND), dimension(:), pointer :: xCell, yCell, dcEdge, yEdge
 
@@ -648,6 +649,8 @@ end subroutine ocn_init_routines_compute_max_level!}}}
     call mpas_pool_get_array(diagnosticsPool, 'xCellGlobalMax', xCellGlobalMax)
     call mpas_pool_get_array(diagnosticsPool, 'yCellGlobalMin', yCellGlobalMin)
     call mpas_pool_get_array(diagnosticsPool, 'yCellGlobalMax', yCellGlobalMax)
+    call mpas_pool_get_array(diagnosticsPool, 'xEdgeGlobalMin', xEdgeGlobalMin)
+    call mpas_pool_get_array(diagnosticsPool, 'xEdgeGlobalMax', xEdgeGlobalMax)
     call mpas_pool_get_array(diagnosticsPool, 'dcEdgeGlobalMin', dcEdgeGlobalMin)
     call mpas_pool_get_array(diagnosticsPool, 'dcEdgeGlobalMax', dcEdgeGlobalMax)
     call mpas_pool_get_array(diagnosticsPool, 'xPlanarDomainWidth', xPlanarDomainWidth)
@@ -666,6 +669,9 @@ end subroutine ocn_init_routines_compute_max_level!}}}
 
     xPlanarDomainWidth = xCellGlobalMax - xCellGlobalMin + dcEdgeGlobalMax*0.5_RKIND
     yPlanarDomainWidth = yCellGlobalMax - yCellGlobalMin + dcEdgeGlobalMax*0.5_RKIND*sqrt(3.0_RKIND)
+
+    xEdgeGlobalMin = xCellGlobalMin - dcEdgeGlobalMax*0.5_RKIND
+    xEdgeGlobalMax = xCellGlobalMax + dcEdgeGlobalMax*0.5_RKIND
 
    end subroutine ocn_init_routines_verification!}}}
 

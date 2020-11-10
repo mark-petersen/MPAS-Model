@@ -14,7 +14,6 @@ ncfileMesh = Dataset('planar_hex.nc', 'r')
 nx = ncfileMesh.getncattr('nx')
 ny = ncfileMesh.getncattr('ny')
 iz = 1
-iTime=0
 nGrids = 3
 
 ncfile = Dataset('output.nc', 'r')
@@ -28,7 +27,7 @@ ncfile = Dataset('output.nc', 'r')
 
 fig = plt.gcf()
 plt.clf()
-fig.set_size_inches(20.0, 20.0)
+fig.set_size_inches(20.0, 16.0)
 
 #iTime=0
 #xEdge = ncfile.variables['xEdge'][:]
@@ -42,38 +41,45 @@ fig.set_size_inches(20.0, 20.0)
 #plt.colorbar()
 #plt.set_cmap('jet')
 
+xCell = 1e-3*np.reshape(ncfile.variables['xCell'][:], [ny, nx])
+yCell = 1e-3*np.reshape(ncfile.variables['yCell'][:], [ny, nx])
 
 varNames = ['ssh','sshSolution']
 varName='ssh'
-for iTime in range(3):
+ms=24
+iTime=[0, 1, 2];
+for j in range(3):
       #for iVar, varName in enumerate(varNames):
-      var = np.reshape(ncfile.variables[varName][iTime, :], [ny, nx])
-      sol = np.reshape(ncfile.variables[varName+'Solution'][iTime, :], [ny, nx])
+      var = np.reshape(ncfile.variables[varName][iTime[j], :], [ny, nx])
+      sol = np.reshape(ncfile.variables[varName+'Solution'][iTime[j], :], [ny, nx])
       dif = var-sol
-      var_avg = var
-      sol_avg = sol
-      dif_avg = dif
-      for iy in range(0, ny, 2):
-          for ix in range(1, nx - 2):
-              var_avg[iy, ix] = (var[iy, ix + 1] + var[iy, ix]) / 2.0
-              sol_avg[iy, ix] = (sol[iy, ix + 1] + sol[iy, ix]) / 2.0
-              dif_avg[iy, ix] = (dif[iy, ix + 1] + dif[iy, ix]) / 2.0
+      #var_avg = var
+      #sol_avg = sol
+      #dif_avg = dif
+      #for iy in range(0, ny, 2):
+      #    for ix in range(1, nx - 2):
+      #        var_avg[iy, ix] = (var[iy, ix + 1] + var[iy, ix]) / 2.0
+      #        sol_avg[iy, ix] = (sol[iy, ix + 1] + sol[iy, ix]) / 2.0
+      #        dif_avg[iy, ix] = (dif[iy, ix + 1] + dif[iy, ix]) / 2.0
       
-      ax1 = plt.subplot(3, 3, 3 * iTime + 0 + 1)
-      plt.imshow(var_avg)
-      plt.title('model' + ' time = '+str(iTime))
+      ax1 = plt.subplot(3, 3, 3 * j + 0 + 1)
+      #plt.imshow(var_avg)
+      plt.scatter(xCell,yCell,c=var,s=ms,marker='h')
+      plt.title('model' + ' time = '+str(iTime[j]))
       plt.colorbar()
       plt.set_cmap('bwr')
 
-      ax1 = plt.subplot(3, 3, 3 * iTime + 1 + 1)
-      plt.imshow(sol_avg)
-      plt.title('sol' + ' time = '+str(iTime))
+      ax1 = plt.subplot(3, 3, 3 * j + 1 + 1)
+      #plt.imshow(sol_avg)
+      plt.scatter(xCell,yCell,c=sol,s=ms,marker='h')
+      plt.title('sol' + ' time = '+str(iTime[j]))
       plt.colorbar()
       plt.set_cmap('bwr')
 
-      ax1 = plt.subplot(3, 3, 3 * iTime + 2 + 1)
-      plt.imshow(dif_avg)
-      plt.title('dif' + ' time = '+str(iTime))
+      ax1 = plt.subplot(3, 3, 3 * j + 2 + 1)
+      #plt.imshow(dif_avg)
+      plt.scatter(xCell,yCell,c=dif,s=ms,marker='h')
+      plt.title('dif' + ' time = '+str(iTime[j]))
       plt.colorbar()
       plt.set_cmap('bwr')
 #

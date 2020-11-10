@@ -1131,6 +1131,8 @@ module ocn_time_integration_rk4
       real (kind=RKIND), dimension(:, :), pointer :: lowFreqDivergenceCur, lowFreqDivergenceProvis, lowFreqDivergenceTend
       real (kind=RKIND), dimension(:, :), pointer :: normalTransportVelocity, normalGMBolusVelocity
       real (kind=RKIND), dimension(:, :), pointer :: wettingVelocity
+      real (kind=RKIND), dimension(:), pointer :: normalVelocitySolution
+      integer, dimension(:,:), pointer :: boundaryEdge
 
       real (kind=RKIND), dimension(:, :, :), pointer :: tracersGroupCur, tracersGroupProvis, tracersGroupTend
 
@@ -1266,6 +1268,22 @@ module ocn_time_integration_rk4
       end if
 
       call ocn_diagnostic_solve(dt, provisStatePool, forcingPool, meshPool, diagnosticsPool, scratchPool, tracersPool, 1)
+
+         if (config_verification_enable) then
+            call mpas_pool_get_array(diagnosticsPool, 'normalVelocitySolution', normalVelocitySolution)
+            call mpas_pool_get_array(meshPool, 'boundaryEdge', boundaryEdge)
+            !$omp parallel
+            !$omp do schedule(runtime) 
+            do iEdge = 1, nEdges
+               do k = 1, maxLevelEdgeTop(iEdge)
+                  if (boundaryEdge(k,iEdge).eq.1) then 
+                     normalVelocityProvis(k, iEdge) = normalVelocitySolution(iEdge)
+                  endif
+               end do
+            end do
+            !$omp end do
+            !$omp end parallel
+         end if
 
       ! ------------------------------------------------------------------
       ! Accumulating various parametrizations of the transport velocity
