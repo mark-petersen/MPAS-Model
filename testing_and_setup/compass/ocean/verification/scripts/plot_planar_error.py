@@ -10,9 +10,10 @@ matplotlib.use('Agg')
 
 
 # mrp: read from file mesh after nx,ny attributes are added:
-ncfileMesh = Dataset('planar_hex.nc', 'r')
-nx = ncfileMesh.getncattr('nx')
-ny = ncfileMesh.getncattr('ny')
+ncfileHex = Dataset('planar_hex.nc', 'r')
+ncfileMesh = Dataset('initial_state.nc', 'r')
+nx = ncfileHex.getncattr('nx')
+ny = ncfileHex.getncattr('ny')
 iz = 1
 nGrids = 3
 
@@ -41,8 +42,8 @@ fig.set_size_inches(20.0, 16.0)
 #plt.colorbar()
 #plt.set_cmap('jet')
 
-xCell = 1e-3*np.reshape(ncfile.variables['xCell'][:], [ny, nx])
-yCell = 1e-3*np.reshape(ncfile.variables['yCell'][:], [ny, nx])
+xCell = 1e-3*np.reshape(ncfileMesh.variables['xCell'][:], [ny, nx])
+yCell = 1e-3*np.reshape(ncfileMesh.variables['yCell'][:], [ny, nx])
 
 varNames = ['ssh','sshSolution']
 varName='ssh'
