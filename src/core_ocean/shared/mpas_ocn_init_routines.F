@@ -775,7 +775,7 @@ end subroutine ocn_init_routines_compute_max_level!}}}
          end do
       end if
 
-      call ocn_diagnostic_solve(dt,  statePool, forcingPool, meshPool, diagnosticsPool, scratchPool, tracersPool)
+      call ocn_diagnostic_solve(dt, 0.0_RKIND,  statePool, forcingPool, meshPool, diagnosticsPool, scratchPool, tracersPool)
 
       ! initialize velocities and active tracers on land to be zero.
       areaCell(nCells+1) = -1.0e34_RKIND

@@ -91,10 +91,11 @@ contains
 !
 !-----------------------------------------------------------------------
 
-   subroutine ocn_diagnostic_solve(dt, statePool, forcingPool, meshPool, diagnosticsPool, scratchPool, tracersPool, &!{{{
+   subroutine ocn_diagnostic_solve(dt, currentTime, statePool, forcingPool, meshPool, diagnosticsPool, scratchPool, tracersPool, &!{{{
                                    timeLevelIn)
 
       real (kind=RKIND), intent(in) :: dt !< Input: Time step
+      real (kind=RKIND), intent(in) :: currentTime ! current time sec
       type (mpas_pool_type), intent(in) :: statePool !< Input: State information
       type (mpas_pool_type), intent(in) :: forcingPool !< Input: Forcing information
       type (mpas_pool_type), intent(in) :: meshPool !< Input: mesh information
@@ -177,9 +178,9 @@ contains
 
       real (kind=RKIND), dimension(:), pointer :: xCell, yCell, xEdge, yEdge, angleEdge
       real (kind=RKIND), dimension(:), pointer :: sshSolution, normalVelocitySolution, velocityMeridionalSolution, velocityZonalSolution
-      real (kind=RKIND) :: f0, beta, maxDepth, phaseSpeed, Rinv, etaHat, kY, v, timeInSec
+      real (kind=RKIND) :: f0, beta, maxDepth, phaseSpeed, Rinv, etaHat, kY, v
       real (kind=RKIND) :: xMin,xMax,yMin,yMax,yMinGlobal,yMaxGlobal,xMinGlobal,xMaxGlobal
-      real (kind=RKIND), pointer :: daysSinceStartOfSim, yPlanarDomainWidth, xEdgeGlobalMin
+      real (kind=RKIND), pointer :: yPlanarDomainWidth, xEdgeGlobalMin
 
       call mpas_timer_start('diagnostic solve')
 
@@ -924,10 +925,8 @@ contains
        call mpas_pool_get_array(meshPool, 'xEdge', xEdge)
        call mpas_pool_get_array(meshPool, 'yEdge', yEdge)
        call mpas_pool_get_array(meshPool, 'angleEdge', angleEdge)
-       call mpas_pool_get_array(diagnosticsPool, 'daysSinceStartOfSim',daysSinceStartOfSim)
        call mpas_pool_get_array(diagnosticsPool, 'yPlanarDomainWidth', yPlanarDomainWidth)
        call mpas_pool_get_array(diagnosticsPool, 'xEdgeGlobalMin', xEdgeGlobalMin)
-       timeInSec = daysSinceStartOfSim * 86400.0_RKIND
 
        maxDepth = 3000.0_RKIND ! H [m]
        select case (config_verification_case)
@@ -941,16 +940,16 @@ contains
 
           do iCell = 1, nCells
               sshSolution(iCell) = - maxDepth &
-                 * etaHat*sin(Ky*(yCell(iCell) + phaseSpeed*timeInSec)) &
+                 * etaHat*sin(Ky*(yCell(iCell) + phaseSpeed*currentTime)) &
                  * exp(-(xCell(iCell) - xEdgeGlobalMin) * Rinv)
               velocityMeridionalSolution(iCell) = phaseSpeed &
-                 * etaHat*sin(Ky*(yCell(iCell) + phaseSpeed*timeInSec)) &
+                 * etaHat*sin(Ky*(yCell(iCell) + phaseSpeed*currentTime)) &
                  * exp(-(xCell(iCell) - xEdgeGlobalMin) * Rinv)
           end do
           do iEdge = 1, nEdges
               ! u = 0.0
               v = phaseSpeed &
-                 * etaHat*sin(Ky*(yEdge(iEdge) + phaseSpeed*timeInSec)) &
+                 * etaHat*sin(Ky*(yEdge(iEdge) + phaseSpeed*currentTime)) &
                  * exp(-(xEdge(iEdge) - xEdgeGlobalMin) * Rinv)
              ! angleEdge=0: edge normal points in positive x
              ! angleEdge=pi/2: edge normal points in positive y

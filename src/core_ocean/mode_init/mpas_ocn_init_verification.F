@@ -94,7 +94,7 @@ contains
     real (kind=RKIND) :: yMinGlobal, yMaxGlobal, yMidGlobal, xMinGlobal, xMaxGlobal
     real (kind=RKIND) :: localVar1, localVar2
     real (kind=RKIND), dimension(:), pointer :: interfaceLocations
-    real (kind=RKIND) :: f0, beta, maxDepth, phaseSpeed, Rinv, etaHat, kY, T0, S0, v, timeInSec
+    real (kind=RKIND) :: f0, beta, maxDepth, phaseSpeed, Rinv, etaHat, kY, T0, S0, v, currentTime
     logical :: flatBottom
 
     ! Define dimension pointers
@@ -244,16 +244,17 @@ contains
           kY = 2.0_RKIND*pii/yPlanarDomainWidth
           T0 = 20.0_RKIND ! constant temperature
           S0 = 35.0_RKIND ! constant salinity
+          currentTime = 0.0_RKIND ! start at time zero
 
           do iCell = 1, nCellsSolve
               ssh(iCell) = - maxDepth &
-                 * etaHat*sin(Ky*(yCell(iCell) + phaseSpeed*timeInSec)) &
+                 * etaHat*sin(Ky*(yCell(iCell) + phaseSpeed*currentTime)) &
                  * exp(-(xCell(iCell) - xEdgeGlobalMin) * Rinv)
           end do
           do iEdge = 1, nEdgesSolve
               ! u = 0.0
               v = phaseSpeed &
-                 * etaHat*sin(Ky*(yEdge(iEdge) + phaseSpeed*timeInSec)) &
+                 * etaHat*sin(Ky*(yEdge(iEdge) + phaseSpeed*currentTime)) &
                  * exp(-(xEdge(iEdge) - xEdgeGlobalMin) * Rinv) 
              ! angleEdge=0: edge normal points in positive x
              ! angleEdge=pi/2: edge normal points in positive y

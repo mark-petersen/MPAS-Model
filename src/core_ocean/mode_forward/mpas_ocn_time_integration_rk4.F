@@ -196,7 +196,8 @@ module ocn_time_integration_rk4
       character (len=StrKIND), pointer :: config_tidal_forcing_type
       real (kind=RKIND), dimension(:), pointer :: tidalInputMask, tidalBCValue
       real (kind=RKIND), dimension(:,:), pointer :: restingThickness
-      real (kind=RKIND) :: totalDepth
+      real (kind=RKIND) :: totalDepth, currentTime
+      real (kind=RKIND), pointer :: daysSinceStartOfSim
       real (kind=RKIND), dimension(:), pointer :: normalVelocitySolution
       integer, dimension(:,:), pointer :: boundaryEdge
 
@@ -363,10 +364,10 @@ module ocn_time_integration_rk4
       ! The coefficients of k_j are b_j = (1/6, 1/3, 1/3, 1/6) and are
       ! initialized here as delta t * b_j:
 
-      rk_weights(1) = dt/6.
-      rk_weights(2) = dt/3.
-      rk_weights(3) = dt/3.
-      rk_weights(4) = dt/6.
+      rk_weights(1) = dt/6.0_RKIND
+      rk_weights(2) = dt/3.0_RKIND
+      rk_weights(3) = dt/3.0_RKIND
+      rk_weights(4) = dt/6.0_RKIND
 
       ! The a_j coefficients of h in the computation of k_j are typically written (0, 1/2, 1/2, 1).
       ! However, in the algorithm below we pre-compute the state for the tendency one iteration early.
@@ -375,8 +376,8 @@ module ocn_time_integration_rk4
       ! That is why the coefficients of h are one index early in the following, i.e.
       ! a = (1/2, 1/2, 1)
 
-      rk_substep_weights(1) = dt/2.
-      rk_substep_weights(2) = dt/2.
+      rk_substep_weights(1) = dt/2.0_RKIND
+      rk_substep_weights(2) = dt/2.0_RKIND
       rk_substep_weights(3) = dt
       rk_substep_weights(4) = dt ! a_4 only used for ALE step, otherwise it is skipped.
 
@@ -708,22 +709,6 @@ module ocn_time_integration_rk4
             !$omp end parallel
          end if
 
-         if (config_verification_enable) then
-            call mpas_pool_get_array(diagnosticsPool, 'normalVelocitySolution', normalVelocitySolution)
-            call mpas_pool_get_array(meshPool, 'boundaryEdge', boundaryEdge)
-            !$omp parallel
-            !$omp do schedule(runtime) 
-            do iEdge = 1, nEdges
-               do k = 1, maxLevelEdgeTop(iEdge)
-                  if (boundaryEdge(k,iEdge).eq.1) then 
-                     normalVelocityNew(k, iEdge) = normalVelocitySolution(iEdge)
-                  endif
-               end do
-            end do
-            !$omp end do
-            !$omp end parallel
-         end if
-
          ! direct application of tidal boundary condition
          if (config_use_tidal_forcing .and. trim(config_tidal_forcing_type) == 'direct') then
            do iCell=1, nCells
@@ -744,7 +729,26 @@ module ocn_time_integration_rk4
            end do
          end if
 
-         call ocn_diagnostic_solve(dt, statePool, forcingPool, meshPool, diagnosticsPool, scratchPool, tracersPool, 2)
+         call mpas_pool_get_array(diagnosticsPool, 'daysSinceStartOfSim',daysSinceStartOfSim)
+         ! daysSinceStartOfSim is at old time
+         currentTime = daysSinceStartOfSim*86400.0_RKIND + dt
+         call ocn_diagnostic_solve(dt, currentTime, statePool, forcingPool, meshPool, diagnosticsPool, scratchPool, tracersPool, 2)
+
+         if (config_verification_enable) then
+            call mpas_pool_get_array(diagnosticsPool, 'normalVelocitySolution', normalVelocitySolution)
+            call mpas_pool_get_array(meshPool, 'boundaryEdge', boundaryEdge)
+            !$omp parallel
+            !$omp do schedule(runtime) 
+            do iEdge = 1, nEdges
+               do k = 1, maxLevelEdgeTop(iEdge)
+                  if (boundaryEdge(k,iEdge).eq.1) then 
+                     normalVelocityNew(k, iEdge) = normalVelocitySolution(iEdge)
+                  endif
+               end do
+            end do
+            !$omp end do
+            !$omp end parallel
+         end if
 
          ! Update the effective desnity in land ice if we're coupling to land ice
          call ocn_effective_density_in_land_ice_update(meshPool, forcingPool, statePool, err)
@@ -1133,6 +1137,8 @@ module ocn_time_integration_rk4
       real (kind=RKIND), dimension(:, :), pointer :: wettingVelocity
       real (kind=RKIND), dimension(:), pointer :: normalVelocitySolution
       integer, dimension(:,:), pointer :: boundaryEdge
+      real (kind=RKIND) :: totalDepth, currentTime
+      real (kind=RKIND), pointer :: daysSinceStartOfSim
 
       real (kind=RKIND), dimension(:, :, :), pointer :: tracersGroupCur, tracersGroupProvis, tracersGroupTend
 
@@ -1267,7 +1273,11 @@ module ocn_time_integration_rk4
          !$omp end parallel
       end if
 
-      call ocn_diagnostic_solve(dt, provisStatePool, forcingPool, meshPool, diagnosticsPool, scratchPool, tracersPool, 1)
+      call mpas_pool_get_array(diagnosticsPool, 'daysSinceStartOfSim',daysSinceStartOfSim)
+      ! daysSinceStartOfSim is at old time
+      ! rkSubstepWeight is either dt or dt/2, depending on RK4 stage
+      currentTime = daysSinceStartOfSim*86400.0_RKIND + rkSubstepWeight
+      call ocn_diagnostic_solve(dt, currentTime, provisStatePool, forcingPool, meshPool, diagnosticsPool, scratchPool, tracersPool, 1)
 
          if (config_verification_enable) then
             call mpas_pool_get_array(diagnosticsPool, 'normalVelocitySolution', normalVelocitySolution)
@@ -1463,6 +1473,8 @@ module ocn_time_integration_rk4
       type (mpas_pool_iterator_type) :: groupItr
       character (len=StrKIND) :: modifiedGroupName
       character (len=StrKIND) :: configName
+      real (kind=RKIND) :: totalDepth, currentTime
+      real (kind=RKIND), pointer :: daysSinceStartOfSim
 
       logical, pointer :: config_use_GM
 
@@ -1510,7 +1522,10 @@ module ocn_time_integration_rk4
          end if
       end do
 
-      call ocn_diagnostic_solve(dt, statePool, forcingPool, meshPool, diagnosticsPool, scratchPool, tracersPool, 2)
+      call mpas_pool_get_array(diagnosticsPool, 'daysSinceStartOfSim',daysSinceStartOfSim)
+      ! daysSinceStartOfSim is at old time
+      currentTime = daysSinceStartOfSim*86400.0_RKIND + dt
+      call ocn_diagnostic_solve(dt, currentTime, statePool, forcingPool, meshPool, diagnosticsPool, scratchPool, tracersPool, 2)
 
       call ocn_vmix_implicit(dt, meshPool, diagnosticsPool, statePool, forcingPool, scratchPool, err, 2)
 
