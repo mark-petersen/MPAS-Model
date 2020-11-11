@@ -1,6 +1,6 @@
 <template>
 	<namelist>
-		<option name="config_dt">'00:00:375'</option>
+		<option name="config_dt">'00:00:300'</option>
 	</namelist>
 
 	<streams>

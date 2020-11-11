@@ -198,7 +198,7 @@ module ocn_time_integration_rk4
       real (kind=RKIND), dimension(:,:), pointer :: restingThickness
       real (kind=RKIND) :: totalDepth, currentTime
       real (kind=RKIND), pointer :: daysSinceStartOfSim
-      real (kind=RKIND), dimension(:), pointer :: normalVelocitySolution
+      real (kind=RKIND), dimension(:,:), pointer :: normalVelocitySolution
       integer, dimension(:,:), pointer :: boundaryEdge
 
       ! Get config options
@@ -559,7 +559,7 @@ module ocn_time_integration_rk4
             do iEdge = 1, nEdges
                do k = 1, maxLevelEdgeTop(iEdge)
                   if (boundaryEdge(k,iEdge).eq.1) then 
-                     normalVelocityNew(k, iEdge) = normalVelocitySolution(iEdge)
+                     normalVelocityNew(k, iEdge) = normalVelocitySolution(k, iEdge)
                   endif
                end do
             end do
@@ -742,7 +742,7 @@ module ocn_time_integration_rk4
             do iEdge = 1, nEdges
                do k = 1, maxLevelEdgeTop(iEdge)
                   if (boundaryEdge(k,iEdge).eq.1) then 
-                     normalVelocityNew(k, iEdge) = normalVelocitySolution(iEdge)
+                     normalVelocityNew(k, iEdge) = normalVelocitySolution(k, iEdge)
                   endif
                end do
             end do
@@ -1135,7 +1135,7 @@ module ocn_time_integration_rk4
       real (kind=RKIND), dimension(:, :), pointer :: lowFreqDivergenceCur, lowFreqDivergenceProvis, lowFreqDivergenceTend
       real (kind=RKIND), dimension(:, :), pointer :: normalTransportVelocity, normalGMBolusVelocity
       real (kind=RKIND), dimension(:, :), pointer :: wettingVelocity
-      real (kind=RKIND), dimension(:), pointer :: normalVelocitySolution
+      real (kind=RKIND), dimension(:, :), pointer :: normalVelocitySolution
       integer, dimension(:,:), pointer :: boundaryEdge
       real (kind=RKIND) :: totalDepth, currentTime
       real (kind=RKIND), pointer :: daysSinceStartOfSim
@@ -1287,7 +1287,7 @@ module ocn_time_integration_rk4
             do iEdge = 1, nEdges
                do k = 1, maxLevelEdgeTop(iEdge)
                   if (boundaryEdge(k,iEdge).eq.1) then 
-                     normalVelocityProvis(k, iEdge) = normalVelocitySolution(iEdge)
+                     normalVelocityProvis(k, iEdge) = normalVelocitySolution(k, iEdge)
                   endif
                end do
             end do

@@ -1,8 +1,15 @@
 <template>
 	<namelist>
-		<option name="config_run_duration">'00-00-00_01:00:00'</option>
-		<option name="config_write_output_on_startup">.true.</option>
 		<option name="config_time_integrator">'RK4'</option>
+		<option name="config_run_duration">'00-00-00_01:00:00'</option>
+		<option name="config_write_output_on_startup">.false.</option>
+		<option name="config_use_implicit_bottom_drag">.true.</option>
+		<option name="config_disable_thick_vadv">.true.</option>
+		<option name="config_disable_vel_hmix">.true.</option>
+		<option name="config_disable_vel_surface_stress">.true.</option>
+		<option name="config_disable_vel_explicit_bottom_drag">.true.</option>
+		<option name="config_disable_vel_vmix">.true.</option>
+		<option name="config_disable_tr_all_tend">.true.</option>
 	</namelist>
 	<streams name="streams.ocean" keep="immutable" mode="forward">
 		<stream name="mesh">
@@ -11,21 +18,27 @@
 		<stream name="input">
 			<attribute name="filename_template">initial_state.nc</attribute>
 		</stream>
-		<template file="output.xml" path_base="script_core_dir" path="templates/streams"/>
 		<stream name="output">
-			<attribute name="output_interval">00-00-00_00:30:00</attribute>
 			<attribute name="filename_template">output.nc</attribute>
+			<attribute name="name">output</attribute>
+			<attribute name="filename_interval">01-00-00_00:00:00</attribute>
+			<attribute name="clobber_mode">truncate</attribute>
+			<attribute name="reference_time">0001-01-01_00:00:00</attribute>
+			<attribute name="type">output</attribute>
+			<attribute name="output_interval">00-00-00_01:00:00</attribute>
 			<add_contents>
-				<member type="var" name="sshSolution"/>
-				<member type="var" name="normalVelocitySolution"/>
-				<member type="var" name="velocityZonalSolution"/>
-				<member type="var" name="velocityMeridionalSolution"/>
+				<member name="xtime" type="var"/>
+				<member name="normalVelocity" type="var"/>
+				<member name="normalVelocitySolution" type="var"/>
+				<member name="ssh" type="var"/>
+				<member name="sshSolution" type="var"/>
+				<member name="refZMid" type="var"/>
+				<member name="refLayerThickness" type="var"/>
 			</add_contents>
 		</stream>
 		<stream name="restart">
 			<attribute name="output_interval">none</attribute>
 			<attribute name="filename_template">restart.nc</attribute>
 		</stream>
-
 	</streams>
 </template>

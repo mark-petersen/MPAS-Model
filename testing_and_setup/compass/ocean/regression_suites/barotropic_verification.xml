@@ -1,0 +1,20 @@
+<regression_suite name="barotropic_verification">
+	<test name="Coastal Kelvin Wave res 1" core="ocean" configuration="verification" resolution="coastal_kelvin_wave" test="res1">
+		<script name="run.py"/>
+	</test>
+	<test name="Coastal Kelvin Wave res 2" core="ocean" configuration="verification" resolution="coastal_kelvin_wave" test="res2">
+		<script name="run.py"/>
+	</test>
+	<test name="Coastal Kelvin Wave res 3" core="ocean" configuration="verification" resolution="coastal_kelvin_wave" test="res3">
+		<script name="run.py"/>
+	</test>
+	<test name="Coastal Kelvin Wave res 4" core="ocean" configuration="verification" resolution="coastal_kelvin_wave" test="res4">
+		<script name="run.py"/>
+	</test>
+	<test name="Coastal Kelvin Wave res 5" core="ocean" configuration="verification" resolution="coastal_kelvin_wave" test="res5">
+		<script name="run.py"/>
+	</test>
+	<test name="Coastal Kelvin Wave plots" core="ocean" configuration="verification" resolution="coastal_kelvin_wave" test="plots">
+		<script name="run.py"/>
+	</test>
+</regression_suite>

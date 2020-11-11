@@ -177,7 +177,8 @@ contains
       integer :: edgeSignOnCell_temp
 
       real (kind=RKIND), dimension(:), pointer :: xCell, yCell, xEdge, yEdge, angleEdge
-      real (kind=RKIND), dimension(:), pointer :: sshSolution, normalVelocitySolution, velocityMeridionalSolution, velocityZonalSolution
+      real (kind=RKIND), dimension(:), pointer :: sshSolution, velocityMeridionalSolution, velocityZonalSolution
+      real (kind=RKIND), dimension(:,:), pointer :: normalVelocitySolution
       real (kind=RKIND) :: f0, beta, maxDepth, phaseSpeed, Rinv, etaHat, kY, v
       real (kind=RKIND) :: xMin,xMax,yMin,yMax,yMinGlobal,yMaxGlobal,xMinGlobal,xMaxGlobal
       real (kind=RKIND), pointer :: yPlanarDomainWidth, xEdgeGlobalMin
@@ -955,7 +956,7 @@ contains
              ! angleEdge=pi/2: edge normal points in positive y
              ! normalVelocity = -u*sin(angleEdge) + v*cos(angleEdge)
              !normalVelocity(:, iEdge) = u*cos(angleEdge(iEdge)) + v*sin(angleEdge(iEdge))
-             normalVelocitySolution(iEdge) = v*sin(angleEdge(iEdge))
+             normalVelocitySolution(:, iEdge) = v*sin(angleEdge(iEdge))
           end do
        end select
       endif

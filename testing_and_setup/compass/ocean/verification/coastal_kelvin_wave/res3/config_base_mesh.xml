@@ -5,9 +5,9 @@
 
 	<run_script name="run.py">
 		<step executable="planar_hex">
-			<argument flag="--nx">40</argument>
-			<argument flag="--ny">40</argument>
-			<argument flag="--dc">125e3</argument>
+			<argument flag="--nx">60</argument>
+			<argument flag="--ny">60</argument>
+			<argument flag="--dc">83.33333333e3</argument>
 			<argument flag="--npx"></argument>
 			<argument flag="-o">planar_hex.nc</argument>
 		</step>

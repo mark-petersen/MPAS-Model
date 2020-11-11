@@ -47,12 +47,16 @@ yCell = 1e-3*np.reshape(ncfile.variables['yCell'][:], [ny, nx])
 varNames = ['ssh','sshSolution']
 varName='ssh'
 ms=24
-iTime=[0, 1, 2];
-for j in range(3):
+iTime=[0];
+for j in range(len(iTime)):
       #for iVar, varName in enumerate(varNames):
       var = np.reshape(ncfile.variables[varName][iTime[j], :], [ny, nx])
       sol = np.reshape(ncfile.variables[varName+'Solution'][iTime[j], :], [ny, nx])
       dif = var-sol
+      difL2 = np.sqrt(np.mean(dif[:]**2))
+      difL1 = np.max(dif[:])
+      print('ssh diffL2', difL2)
+      print('ssh diffL1', difL1)
       #var_avg = var
       #sol_avg = sol
       #dif_avg = dif

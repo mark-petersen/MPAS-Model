@@ -20,7 +20,7 @@
 			 description="component of horizontal velocity in the northward direction"
 			 packages="verificationPKG"
 		/>
-		<var name="normalVelocitySolution" type="real" dimensions="nEdges Time" units="m s^{-1}"
+		<var name="normalVelocitySolution" type="real" dimensions="nVertLevels nEdges Time" units="m s^{-1}"
 			 description="component of horizontal velocity in the northward direction"
 			 packages="verificationPKG"
 		/>
