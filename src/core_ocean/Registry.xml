@@ -1195,6 +1195,10 @@
 					description="Disable tendencies on the thickness field from horizontal advection."
 					possible_values=".true. or .false."
 		/>
+		<nml_option name="config_linearize_thick_hadv" type="logical" default_value=".false." units="unitless"
+					description="Change horizontal thickness advection from div(hu) to div(Hu) where h was the full velocity field, and H is the mean total depth."
+					possible_values=".true. or .false."
+		/>
 		<nml_option name="config_disable_thick_vadv" type="logical" default_value=".false." units="unitless"
 					description="Disables tendencies on the thickness field from vertical advection."
 					possible_values=".true. or .false."
@@ -1207,8 +1211,12 @@
 					description="Disables all tendencies on the velocity field."
 					possible_values=".true. or .false."
 		/>
+		<nml_option name="config_disable_vel_hadv" type="logical" default_value=".false." units="unitless"
+					description="Disables tendencies on the velocity field from the horizontal momentum advection."
+					possible_values=".true. or .false."
+		/>
 		<nml_option name="config_disable_vel_coriolis" type="logical" default_value=".false." units="unitless"
-					description="Diables tendencies on the velocity field from the Coriolis force and momentum advection."
+					description="Disables tendencies on the velocity field from the Coriolis force."
 					possible_values=".true. or .false."
 		/>
 		<nml_option name="config_disable_vel_pgrad" type="logical" default_value=".false." units="unitless"

@@ -70,7 +70,8 @@ contains
 !
 !-----------------------------------------------------------------------
 
-   subroutine ocn_thick_hadv_tend(meshPool, normalVelocity, layerThicknessEdge, tend, err)!{{{
+   subroutine ocn_thick_hadv_tend(meshPool, verticalMeshPool, normalVelocity, &
+      layerThicknessEdge, tend, err)!{{{
 
       !-----------------------------------------------------------------
       !
@@ -85,7 +86,8 @@ contains
          layerThicknessEdge     !< Input: thickness at edge
 
       type (mpas_pool_type), intent(in) :: &
-         meshPool          !< Input: mesh information
+         meshPool, &       !< Input: mesh information
+         verticalMeshPool          !< Input: mesh information
 
       !-----------------------------------------------------------------
       !
@@ -119,6 +121,7 @@ contains
 
       real (kind=RKIND) :: flux, invAreaCell, invAreaCell1, invAreaCell2
       real (kind=RKIND), dimension(:), pointer :: dvEdge, areaCell
+      real (kind=RKIND), dimension(:), pointer :: refLayerThickness
 
       !-----------------------------------------------------------------
       !
@@ -146,23 +149,41 @@ contains
       call mpas_pool_get_array(meshPool, 'nEdgesOnCell', nEdgesOnCell)
       call mpas_pool_get_array(meshPool, 'edgesOnCell', edgesOnCell)
       call mpas_pool_get_array(meshPool, 'edgeSignOnCell', edgeSignOnCell)
+      call mpas_pool_get_array(verticalMeshPool, 'refLayerThickness', refLayerThickness)
 
       nCells = nCellsArray( 1 )
 
-      !$omp parallel
-      !$omp do schedule(runtime) private(invAreaCell, i, iEdge, k, flux)
-      do iCell = 1, nCells
-        invAreaCell = 1.0_RKIND / areaCell(iCell)
-        do i = 1, nEdgesOnCell(iCell)
-          iEdge = edgesOnCell(i, iCell)
-          do k = 1, maxLevelEdgeTop(iEdge)
-            flux = normalVelocity(k, iEdge) * dvEdge(iEdge) * layerThicknessEdge(k, iEdge)
-            tend(k, iCell) = tend(k, iCell) + edgeSignOnCell(i, iCell) * flux * invAreaCell
-          end do
-        end do
-      end do
-      !$omp end do
-      !$omp end parallel
+      if (config_linearize_thick_hadv) then
+         !$omp parallel
+         !$omp do schedule(runtime) private(invAreaCell, i, iEdge, k, flux)
+         do iCell = 1, nCells
+           invAreaCell = 1.0_RKIND / areaCell(iCell)
+           do i = 1, nEdgesOnCell(iCell)
+             iEdge = edgesOnCell(i, iCell)
+             do k = 1, maxLevelEdgeTop(iEdge)
+               flux = normalVelocity(k, iEdge) * dvEdge(iEdge) * refLayerThickness(k)
+               tend(k, iCell) = tend(k, iCell) + edgeSignOnCell(i, iCell) * flux * invAreaCell
+             end do
+           end do
+         end do
+         !$omp end do
+         !$omp end parallel
+      else
+         !$omp parallel
+         !$omp do schedule(runtime) private(invAreaCell, i, iEdge, k, flux)
+         do iCell = 1, nCells
+           invAreaCell = 1.0_RKIND / areaCell(iCell)
+           do i = 1, nEdgesOnCell(iCell)
+             iEdge = edgesOnCell(i, iCell)
+             do k = 1, maxLevelEdgeTop(iEdge)
+               flux = normalVelocity(k, iEdge) * dvEdge(iEdge) * layerThicknessEdge(k, iEdge)
+               tend(k, iCell) = tend(k, iCell) + edgeSignOnCell(i, iCell) * flux * invAreaCell
+             end do
+           end do
+         end do
+         !$omp end do
+         !$omp end parallel
+      endif
 
       call mpas_timer_stop("thick hadv")
 
@@ -196,7 +217,6 @@ contains
       integer, intent(out) :: err !< Output: error flag
 
       thickHadvOn = .true.
-
       if(config_disable_thick_hadv) thickHadvOn = .false.
 
       err = 0

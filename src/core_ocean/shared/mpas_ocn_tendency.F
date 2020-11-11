@@ -108,13 +108,14 @@ contains
 !
 !-----------------------------------------------------------------------
 
-   subroutine ocn_tend_thick(tendPool, forcingPool, diagnosticsPool, meshPool)!{{{
+   subroutine ocn_tend_thick(tendPool, forcingPool, diagnosticsPool, meshPool, verticalMeshPool)!{{{
       implicit none
 
       type (mpas_pool_type), intent(inout) :: tendPool !< Input/Output: Tendency structure
       type (mpas_pool_type), intent(inout) :: forcingPool !< Input: Forcing information
       type (mpas_pool_type), intent(in) :: diagnosticsPool !< Input: Diagnostics information
       type (mpas_pool_type), intent(in) :: meshPool !< Input: Mesh information
+      type (mpas_pool_type), intent(in) :: verticalMeshPool !< Input: Mesh information
 
       real (kind=RKIND), dimension(:), pointer :: surfaceThicknessFlux
       real (kind=RKIND), dimension(:), pointer :: surfaceThicknessFluxRunoff
@@ -168,7 +169,7 @@ contains
       !
       ! QC Comment (3/15/12): need to make sure that uTranport is the right
       ! transport velocity here.
-      call ocn_thick_hadv_tend(meshPool, normalTransportVelocity, layerThicknessEdge, tend_layerThickness, err)
+      call ocn_thick_hadv_tend(meshPool, verticalMeshPool, normalTransportVelocity, layerThicknessEdge, tend_layerThickness, err)
 
       !
       ! height tendency: vertical advection term -d/dz(hw)

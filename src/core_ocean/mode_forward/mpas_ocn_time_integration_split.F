@@ -1530,7 +1530,7 @@ module ocn_time_integration_split
             endif
             call mpas_timer_stop('thick vert trans vel top')
 
-            call ocn_tend_thick(tendPool, forcingPool, diagnosticsPool, meshPool)
+            call ocn_tend_thick(tendPool, forcingPool, diagnosticsPool, meshPool, verticalMeshPool)
 
             block => block % next
          end do

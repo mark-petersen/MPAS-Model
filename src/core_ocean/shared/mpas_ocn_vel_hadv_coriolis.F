@@ -52,8 +52,9 @@ module ocn_vel_hadv_coriolis
    !
    !--------------------------------------------------------------------
 
-   logical :: hadvAndCoriolisOn
-   integer :: RK4On
+   integer :: gradKEOn ! Turn on gradient of kinetic energy term
+   integer :: relVorOn ! Turn on relative vorticity term
+   integer :: planVorOn ! Turn on planetary vorticity term
 
 !***********************************************************************
 
@@ -130,7 +131,7 @@ contains
 
       err = 0
 
-      if ( .not. hadvAndCoriolisOn ) return
+      if (relVorOn.eq.0.and.gradKEOn.eq.0) return
 
       call mpas_timer_start("coriolis")
 
@@ -168,16 +169,19 @@ contains
 
             do k = 1, maxLevelEdgeTop(iEdge)
                workVorticity = 0.5_RKIND &
-                  * (  normalizedRelativeVorticityEdge(k, iEdge) + RK4On * normalizedPlanetaryVorticityEdge(k, iEdge) &
-                     + normalizedRelativeVorticityEdge(k, eoe)   + RK4On * normalizedPlanetaryVorticityEdge(k, eoe))
+                  * (  relVorOn*normalizedRelativeVorticityEdge(k, iEdge) + planVorOn * normalizedPlanetaryVorticityEdge(k, iEdge) &
+                     + relVorOn*normalizedRelativeVorticityEdge(k, eoe)   + planVorOn * normalizedPlanetaryVorticityEdge(k, eoe))
                qArr(k) = qArr(k) + edgeWeight * normalVelocity(k, eoe) * workVorticity * layerThicknessEdge(k, eoe)
             end do
 
          end do
 
          do k = 1, maxLevelEdgeTop(iEdge)
-            tend(k, iEdge) = tend(k, iEdge) + edgeMask(k, iEdge) * ( qArr(k) - ( kineticEnergyCell(k, cell2) &
-                          - kineticEnergyCell(k, cell1) ) * invLength )
+            tend(k, iEdge) = tend(k, iEdge) &
+               + edgeMask(k, iEdge) &
+                 * ( qArr(k) &
+                     - gradKEOn*(  kineticEnergyCell(k, cell2) &
+                                 - kineticEnergyCell(k, cell1) ) * invLength )
          end do
 
       end do
@@ -217,18 +221,25 @@ contains
 
       err = 0
 
-      hadvAndCoriolisOn = .true.
+      gradKEOn = 1
+      relVorOn = 1
+      planVorOn = 1
 
-      if ( config_disable_vel_coriolis ) hadvAndCoriolisOn = .false.
+      ! In (eta+f)/h, do not add f/h
+      if ( config_disable_vel_coriolis ) planVorOn = 0
 
-      if ( trim( config_time_integrator ) == 'RK4') then
-         ! For RK4, coriolis tendency term includes f: (eta+f)/h.
-         RK4On = 1
-      elseif ( trim( config_time_integrator ) == 'split_explicit' &
+      ! In (eta+f)/h, do not add eta/h. Also do not add grad(KE)
+      if ( config_disable_vel_hadv ) then
+         relVorOn = 0
+         gradKEOn = 0
+      end if
+
+      if ( trim( config_time_integrator ) == 'split_explicit' &
         .or. trim( config_time_integrator ) == 'unsplit_explicit') then
-         ! For split explicit, Coriolis tendency uses eta/h because the Coriolis term
+         ! In (eta+f)/h, do not add f/h
+         ! For split explicit, Coriolis tendency 
          ! is added separately to the momentum tendencies.
-         RK4On = 0
+         planVorOn = 0
       end if
 
 

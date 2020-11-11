@@ -958,7 +958,7 @@ module ocn_time_integration_rk4
             vertAleTransportTop, err)
       endif
 
-      call ocn_tend_thick(tendPool, forcingPool, diagnosticsPool, meshPool)
+      call ocn_tend_thick(tendPool, forcingPool, diagnosticsPool, meshPool, verticalMeshPool)
 
 
    end subroutine ocn_time_integrator_rk4_compute_thick_tends!}}}
@@ -1104,7 +1104,7 @@ module ocn_time_integration_rk4
             vertAleTransportTop, err)
       endif
 
-      call ocn_tend_thick(tendPool, forcingPool, diagnosticsPool, meshPool)
+      call ocn_tend_thick(tendPool, forcingPool, diagnosticsPool, meshPool, verticalMeshPool)
 
       if (config_filter_btr_mode) then
           call ocn_filter_btr_mode_tend_vel(tendPool, provisStatePool, diagnosticsPool, meshPool, 1)
