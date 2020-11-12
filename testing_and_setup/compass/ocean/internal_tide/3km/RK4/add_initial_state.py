@@ -36,6 +36,11 @@ def main():
     nVertLevels = parser.parse_args().nVertLevels
     ds = xr.open_dataset(parser.parse_args().input_file)
 
+# configuration settings
+    # reference vertical grid spacing
+    maxDepth = 5000.0
+    vertical_coordinate = 'sigma'  # sigma or z
+
     #comment('obtain dimensions and mesh variables')
     nCells = ds['nCells'].size
     nEdges = ds['nEdges'].size
@@ -77,17 +82,16 @@ def main():
     maxLevelCell = np.ones(nCells, dtype=np.int32)
 
     vars3D = [ 'layerThickness','temperature', 'salinity',
-         'restingThickness', 'zMid', 'density']
+         'zMid', 'density']
     for var in vars3D:
         globals()[var] = np.nan * np.ones([1, nCells, nVertLevels])
+    restingThickness = np.nan * np.ones([nCells, nVertLevels])
 
     # Note that this line shouldn't be required, but if layerThickness is
     # initialized with nans, the simulation dies. It must multiply by a nan on
     # a land cell on an edge, and then multiply by zero.
     layerThickness[:] = -1e34
 
-    # reference vertical grid spacing
-    maxDepth = 5000.0
     # equally spaced layers
     refLayerThickness[:] = maxDepth / nVertLevels
     refBottomDepth[0] = refLayerThickness[0]
@@ -103,22 +107,35 @@ def main():
     ssh[:] = (xCell[:] - xMid)/ xMid
 
     # Compute maxLevelCell and layerThickness for z-level (variation only on top)
-    vertCoordMovementWeights[:] = 0.0
-    vertCoordMovementWeights[0] = 1.0
-    for iCell in range(0, nCells):
-        for k in range(nVertLevels - 1, 0, -1):
-            if bottomDepthObserved[iCell] > refBottomDepth[k - 1]:
+    if (vertical_coordinate=='z'):
+        vertCoordMovementWeights[:] = 0.0
+        vertCoordMovementWeights[0] = 1.0
+        for iCell in range(0, nCells):
+            for k in range(nVertLevels - 1, 0, -1):
+                if bottomDepthObserved[iCell] > refBottomDepth[k - 1]:
 
-                maxLevelCell[iCell] = k
-                # Partial bottom cells
-                bottomDepth[iCell] = bottomDepthObserved[iCell]
-                # No partial bottom cells
-                #bottomDepth[iCell] = refBottomDepth[k]
+                    # z-level (and z-star) vertical coordinates
+                    maxLevelCell[iCell] = k
+                    # Partial bottom cells
+                    bottomDepth[iCell] = bottomDepthObserved[iCell]
+                    # No partial bottom cells
+                    #bottomDepth[iCell] = refBottomDepth[k]
 
-                layerThickness[0, iCell, k] = bottomDepth[iCell] - refBottomDepth[k - 1]
-                break
-        layerThickness[0, iCell, 0:maxLevelCell[iCell] ] = refLayerThickness[0:maxLevelCell[iCell]]
-        layerThickness[0, iCell, 0] += ssh[iCell]
+                    layerThickness[0, iCell, k] = bottomDepth[iCell] - refBottomDepth[k - 1]
+                    break
+            layerThickness[0, iCell, 0:maxLevelCell[iCell] ] = refLayerThickness[0:maxLevelCell[iCell]]
+            layerThickness[0, iCell, 0] += ssh[iCell]
+        restingThickness[:, :] = layerThickness[0, :, :]
+        restingThickness[:, 0] = refLayerThickness[0]
+
+    # Compute maxLevelCell and layerThickness for sigma
+    elif (vertical_coordinate=='sigma'):
+        vertCoordMovementWeights[:] = 1.0
+        maxLevelCell[:] = nVertLevels - 1 # maxLevelCell is zero-based within python code
+        bottomDepth[:] = bottomDepthObserved[:]
+        for iCell in range(0, nCells):
+            restingThickness[iCell, :] = refLayerThickness[:]*bottomDepth[iCell]/maxDepth
+            layerThickness[0, iCell, :] = refLayerThickness[:]*(ssh[iCell] + bottomDepth[iCell])/maxDepth
 
     # Compute zMid (same, regardless of vertical coordinate)
     for iCell in range(0, nCells):
@@ -128,8 +145,6 @@ def main():
         for k in range(maxLevelCell[iCell] - 1, -1, -1):
             zMid[0, iCell, k] = zMid[0, iCell, k + 1] + 0.5 * \
                 (layerThickness[0, iCell, k + 1] + layerThickness[0, iCell, k])
-    restingThickness[:, :] = layerThickness[0, :, :]
-    restingThickness[:, 0] = refLayerThickness[0]
 
     # initialize tracers
     rho0 = 1000.0  # kg/m^3
@@ -172,6 +187,7 @@ def main():
     comment('finalize and write file')
     time1 = time.time()
     ds['maxLevelCell'] = (['nCells'], maxLevelCell + 1)
+    ds['restingThickness'] = (['nCells', 'nVertLevels'])
     for var in varsZ:
         ds[var] = (['nVertLevels'], globals()[var])
     for var in vars2D:
