@@ -89,11 +89,20 @@ def vertical_init(ds, thicknessAllLayers, nVertLevels):
     Lx = max(lonCell)
     Ly = max(latCell)
    
+    latCenterDeg = 45.0 # center point in degrees
+    lonCenterDeg = 0.0 # center point in degrees
+    GaussianWidth = 10000e3
+    
+    latCenter = np.deg2rad(latCenterDeg)
+    lonCenter = np.deg2rad(lonCenterDeg)
+
     for iCell in range(0, nCells):
-        x = lonCell[iCell]
-        y = latCell[iCell]
-        ssh[0, iCell] = 1.0+1000.0*np.exp(-(x-Lx/2.0)**2.0-(y-Ly/2.0)**2.0)
-        layerThickness[0,iCell,:]=ssh[0,iCell]#/nVertLevels
+        # Halversine formula for distance
+        d = np.sin((latCell[iCell] - latCenter)/2)**2 \
+            + np.cos(latCenter)*np.cos(latCell[iCell]) \
+            * np.sin((lonCell[iCell] - lonCenter)/2)**2
+        ssh[0, iCell] = 1.0*np.exp(-0.5(d/GaussianWidth)**2.0)
+        layerThickness[0,iCell,:]= (thicknessAllLayers + ssh[0,iCell])/nVertLevels
     # Create other variables from refLayerThickness
     refBottomDepth[0] = refLayerThickness[0]
     refZMid[0] = -0.5 * refLayerThickness[0]
@@ -107,7 +116,6 @@ def vertical_init(ds, thicknessAllLayers, nVertLevels):
     bottomDepth[:] = refBottomDepth[nVertLevels - 1]
     bottomDepthObserved[:] = refBottomDepth[nVertLevels - 1]
     for k in range(nVertLevels):
-    #    layerThickness[0, :, k] = refLayerThickness[k]
         restingThickness[:, k] = refLayerThickness[k]
 # }}}
 
