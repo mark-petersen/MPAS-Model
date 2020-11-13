@@ -101,7 +101,7 @@ def vertical_init(ds, thicknessAllLayers, nVertLevels):
         d = np.sin((latCell[iCell] - latCenter)/2)**2 \
             + np.cos(latCenter)*np.cos(latCell[iCell]) \
             * np.sin((lonCell[iCell] - lonCenter)/2)**2
-        ssh[0, iCell] = 1.0*np.exp(-0.5(d/GaussianWidth)**2.0)
+        ssh[0, iCell] = 1.0*np.ex (-0.5*(d/GaussianWidth)**2.0)
         layerThickness[0,iCell,:]= (thicknessAllLayers + ssh[0,iCell])/nVertLevels
     # Create other variables from refLayerThickness
     refBottomDepth[0] = refLayerThickness[0]
