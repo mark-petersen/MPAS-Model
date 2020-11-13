@@ -86,8 +86,8 @@ def vertical_init(ds, thicknessAllLayers, nVertLevels):
     lonCell = ds.variables['lonCell']
     latCell = ds.variables['latCell']
 
-    latCenterDeg = 45.0 # center point in degrees
-    lonCenterDeg = 0.0 # center point in degrees
+    latCenterDeg = 0.0 # center point in degrees
+    lonCenterDeg = 180.0 # center point in degrees
     sphere_radius = 6371220.
     GaussianWidth = 100e3/ sphere_radius
     
