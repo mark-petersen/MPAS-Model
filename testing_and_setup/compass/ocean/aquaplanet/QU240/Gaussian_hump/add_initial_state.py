@@ -73,12 +73,27 @@ def vertical_init(ds, thicknessAllLayers, nVertLevels):
     vertCoordMovementWeights = ds.createVariable(
         'vertCoordMovementWeights', np.float64, ('nVertLevels',))
     # }}}
+    ssh = ds.createVariable(
+        'ssh', np.float64, ('Time', 'nCells',))
 
     # evenly spaced vertical grid
     refLayerThickness[:] = thicknessAllLayers
     # make first layer deep to avoid z^2 derivative problems near zero.
-    refLayerThickness[0] = 100
-
+    refLayerThickness[0] = 1000
+    #ssh[0,:]=2.0
+    nVertLevels = len(ds.dimensions['nVertLevels'])
+    nCells = len(ds.dimensions['nCells'])
+    lonCell = ds.variables['lonCell']
+    latCell = ds.variables['latCell']
+    # For periodic domains, the max cell coordinate is also the domain width
+    Lx = max(lonCell)
+    Ly = max(latCell)
+   
+    for iCell in range(0, nCells):
+        x = lonCell[iCell]
+        y = latCell[iCell]
+        ssh[0, iCell] = 1.0+1000.0*np.exp(-(x-Lx/2.0)**2.0-(y-Ly/2.0)**2.0)
+        layerThickness[0,iCell,:]=ssh[0,iCell]#/nVertLevels
     # Create other variables from refLayerThickness
     refBottomDepth[0] = refLayerThickness[0]
     refZMid[0] = -0.5 * refLayerThickness[0]
@@ -92,7 +107,7 @@ def vertical_init(ds, thicknessAllLayers, nVertLevels):
     bottomDepth[:] = refBottomDepth[nVertLevels - 1]
     bottomDepthObserved[:] = refBottomDepth[nVertLevels - 1]
     for k in range(nVertLevels):
-        layerThickness[0, :, k] = refLayerThickness[k]
+    #    layerThickness[0, :, k] = refLayerThickness[k]
         restingThickness[:, k] = refLayerThickness[k]
 # }}}
 
@@ -174,6 +189,31 @@ def others_init(ds):
     boundaryLayerDepth = ds.createVariable(
         'boundaryLayerDepth', np.float64, ('Time', 'nCells',))
     boundaryLayerDepth[:] = 0.0
+   # ssh = ds.createVariable(
+   #     'ssh', np.float64, ('Time', 'nCells',))
+    #ssh[:] = 0.0
+
+
+    # obtain dimensions and mesh variables # {{{
+    nVertLevels = len(ds.dimensions['nVertLevels'])
+    nCells = len(ds.dimensions['nCells'])
+    lonCell = ds.variables['lonCell']
+    latCell = ds.variables['latCell']
+    # For periodic domains, the max cell coordinate is also the domain width
+    Lx = max(lonCell)
+    Ly = max(latCell)
+    refZMid = ds.variables['refZMid']
+    refBottomDepth = ds.variables['refBottomDepth']
+    H = max(refBottomDepth)
+
+
+   # for iCell in range(0, nCells):
+   #     x = lonCell[iCell]
+   #     y = latCell[iCell]
+   #     ssh[0, iCell] = np.exp(-(x-Lx)**2.0-(y-Ly)**2.0)
+   #     ssh[1, iCell] = np.exp(-(x-Lx)**2.0-(y-Ly)**2.0)
+
+
 # }}}
 
 
