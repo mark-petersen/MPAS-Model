@@ -1,13 +1,12 @@
 <template>
 	<namelist>
-		<option name="config_time_integrator">'RK4'</option>
 		<option name="config_run_duration">'00-00-00_01:00:00'</option>
 		<option name="config_pressure_gradient_type">'ssh_gradient'</option>
 		<option name="config_write_output_on_startup">.false.</option>
 		<option name="config_use_implicit_bottom_drag">.false.</option>
 		<option name="config_disable_thick_vadv">.true.</option>
 		<option name="config_linearize_thick_hadv">.true.</option>
-		<option name="config_disable_vel_hadv">.true.</option>
+		<option name="config_disable_vel_hadv">.false.</option>
 		<option name="config_disable_vel_hmix">.true.</option>
 		<option name="config_disable_vel_surface_stress">.true.</option>
 		<option name="config_disable_vel_explicit_bottom_drag">.true.</option>

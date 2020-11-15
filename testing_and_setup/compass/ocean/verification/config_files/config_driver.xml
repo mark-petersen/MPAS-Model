@@ -5,7 +5,13 @@
     <case name="initial_state">
         <step executable="./run.py" quiet="true" pre_message=" * Initializing ocean state with bathymetry and tracers..." post_message="     complete!  Created file:  initial_state/initial_state.nc"/>
     </case>
-    <case name="simulation">
-        <step executable="./run.py" quiet="true" pre_message=" * Running simulation..." post_message="     complete!  Created file:  simulation/output.nc"/>
+    <case name="simulation_RK4">
+        <step executable="./run.py" quiet="true" pre_message=" * Running RK4 simulation..." post_message="     complete!  Created file:  simulation_RK4/output.nc"/>
+    </case>
+    <case name="simulation_split_explicit">
+        <step executable="./run.py" quiet="true" pre_message=" * Running simulation_split_explicit..." post_message="     complete!  Created file:  simulation_split_explicit/output.nc"/>
+    </case>
+    <case name="simulation_semi_implicit">
+        <step executable="./run.py" quiet="true" pre_message=" * Running simulation_semi_implicit..." post_message="     complete!  Created file:  simulation_semi_implicit/output.nc"/>
     </case>
 </driver_script>

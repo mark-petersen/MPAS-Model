@@ -1,0 +1,5 @@
+<driver_script name="run.py">
+    <case name="plots">
+        <step executable="./run.py" quiet="true" pre_message=" * Making plots..." post_message="     complete!  Created file:  plots/*.png"/>
+    </case>
+</driver_script>

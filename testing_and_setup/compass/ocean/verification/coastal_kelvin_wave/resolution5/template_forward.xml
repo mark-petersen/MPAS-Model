@@ -1,6 +1,7 @@
 <template>
 	<namelist>
 		<option name="config_dt">'00:00:150'</option>
+		<option name="config_btr_dt">'00:00:7.5'</option>
 	</namelist>
 
 	<streams>

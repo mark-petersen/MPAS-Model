@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<config case="simulation">
+<config case="simulation_RK4">
 	<add_link source="../initial_state/initial_state.nc" dest="initial_state.nc"/>
 	<add_link source="../base_mesh/planar_hex.nc" dest="planar_hex.nc"/>
     <add_link source="../base_mesh/graph.info" dest="graph.info"/>
@@ -8,6 +8,7 @@
 	<namelist name="namelist.ocean" mode="forward">
 		<template file="template_forward.xml" path_base="script_configuration_dir"/>
 		<template file="template_forward.xml" path_base="script_test_dir"/>
+		<option name="config_time_integrator">'RK4'</option>
 	</namelist>
 
 	<streams name="streams.ocean" keep="immutable" mode="forward">
@@ -20,7 +21,6 @@
             <argument flag="graph.info">36</argument>
         </step>
 		<model_run procs="36" threads="1" namelist="namelist.ocean" streams="streams.ocean"/>
-		<step executable="./plot_planar_error.py">
-		</step>
+		<step executable="./plot_planar_error.py"/>
 	</run_script>
 </config>

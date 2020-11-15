@@ -1,17 +1,17 @@
 <regression_suite name="barotropic_verification">
-	<test name="Coastal Kelvin Wave res 1" core="ocean" configuration="verification" resolution="coastal_kelvin_wave" test="res1">
+	<test name="Coastal Kelvin Wave resolution 1" core="ocean" configuration="verification" resolution="coastal_kelvin_wave" test="resolution1">
 		<script name="run.py"/>
 	</test>
-	<test name="Coastal Kelvin Wave res 2" core="ocean" configuration="verification" resolution="coastal_kelvin_wave" test="res2">
+	<test name="Coastal Kelvin Wave resolution 2" core="ocean" configuration="verification" resolution="coastal_kelvin_wave" test="resolution2">
 		<script name="run.py"/>
 	</test>
-	<test name="Coastal Kelvin Wave res 3" core="ocean" configuration="verification" resolution="coastal_kelvin_wave" test="res3">
+	<test name="Coastal Kelvin Wave resolution 3" core="ocean" configuration="verification" resolution="coastal_kelvin_wave" test="resolution3">
 		<script name="run.py"/>
 	</test>
-	<test name="Coastal Kelvin Wave res 4" core="ocean" configuration="verification" resolution="coastal_kelvin_wave" test="res4">
+	<test name="Coastal Kelvin Wave resolution 4" core="ocean" configuration="verification" resolution="coastal_kelvin_wave" test="resolution4">
 		<script name="run.py"/>
 	</test>
-	<test name="Coastal Kelvin Wave res 5" core="ocean" configuration="verification" resolution="coastal_kelvin_wave" test="res5">
+	<test name="Coastal Kelvin Wave resolution 5" core="ocean" configuration="verification" resolution="coastal_kelvin_wave" test="resolution5">
 		<script name="run.py"/>
 	</test>
 	<test name="Coastal Kelvin Wave plots" core="ocean" configuration="verification" resolution="coastal_kelvin_wave" test="plots">
