@@ -45,10 +45,11 @@ for iRes in range(nRes):
        xCell1D[2*ix+1] = xCell[0, ix+1]
 
    if iRes==0:
-       YGridRef, XGridRef = np.meshgrid(yCell1D[1:nx-2], xCell1D[1:nx-2])
-       #x = np.arange(np.min(xCell),np.max(xCell),nGrid)
-       #y = np.arange(np.min(yCell),np.max(yCell),nGrid)
-       #xGrid, yGrid = np.meshgrid(x, y, sparse=True)
+# Choose the grid for comparison.
+# Compare only where data exists for the exact solution
+       xCell1DRef = xCell[0,1:nx-2]
+       yCell1DRef = yCell[2:ny-2:2,0]
+       YGridRef, XGridRef = np.meshgrid(yCell1DRef, xCell1DRef)
 
    dcEdge = 1e-3*ncfileMesh.variables['dcEdge'][:]
    dx[iRes] = np.max(dcEdge[:])
@@ -89,9 +90,9 @@ os.chdir(plotDir)
 print('ssh diffL1', difL1)
 print('ssh diffL2', difL2)
 
-print('dx[i+1]/dx[i], (dx[i+1]/dx[i])^2, difL1[i+1]/difL1[i], difL2[i+1]/difL2[i]')
+print('dx[i+1]/dx[i], (dx[i+1]/dx[i])^2, difL1[i+1]/difL1[i], difL2[i+1]/difL2[i], L1Slope, L2Slope')
 for i in range(nRes-1):
-    print(dx[i+1]/dx[i], (dx[i+1]/dx[i])**2, difL1[i+1]/difL1[i], difL2[i+1]/difL2[i])
+    print(dx[i+1]/dx[i], (dx[i+1]/dx[i])**2, difL1[i+1]/difL1[i], difL2[i+1]/difL2[i], difL1[i+1]/difL1[i]/(dx[i+1]/dx[i]), difL2[i+1]/difL2[i]/(dx[i+1]/dx[i]))
 
 # ax1 = plt.subplot(3, 3, 3 * j + 0 + 1)
 # #plt.imshow(var_avg)
