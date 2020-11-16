@@ -12,13 +12,13 @@ from scipy.interpolate import RegularGridInterpolator
 matplotlib.use('Agg')
 
 varNames = ['ssh'] #,'normalVelocity']
+test = 'coastal Kelvin Wave, '
 time_step_method = 'split_explicit'
 time_step_method = 'RK4'
 #varNames = ['ssh','normalVelocity']
 nVars = len(varNames)
 plotDir = os.getcwd()
 nRes = 5
-nGrid = 10
 
 difL1 = np.zeros([nRes,nVars])
 difL2 = np.zeros([nRes,nVars])
@@ -99,32 +99,12 @@ conv = abs(p[0])
 
 yfit = dx**p[0]*10**p[1]
 
+fig, ax = plt.subplots()
 plt.loglog(dx,yfit,'k')
 plt.loglog(dx,difL2,'or')
-plt.annotate('Order of Convergence = {}'.format(np.round(conv,2)),xycoords='axes fraction',xy=(0.4,0.95),fontsize=14)
-plt.xlabel('Number of Grid Cells',fontsize=14)
+plt.annotate('Order of Convergence = {}'.format(np.round(conv,2)),xycoords='axes fraction',xy=(0.04,0.95),fontsize=14)
+plt.xlabel('cell width [km]',fontsize=14)
 plt.ylabel('L2 Norm',fontsize=14)
-plt.savefig('convergence.png',bbox_inches='tight', pad_inches=0.1)
-
-# ax1 = plt.subplot(3, 3, 3 * j + 0 + 1)
-# #plt.imshow(var_avg)
-# plt.scatter(xCell,yCell,c=var,s=ms,marker='h')
-# plt.title('model' + ' time = '+str(iTime[j]))
-# plt.colorbar()
-# plt.set_cmap('bwr')
-# 
-# ax1 = plt.subplot(3, 3, 3 * j + 1 + 1)
-# #plt.imshow(sol_avg)
-# plt.scatter(xCell,yCell,c=sol,s=ms,marker='h')
-# plt.title('sol' + ' time = '+str(iTime[j]))
-# plt.colorbar()
-# plt.set_cmap('bwr')
-# 
-# ax1 = plt.subplot(3, 3, 3 * j + 2 + 1)
-# #plt.imshow(dif_avg)
-# plt.scatter(xCell,yCell,c=dif,s=ms,marker='h')
-# plt.title('dif' + ' time = '+str(iTime[j]))
-# plt.colorbar()
-# plt.set_cmap('bwr')
-# 
-# plt.savefig('plot.png')
+plt.title(test + time_step_method)
+#ax.grid()
+plt.savefig('convergence_'+test+time_step_method+'.png',bbox_inches='tight', pad_inches=0.1)
