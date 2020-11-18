@@ -11,7 +11,7 @@ import os
 import shutil
 import numpy as np
 import xarray as xr
-from mpas_tools.io import write_netcdf
+#from mpas_tools.io import write_netcdf
 import argparse
 import math
 import time
@@ -82,10 +82,13 @@ def main():
     maxLevelCell = np.ones(nCells, dtype=np.int32)
 
     vars3D = [ 'layerThickness','temperature', 'salinity',
-         'zMid', 'density']
+        'zMid', 'density']
     for var in vars3D:
         globals()[var] = np.nan * np.ones([1, nCells, nVertLevels])
-    restingThickness = np.nan * np.ones([nCells, nVertLevels])
+    #restingThickness = np.nan * np.ones([nCells, nVertLevels])
+    varsXZ = [ 'restingThickness' ]
+    for var in varsXZ:
+        globals()[var] = np.nan * np.ones([nCells, nVertLevels])
 
     # Note that this line shouldn't be required, but if layerThickness is
     # initialized with nans, the simulation dies. It must multiply by a nan on
@@ -136,7 +139,7 @@ def main():
         for iCell in range(0, nCells):
             restingThickness[iCell, :] = refLayerThickness[:]*bottomDepth[iCell]/maxDepth
             layerThickness[0, iCell, :] = refLayerThickness[:]*(ssh[iCell] + bottomDepth[iCell])/maxDepth
-
+            
     # Compute zMid (same, regardless of vertical coordinate)
     for iCell in range(0, nCells):
         k = maxLevelCell[iCell]
@@ -187,13 +190,15 @@ def main():
     comment('finalize and write file')
     time1 = time.time()
     ds['maxLevelCell'] = (['nCells'], maxLevelCell + 1)
-    ds['restingThickness'] = (['nCells', 'nVertLevels'])
+    #ds['restingThickness'] = (['nCells', 'nVertLevels'])
     for var in varsZ:
         ds[var] = (['nVertLevels'], globals()[var])
     for var in vars2D:
         ds[var] = (['nCells'], globals()[var])
     for var in vars3D:
         ds[var] = (['Time', 'nCells', 'nVertLevels'], globals()[var])
+    for var in varsXZ:
+        ds[var] = (['nCells', 'nVertLevels'], globals()[var])
     # If you prefer not to have NaN as the fill value, you should consider
     # using mpas_tools.io.write_netcdf() instead
     ds.to_netcdf('initial_state.nc', format='NETCDF3_64BIT_OFFSET')
