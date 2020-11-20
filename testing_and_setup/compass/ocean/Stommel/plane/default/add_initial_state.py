@@ -55,6 +55,11 @@ def main():
     xMin = min(xCell)
     xMid = 0.5 * (xMin + xMax)
 
+    # y values for convenience
+    yMax = max(yCell)
+    yMin = min(yCell)
+    yMid = 0.5 * (yMin + yMax)
+
     comment('create and initialize variables')
     time1 = time.time()
 
@@ -63,7 +68,7 @@ def main():
         globals()[var] = np.nan * np.ones(nVertLevels)
 
     vars2D = ['ssh', 'bottomDepth', 'bottomDepthObserved',
-        'surfaceStress','windStressZonal', 'atmosphericPressure', 'boundaryLayerDepth']
+        'surfaceStress','windStressZonal','windStressMeridional', 'atmosphericPressure', 'boundaryLayerDepth']
     for var in vars2D:
         globals()[var] = np.nan * np.ones(nCells)
     maxLevelCell = np.ones(nCells, dtype=np.int32)
@@ -150,6 +155,7 @@ def main():
     # surface fields
 # Nairita, add surface stress here
     ds['windStressZonal'] = (('nCells',), np.zeros([nCells,]))
+    ds['windStressMeridional'] = (('nCells',), np.zeros([nCells,]))
     #lonCell = ds.variables['lonCell']
     #latCell = ds.variables['latCell']
     # For periodic domains, the max cell coordinate is also the domain width
