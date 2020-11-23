@@ -17,11 +17,11 @@
 	</packages>
 	<var_struct name="diagnostics" time_levs="1">
 		<var name="sshSolution" type="real" dimensions="nCells Time" units="m"
-			 description="component of horizontal velocity in the northward direction"
+			 description="ssh exact solution"
 			 packages="verificationPKG"
 		/>
 		<var name="normalVelocitySolution" type="real" dimensions="nVertLevels nEdges Time" units="m s^{-1}"
-			 description="component of horizontal velocity in the northward direction"
+			 description="normal velocity exact solution"
 			 packages="verificationPKG"
 		/>
 		<var name="velocityZonalSolution" type="real" dimensions="nCells Time" units="m s^{-1}"

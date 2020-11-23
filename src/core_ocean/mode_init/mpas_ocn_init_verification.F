@@ -32,6 +32,7 @@ module ocn_init_verification
    use ocn_config
    use ocn_init_vertical_grids
    use ocn_init_cell_markers
+   use ocn_verification_cases
 
    implicit none
    private
@@ -110,6 +111,8 @@ contains
     real (kind=RKIND), dimension(:), pointer :: refBottomDepth, refZMid, refLayerThickness
     real (kind=RKIND), dimension(:), pointer :: ssh
     real (kind=RKIND), dimension(:,:), pointer :: layerThickness, restingThickness, normalVelocity
+    real (kind=RKIND), dimension(:), pointer :: sshSolution
+    real (kind=RKIND), dimension(:,:), pointer :: normalVelocitySolution
     real (kind=RKIND), dimension(:,:,:), pointer :: activeTracers
     real (kind=RKIND), pointer :: yPlanarDomainWidth, xEdgeGlobalMin
 
@@ -211,6 +214,8 @@ contains
        call mpas_pool_get_array(statePool, 'layerThickness', layerThickness, 1)
        call mpas_pool_get_array(statePool, 'ssh', ssh, 1)
        call mpas_pool_get_array(statePool, 'normalVelocity', normalVelocity, 1)
+       call mpas_pool_get_array(diagnosticsPool, 'sshSolution', sshSolution)
+       call mpas_pool_get_array(diagnosticsPool, 'normalVelocitySolution', normalVelocitySolution)
 
        call mpas_pool_get_array(verticalMeshPool, 'refZMid', refZMid)
        call mpas_pool_get_array(verticalMeshPool, 'restingThickness', restingThickness)
@@ -220,6 +225,7 @@ contains
        call mpas_pool_get_array(diagnosticsPool, 'xEdgeGlobalMin', xEdgeGlobalMin)
 
        maxDepth = 3000.0_RKIND ! H [m]
+       flatBottom = .true.
 
        ! Set refBottomDepth and refZMid
        do k = 1, nVertLevels
@@ -233,36 +239,15 @@ contains
        ! Set vertCoordMovementWeights
        vertCoordMovementWeights(:) = 1.0_RKIND
 
-       select case (config_verification_case)
-       case (1) ! coastal Kelvin wave
-          f0 = 1.0e-4_RKIND ! coriolis parameter [1/s]
-          beta = 0.0 ! beta parameter
-          flatBottom = .true.
-          phaseSpeed = sqrt(gravity*maxDepth) ! c=sqrt(gH)
-          Rinv = f0 / phaseSpeed ! R = sqrt(gH)/f0
-          etaHat = 0.001
-          kY = 2.0_RKIND*pii/yPlanarDomainWidth
-          T0 = 20.0_RKIND ! constant temperature
-          S0 = 35.0_RKIND ! constant salinity
-          currentTime = 0.0_RKIND ! start at time zero
+       currentTime = 0.0_RKIND ! start at time zero
+       call ocn_verification_solution(currentTime, statePool, meshPool, diagnosticsPool, tracersPool)
 
-          do iCell = 1, nCellsSolve
-              ssh(iCell) = - maxDepth &
-                 * etaHat*sin(Ky*(yCell(iCell) + phaseSpeed*currentTime)) &
-                 * exp(-(xCell(iCell) - xEdgeGlobalMin) * Rinv)
-          end do
-          do iEdge = 1, nEdgesSolve
-              ! u = 0.0
-              v = phaseSpeed &
-                 * etaHat*sin(Ky*(yEdge(iEdge) + phaseSpeed*currentTime)) &
-                 * exp(-(xEdge(iEdge) - xEdgeGlobalMin) * Rinv) 
-             ! angleEdge=0: edge normal points in positive x
-             ! angleEdge=pi/2: edge normal points in positive y
-             ! normalVelocity = -u*sin(angleEdge) + v*cos(angleEdge)
-             !normalVelocity(:, iEdge) = u*cos(angleEdge(iEdge)) + v*sin(angleEdge(iEdge))
-             normalVelocity(:, iEdge) = v*sin(angleEdge(iEdge))
-          end do
-       end select
+       do iCell = 1, nCellsSolve
+           ssh(iCell) = sshSolution(iCell)
+       end do
+       do iEdge = 1, nEdgesSolve
+          normalVelocity(:, iEdge) = normalVelocitySolution(:, iEdge)
+       end do
 
        if (flatBottom) then
           bottomDepth(:) = maxDepth

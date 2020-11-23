@@ -1707,6 +1707,9 @@ module ocn_time_integration_split
 
                ! Efficiency note: We really only need this to compute layerThicknessEdge, density, pressure, and SSH
                ! in this diagnostics solve.
+         call mpas_pool_get_array(diagnosticsPool, 'daysSinceStartOfSim',daysSinceStartOfSim)
+         ! daysSinceStartOfSim is at old time
+         currentTime = daysSinceStartOfSim*86400.0_RKIND + dt
                call ocn_diagnostic_solve(dt, currentTime, statePool, forcingPool, meshPool, diagnosticsPool, scratchPool, tracersPool, 2)
 
             !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1944,6 +1947,9 @@ module ocn_time_integration_split
         ! be computed.  For kpp, more variables may be needed.  Either way, this
         ! could be made more efficient by only computing what is needed for the
         ! implicit vmix routine that follows.
+         call mpas_pool_get_array(diagnosticsPool, 'daysSinceStartOfSim',daysSinceStartOfSim)
+         ! daysSinceStartOfSim is at old time
+         currentTime = daysSinceStartOfSim*86400.0_RKIND + dt
         call ocn_diagnostic_solve(dt, currentTime, statePool, forcingPool, meshPool, diagnosticsPool, scratchPool, tracersPool, 2)
 
         block => block % next
@@ -2057,6 +2063,9 @@ module ocn_time_integration_split
             !$omp end parallel
          end if
 
+         call mpas_pool_get_array(diagnosticsPool, 'daysSinceStartOfSim',daysSinceStartOfSim)
+         ! daysSinceStartOfSim is at old time
+         currentTime = daysSinceStartOfSim*86400.0_RKIND + dt
          call ocn_diagnostic_solve(dt, currentTime, statePool, forcingPool, meshPool, diagnosticsPool, scratchPool, tracersPool, 2)
 
          ! Update the effective desnity in land ice if we're coupling to land ice

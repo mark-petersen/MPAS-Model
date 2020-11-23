@@ -18,7 +18,7 @@ time_step_method = 'RK4'
 #varNames = ['ssh','normalVelocity']
 nVars = len(varNames)
 plotDir = os.getcwd()
-nRes = 5
+nRes = 4
 
 difL1 = np.zeros([nRes,nVars])
 difL2 = np.zeros([nRes,nVars])
@@ -107,4 +107,4 @@ plt.xlabel('cell width [km]',fontsize=14)
 plt.ylabel('L2 Norm',fontsize=14)
 plt.title(test + time_step_method)
 #ax.grid()
-plt.savefig('convergence_'+test+time_step_method+'.png',bbox_inches='tight', pad_inches=0.1)
+plt.savefig('convergence_'+time_step_method+'.png',bbox_inches='tight', pad_inches=0.1)
