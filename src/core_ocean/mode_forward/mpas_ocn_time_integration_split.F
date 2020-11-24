@@ -41,6 +41,7 @@ module ocn_time_integration_split
    use ocn_time_average_coupled
 
    use ocn_effective_density_in_land_ice
+   use ocn_verification_cases
 
    implicit none
    private
@@ -181,6 +182,8 @@ module ocn_time_integration_split
       real (kind=RKIND), dimension(:,:), pointer :: highFreqThicknessCur, highFreqThicknessNew
       real (kind=RKIND), dimension(:,:), pointer :: lowFreqDivergenceCur, lowFreqDivergenceNew
       real (kind=RKIND), dimension(:,:,:), pointer :: tracersGroupCur, tracersGroupNew
+      real (kind=RKIND), dimension(:,:), pointer :: normalVelocitySolution
+      integer, dimension(:,:), pointer :: boundaryEdge
 
       ! Tend Array Pointers
       real (kind=RKIND), dimension(:), pointer :: sshTend
@@ -892,6 +895,24 @@ module ocn_time_integration_split
                      !$omp end do
                      !$omp end parallel
 
+      call mpas_pool_get_array(diagnosticsPool, 'daysSinceStartOfSim',daysSinceStartOfSim)
+      currentTime = daysSinceStartOfSim*86400.0_RKIND + dt*split_explicit_step/nBtrSubcycles
+      call ocn_verification_solution(currentTime, statePool, meshPool, diagnosticsPool, tracersPool)
+
+                   if (config_verification_enable) then
+                      call mpas_pool_get_array(diagnosticsPool, 'normalVelocitySolution', normalVelocitySolution)
+                      call mpas_pool_get_array(meshPool, 'boundaryEdge', boundaryEdge)
+                      !$omp parallel
+                      !$omp do schedule(runtime) 
+                      do iEdge = 1, nEdges
+                         if (boundaryEdge(1,iEdge).eq.1) then 
+                            normalBarotropicVelocitySubcycleNew(iEdge) = normalVelocitySolution(1, iEdge)
+                         endif
+                      end do
+                      !$omp end do
+                      !$omp end parallel
+                   end if
+
                      block => block % next
                   end do  ! block
               endif ! config_btr_gam1_velWt1>1.0e-12
@@ -1146,6 +1167,20 @@ module ocn_time_integration_split
                    end do
                    !$omp end do
                    !$omp end parallel
+
+                   if (config_verification_enable) then
+                      call mpas_pool_get_array(diagnosticsPool, 'normalVelocitySolution', normalVelocitySolution)
+                      call mpas_pool_get_array(meshPool, 'boundaryEdge', boundaryEdge)
+                      !$omp parallel
+                      !$omp do schedule(runtime) 
+                      do iEdge = 1, nEdges
+                         if (boundaryEdge(1,iEdge).eq.1) then 
+                            normalBarotropicVelocitySubcycleNew(iEdge) = normalVelocitySolution(1, iEdge)
+                         endif
+                      end do
+                      !$omp end do
+                      !$omp end parallel
+                   end if
 
                    block => block % next
                 end do  ! block
@@ -1709,8 +1744,23 @@ module ocn_time_integration_split
                ! in this diagnostics solve.
          call mpas_pool_get_array(diagnosticsPool, 'daysSinceStartOfSim',daysSinceStartOfSim)
          ! daysSinceStartOfSim is at old time
-         currentTime = daysSinceStartOfSim*86400.0_RKIND + dt
+         currentTime = daysSinceStartOfSim*86400.0_RKIND + dt/2.0_RKIND
                call ocn_diagnostic_solve(dt, currentTime, statePool, forcingPool, meshPool, diagnosticsPool, scratchPool, tracersPool, 2)
+         if (config_verification_enable) then
+            call mpas_pool_get_array(diagnosticsPool, 'normalVelocitySolution', normalVelocitySolution)
+            call mpas_pool_get_array(meshPool, 'boundaryEdge', boundaryEdge)
+            !$omp parallel
+            !$omp do schedule(runtime) 
+            do iEdge = 1, nEdges
+               do k = 1, maxLevelEdgeTop(iEdge)
+                  if (boundaryEdge(k,iEdge).eq.1) then 
+                     normalVelocityNew(k, iEdge) = normalVelocitySolution(k, iEdge)
+                  endif
+               end do
+            end do
+            !$omp end do
+            !$omp end parallel
+         end if
 
             !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             !
@@ -1949,8 +1999,24 @@ module ocn_time_integration_split
         ! implicit vmix routine that follows.
          call mpas_pool_get_array(diagnosticsPool, 'daysSinceStartOfSim',daysSinceStartOfSim)
          ! daysSinceStartOfSim is at old time
-         currentTime = daysSinceStartOfSim*86400.0_RKIND + dt
+         currentTime = daysSinceStartOfSim*86400.0_RKIND + dt/2.0_RKIND
         call ocn_diagnostic_solve(dt, currentTime, statePool, forcingPool, meshPool, diagnosticsPool, scratchPool, tracersPool, 2)
+
+         if (config_verification_enable) then
+            call mpas_pool_get_array(diagnosticsPool, 'normalVelocitySolution', normalVelocitySolution)
+            call mpas_pool_get_array(meshPool, 'boundaryEdge', boundaryEdge)
+            !$omp parallel
+            !$omp do schedule(runtime) 
+            do iEdge = 1, nEdges
+               do k = 1, maxLevelEdgeTop(iEdge)
+                  if (boundaryEdge(k,iEdge).eq.1) then 
+                     normalVelocityNew(k, iEdge) = normalVelocitySolution(k, iEdge)
+                  endif
+               end do
+            end do
+            !$omp end do
+            !$omp end parallel
+         end if
 
         block => block % next
       end do
@@ -2064,9 +2130,24 @@ module ocn_time_integration_split
          end if
 
          call mpas_pool_get_array(diagnosticsPool, 'daysSinceStartOfSim',daysSinceStartOfSim)
-         ! daysSinceStartOfSim is at old time
          currentTime = daysSinceStartOfSim*86400.0_RKIND + dt
          call ocn_diagnostic_solve(dt, currentTime, statePool, forcingPool, meshPool, diagnosticsPool, scratchPool, tracersPool, 2)
+
+         if (config_verification_enable) then
+            call mpas_pool_get_array(diagnosticsPool, 'normalVelocitySolution', normalVelocitySolution)
+            call mpas_pool_get_array(meshPool, 'boundaryEdge', boundaryEdge)
+            !$omp parallel
+            !$omp do schedule(runtime) 
+            do iEdge = 1, nEdges
+               do k = 1, maxLevelEdgeTop(iEdge)
+                  if (boundaryEdge(k,iEdge).eq.1) then 
+                     normalVelocityNew(k, iEdge) = normalVelocitySolution(k, iEdge)
+                  endif
+               end do
+            end do
+            !$omp end do
+            !$omp end parallel
+         end if
 
          ! Update the effective desnity in land ice if we're coupling to land ice
          call ocn_effective_density_in_land_ice_update(meshPool, forcingPool, statePool, err)
