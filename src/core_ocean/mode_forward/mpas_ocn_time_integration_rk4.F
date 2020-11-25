@@ -657,6 +657,7 @@ module ocn_time_integration_rk4
 
          call mpas_pool_get_dimension(meshPool, 'nCells', nCells)
          call mpas_pool_get_dimension(meshPool, 'nEdges', nEdges)
+         call mpas_pool_get_dimension(block % dimensions, 'nVertLevels', nVertLevels)
          call mpas_pool_get_array(meshPool, 'bottomDepth', bottomDepth)
 
          call mpas_pool_get_array(statePool, 'normalVelocity', normalVelocityCur, 1)
@@ -737,10 +738,13 @@ module ocn_time_integration_rk4
          if (config_verification_enable) then
             call mpas_pool_get_array(diagnosticsPool, 'normalVelocitySolution', normalVelocitySolution)
             call mpas_pool_get_array(meshPool, 'boundaryEdge', boundaryEdge)
+            print *, 'RK L740 normalVelocitySolution(1,1:5)',normalVelocitySolution(1,1:5)
+            print *, 'RK L740 normalVelocityNew(1,1:5)',normalVelocityNew(1,1:5)
+            print *, 'RK L740 boundaryEdge(1,1:5)',boundaryEdge(1,1:5)
             !$omp parallel
             !$omp do schedule(runtime) 
             do iEdge = 1, nEdges
-               do k = 1, maxLevelEdgeTop(iEdge)
+               do k = 1, nVertLevels
                   if (boundaryEdge(k,iEdge).eq.1) then 
                      normalVelocityNew(k, iEdge) = normalVelocitySolution(k, iEdge)
                   endif
@@ -748,6 +752,8 @@ module ocn_time_integration_rk4
             end do
             !$omp end do
             !$omp end parallel
+
+            print *, 'RK L751 normalVelocityNew(1,1:5)',normalVelocityNew(1,1:5)
          end if
 
          ! Update the effective desnity in land ice if we're coupling to land ice
@@ -1123,7 +1129,7 @@ module ocn_time_integration_rk4
 
       logical, pointer :: config_prescribe_velocity, config_prescribe_thickness, config_use_GM
 
-      integer, pointer :: nCells, nEdges
+      integer, pointer :: nCells, nEdges, nVertLevels
       integer :: iCell, iEdge, k
 
       type (mpas_pool_type), pointer :: statePool, tendPool, meshPool, scratchPool
@@ -1157,6 +1163,7 @@ module ocn_time_integration_rk4
 
       call mpas_pool_get_dimension(block % dimensions, 'nCells', nCells)
       call mpas_pool_get_dimension(block % dimensions, 'nEdges', nEdges)
+      call mpas_pool_get_dimension(block % dimensions, 'nVertLevels', nVertLevels)
 
       call mpas_pool_get_subpool(block % structs, 'state', statePool)
       call mpas_pool_get_subpool(block % structs, 'tend', tendPool)
@@ -1282,10 +1289,14 @@ module ocn_time_integration_rk4
          if (config_verification_enable) then
             call mpas_pool_get_array(diagnosticsPool, 'normalVelocitySolution', normalVelocitySolution)
             call mpas_pool_get_array(meshPool, 'boundaryEdge', boundaryEdge)
+            print *, 'RK L1288 normalVelocitySolution(1,1:5)',normalVelocitySolution(1,1:5)
+            print *, 'RK L1288 normalVelocityProvis(1,1:5)',normalVelocityProvis(1,1:5)
+            print *, 'RK L1288 boundaryEdge(1,1:5)',boundaryEdge(1,1:5)
             !$omp parallel
             !$omp do schedule(runtime) 
             do iEdge = 1, nEdges
-               do k = 1, maxLevelEdgeTop(iEdge)
+               ! to do: change all these to maxLevelEdgeTop(iEdge)+1, nVertLevels and delete if
+               do k = 1, nVertLevels
                   if (boundaryEdge(k,iEdge).eq.1) then 
                      normalVelocityProvis(k, iEdge) = normalVelocitySolution(k, iEdge)
                   endif
@@ -1293,6 +1304,7 @@ module ocn_time_integration_rk4
             end do
             !$omp end do
             !$omp end parallel
+            print *, 'RK L1300 normalVelocityProvis(1,1:5)',normalVelocityProvis(1,1:5)
          end if
 
       ! ------------------------------------------------------------------

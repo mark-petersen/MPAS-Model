@@ -298,6 +298,15 @@ contains
             ! central differenced
             layerThicknessEdge(k,iEdge) = 0.5_RKIND * (layerThickness(k,cell1) + layerThickness(k,cell2))
           end do
+          do k = maxLevelEdgeTop(iEdge)+1,nVertLevels
+            if (cell1==nCells+1) then
+               layerThicknessEdge(k,iEdge) = layerThickness(k,cell2)
+            else if (cell2==nCells+1) then
+               layerThicknessEdge(k,iEdge) = layerThickness(k,cell1)
+            else
+               print *, 'ERROR diagnostics line 307: cell1, cell2, nCells',cell1,cell2,nCells
+            end if
+          end do
         end do
         !$omp end do
         !$omp end parallel
