@@ -559,7 +559,7 @@ module ocn_time_integration_rk4
             do iEdge = 1, nEdges
                do k = 1, maxLevelEdgeTop(iEdge)
                   if (boundaryEdge(k,iEdge).eq.1) then 
-                     normalVelocityNew(k, iEdge) = normalVelocitySolution(k, iEdge)
+!mrp temp                     normalVelocityNew(k, iEdge) = normalVelocitySolution(k, iEdge)
                   endif
                end do
             end do
@@ -743,7 +743,7 @@ module ocn_time_integration_rk4
             do iEdge = 1, nEdges
                do k = 1, nVertLevels
                   if (boundaryEdge(k,iEdge).eq.1) then 
-                     normalVelocityNew(k, iEdge) = normalVelocitySolution(k, iEdge)
+!mrp temp                     normalVelocityNew(k, iEdge) = normalVelocitySolution(k, iEdge)
                   endif
                end do
             end do
@@ -1290,7 +1290,7 @@ module ocn_time_integration_rk4
                ! to do: change all these to maxLevelEdgeTop(iEdge)+1, nVertLevels and delete if
                do k = 1, nVertLevels
                   if (boundaryEdge(k,iEdge).eq.1) then 
-                     normalVelocityProvis(k, iEdge) = normalVelocitySolution(k, iEdge)
+!mrp temp                     normalVelocityProvis(k, iEdge) = normalVelocitySolution(k, iEdge)
                   endif
                end do
             end do
