@@ -906,7 +906,7 @@ module ocn_time_integration_split
                       !$omp do schedule(runtime) 
                       do iEdge = 1, nEdges
                          if (boundaryEdge(1,iEdge).eq.1) then 
-!mrp temp                            normalBarotropicVelocitySubcycleNew(iEdge) = normalVelocitySolution(1, iEdge)
+                            normalBarotropicVelocitySubcycleNew(iEdge) = normalVelocitySolution(1, iEdge)
                          endif
                       end do
                       !$omp end do
@@ -1175,7 +1175,7 @@ module ocn_time_integration_split
                       !$omp do schedule(runtime) 
                       do iEdge = 1, nEdges
                          if (boundaryEdge(1,iEdge).eq.1) then 
-!mrp temp                            normalBarotropicVelocitySubcycleNew(iEdge) = normalVelocitySolution(1, iEdge)
+                            normalBarotropicVelocitySubcycleNew(iEdge) = normalVelocitySolution(1, iEdge)
                          endif
                       end do
                       !$omp end do
@@ -1754,7 +1754,7 @@ module ocn_time_integration_split
             do iEdge = 1, nEdges
                do k = 1, maxLevelEdgeTop(iEdge)
                   if (boundaryEdge(k,iEdge).eq.1) then 
-!mrp temp                     normalVelocityNew(k, iEdge) = normalVelocitySolution(k, iEdge)
+                     normalVelocityNew(k, iEdge) = normalVelocitySolution(k, iEdge)
                   endif
                end do
             end do
@@ -2010,7 +2010,7 @@ module ocn_time_integration_split
             do iEdge = 1, nEdges
                do k = 1, maxLevelEdgeTop(iEdge)
                   if (boundaryEdge(k,iEdge).eq.1) then 
-!mrp temp                     normalVelocityNew(k, iEdge) = normalVelocitySolution(k, iEdge)
+                     normalVelocityNew(k, iEdge) = normalVelocitySolution(k, iEdge)
                   endif
                end do
             end do
@@ -2141,7 +2141,7 @@ module ocn_time_integration_split
             do iEdge = 1, nEdges
                do k = 1, maxLevelEdgeTop(iEdge)
                   if (boundaryEdge(k,iEdge).eq.1) then 
-!mrp temp                     normalVelocityNew(k, iEdge) = normalVelocitySolution(k, iEdge)
+                     normalVelocityNew(k, iEdge) = normalVelocitySolution(k, iEdge)
                   endif
                end do
             end do
