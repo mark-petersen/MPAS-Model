@@ -191,7 +191,6 @@ contains
        call mpas_pool_get_dimension(meshPool, 'nCellsSolve', nCellsSolve)
        call mpas_pool_get_dimension(meshPool, 'nEdgesSolve', nEdgesSolve)
        call mpas_pool_get_dimension(meshPool, 'nVertLevels', nVertLevels)
-       call mpas_pool_get_dimension(meshPool, 'nCellsSolve', nCellsSolve)
 
        call mpas_pool_get_dimension(tracersPool, 'index_temperature', index_temperature)
        call mpas_pool_get_dimension(tracersPool, 'index_salinity', index_salinity)
@@ -224,8 +223,17 @@ contains
        call mpas_pool_get_array(diagnosticsPool, 'yPlanarDomainWidth', yPlanarDomainWidth)
        call mpas_pool_get_array(diagnosticsPool, 'xEdgeGlobalMin', xEdgeGlobalMin)
 
+       ! defaults
+       f0 = 1.0e-4_RKIND ! coriolis parameter [1/s]
+       beta = 0.0 ! beta parameter
        maxDepth = 3000.0_RKIND ! H [m]
        flatBottom = .true.
+       T0 = 15
+       S0 = 35
+       select case (config_verification_case)
+       case (1) ! coastal Kelvin wave
+          ! add any case specific variables
+       end select
 
        ! Set refBottomDepth and refZMid
        do k = 1, nVertLevels
@@ -239,6 +247,7 @@ contains
        ! Set vertCoordMovementWeights
        vertCoordMovementWeights(:) = 1.0_RKIND
 
+       ! Add exact solution: ssh and normalVelocity
        currentTime = 0.0_RKIND ! start at time zero
        call ocn_verification_solution(currentTime, statePool, meshPool, diagnosticsPool, tracersPool)
 

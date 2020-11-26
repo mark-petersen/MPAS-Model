@@ -12,7 +12,7 @@ matplotlib.use('Agg')
 # mrp: read from file mesh after nx,ny attributes are added:
 ncfileHex = Dataset('planar_hex.nc', 'r')
 ncfileMesh = Dataset('initial_state.nc', 'r')
-ncfileBadAngleEdge = Dataset('mesh_bad_angleEdge.nc', 'r')
+#ncfileBadAngleEdge = Dataset('mesh_bad_angleEdge.nc', 'r')
 nx = ncfileHex.getncattr('nx')
 ny = ncfileHex.getncattr('ny')
 iz = 1
@@ -45,7 +45,8 @@ yCell = 1e-3*np.reshape(ncfileMesh.variables['yCell'][:], [ny, nx])
 
 xEdge = 1e-3*ncfileMesh.variables['xEdge'][:]
 yEdge = 1e-3*ncfileMesh.variables['yEdge'][:]
-angleEdge = 180./np.pi*ncfileBadAngleEdge.variables['angleEdge'][:]
+#angleEdge = 180./np.pi*ncfileBadAngleEdge.variables['angleEdge'][:]
+angleEdge = 180./np.pi*ncfileMesh.variables['angleEdge'][:]
 
 varNames = ['ssh','sshSolution']
 varName='ssh'

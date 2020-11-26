@@ -13,8 +13,8 @@ matplotlib.use('Agg')
 
 varNames = ['ssh'] #,'normalVelocity']
 test = 'coastal Kelvin Wave, '
-time_step_method = 'split_explicit'
 time_step_method = 'RK4'
+time_step_method = 'split_explicit'
 #varNames = ['ssh','normalVelocity']
 nVars = len(varNames)
 plotDir = os.getcwd()

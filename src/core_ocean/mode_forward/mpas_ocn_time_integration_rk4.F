@@ -738,9 +738,6 @@ module ocn_time_integration_rk4
          if (config_verification_enable) then
             call mpas_pool_get_array(diagnosticsPool, 'normalVelocitySolution', normalVelocitySolution)
             call mpas_pool_get_array(meshPool, 'boundaryEdge', boundaryEdge)
-            print *, 'RK L740 normalVelocitySolution(1,1:5)',normalVelocitySolution(1,1:5)
-            print *, 'RK L740 normalVelocityNew(1,1:5)',normalVelocityNew(1,1:5)
-            print *, 'RK L740 boundaryEdge(1,1:5)',boundaryEdge(1,1:5)
             !$omp parallel
             !$omp do schedule(runtime) 
             do iEdge = 1, nEdges
@@ -752,8 +749,6 @@ module ocn_time_integration_rk4
             end do
             !$omp end do
             !$omp end parallel
-
-            print *, 'RK L751 normalVelocityNew(1,1:5)',normalVelocityNew(1,1:5)
          end if
 
          ! Update the effective desnity in land ice if we're coupling to land ice
@@ -1289,9 +1284,6 @@ module ocn_time_integration_rk4
          if (config_verification_enable) then
             call mpas_pool_get_array(diagnosticsPool, 'normalVelocitySolution', normalVelocitySolution)
             call mpas_pool_get_array(meshPool, 'boundaryEdge', boundaryEdge)
-            print *, 'RK L1288 normalVelocitySolution(1,1:5)',normalVelocitySolution(1,1:5)
-            print *, 'RK L1288 normalVelocityProvis(1,1:5)',normalVelocityProvis(1,1:5)
-            print *, 'RK L1288 boundaryEdge(1,1:5)',boundaryEdge(1,1:5)
             !$omp parallel
             !$omp do schedule(runtime) 
             do iEdge = 1, nEdges
@@ -1304,7 +1296,6 @@ module ocn_time_integration_rk4
             end do
             !$omp end do
             !$omp end parallel
-            print *, 'RK L1300 normalVelocityProvis(1,1:5)',normalVelocityProvis(1,1:5)
          end if
 
       ! ------------------------------------------------------------------
