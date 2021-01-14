@@ -1,3 +1,4 @@
+! COMMIT 1 TO SW WITHIN E3SM !!!
 ! Copyright (c) 2013,  Los Alamos National Security, LLC (LANS)
 ! and the University Corporation for Atmospheric Research (UCAR).
 !
