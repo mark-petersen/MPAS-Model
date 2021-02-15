@@ -384,6 +384,7 @@ module sw_time_integration
                                                     circulation, vorticity, ke, pv_edge, divergence, h_vertex
       integer, dimension(:,:), pointer :: cellsOnEdge, cellsOnVertex, verticesOnEdge, edgesOnCell, edgesOnEdge, edgesOnVertex
       integer, dimension(:), pointer :: nEdgesOnCell, nEdgesOnEdge
+      integer, dimension(:,:), pointer :: edgeSignOnCell
       real (kind=RKIND) :: r, u_diffusion
 
       real (kind=RKIND), allocatable, dimension(:,:) :: delsq_divergence
@@ -439,6 +440,7 @@ module sw_time_integration
       call mpas_pool_get_array(meshPool, 'u_src', u_src)
       call mpas_pool_get_array(meshPool, 'meshScalingDel2', meshScalingDel2)
       call mpas_pool_get_array(meshPool, 'meshScalingDel4', meshScalingDel4)
+      call mpas_pool_get_array(meshPool, 'edgeSignOnCell', edgeSignOnCell)
 
       call mpas_pool_get_array(tendPool, 'h', tend_h)
       call mpas_pool_get_array(tendPool, 'u', tend_u)
@@ -463,12 +465,28 @@ module sw_time_integration
             tend_h(k,cell1) = tend_h(k,cell1) - flux
             tend_h(k,cell2) = tend_h(k,cell2) + flux
          end do
-      end do 
+      end do
       do iCell = 1, nCellsSolve
          do k = 1, nVertLevels
             tend_h(k,iCell) = tend_h(k,iCell) / areaCell(iCell)
          end do
       end do
+      print *, 'E:',tend_h(1,1:10)
+
+      tend_h(:,:) = 0.0
+      do iCell = 1, nCellsSolve
+         do i = 1, nEdgesOnCell(iCell)
+            iEdge = edgesOnCell(i, iCell)
+            do k = 1, nVertLevels
+               flux = u(k,iEdge) * dvEdge(iEdge) * h_edge(k,iEdge)
+               tend_h(k, iCell) = tend_h(k, iCell) + edgeSignOnCell(i, iCell) * flux
+            end do
+         end do
+         do k = 1, nVertLevels
+            tend_h(k,iCell) = tend_h(k,iCell) / areaCell(iCell)
+         end do
+      end do
+      print *, 'C:',tend_h(1,1:10)
 
 
       !
