@@ -457,24 +457,7 @@ module sw_time_integration
       ! Compute height tendency for each cell
       !
       tend_h(:,:) = 0.0
-      do iEdge = 1, nEdges
-         cell1 = cellsOnEdge(1,iEdge)
-         cell2 = cellsOnEdge(2,iEdge)
-         do k = 1, nVertLevels
-            flux = u(k,iEdge) * dvEdge(iEdge) * h_edge(k,iEdge)
-            tend_h(k,cell1) = tend_h(k,cell1) - flux
-            tend_h(k,cell2) = tend_h(k,cell2) + flux
-         end do
-      end do
-      do iCell = 1, nCellsSolve
-         do k = 1, nVertLevels
-            tend_h(k,iCell) = tend_h(k,iCell) / areaCell(iCell)
-         end do
-      end do
-      print *, 'E:',tend_h(1,1:10)
-
-      tend_h(:,:) = 0.0
-      do iCell = 1, nCellsSolve
+      do iCell = 1, nCells
          do i = 1, nEdgesOnCell(iCell)
             iEdge = edgesOnCell(i, iCell)
             do k = 1, nVertLevels
@@ -486,7 +469,6 @@ module sw_time_integration
             tend_h(k,iCell) = tend_h(k,iCell) / areaCell(iCell)
          end do
       end do
-      print *, 'C:',tend_h(1,1:10)
 
 
       !
