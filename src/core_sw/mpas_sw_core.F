@@ -186,6 +186,7 @@ module sw_core
 
       call mpas_rbf_interp_initialize(meshPool)
       call mpas_init_reconstruct(meshPool)
+      call ocn_init_routines_setup_sign_and_index_fields(meshPool)
       call mpas_reconstruct(meshPool, u,                  &
                        uReconstructX, uReconstructY, uReconstructZ, &
                        uReconstructZonal, uReconstructMeridional)
@@ -487,5 +488,83 @@ module sw_core
       end if
 
    end subroutine mpas_core_get_mesh_stream
+
+!***********************************************************************
+!
+!  routine ocn_init_routines_setup_sign_and_index_fields
+!
+!> \brief   set up sign and index fields
+!> \author Doug Jacobsen, Mark Petersen, Todd Ringler
+!> \date   September 2011
+!> \details
+!>  This routine initializes edgeSignOnCell, edgeSignOnVertex, and
+!>   kiteIndexOnCell.
+!
+!-----------------------------------------------------------------------
+   subroutine ocn_init_routines_setup_sign_and_index_fields(meshPool)!{{{
+
+       type (mpas_pool_type), intent(inout) :: meshPool
+
+       integer, dimension(:), pointer :: nEdgesOnCell
+       integer, dimension(:,:), pointer :: edgesOnCell, edgesOnVertex, cellsOnVertex, cellsOnEdge, verticesOnCell, verticesOnEdge
+       integer, dimension(:,:), pointer :: edgeSignOnCell, edgeSignOnVertex, kiteIndexOnCell
+
+       integer, pointer :: nCells, nEdges, nVertices, vertexDegree
+       integer :: iCell, iEdge, iVertex, i, j, k
+
+       call mpas_pool_get_dimension(meshPool, 'nCells', nCells)
+       call mpas_pool_get_dimension(meshPool, 'nEdges', nEdges)
+       call mpas_pool_get_dimension(meshPool, 'nVertices', nVertices)
+       call mpas_pool_get_dimension(meshPool, 'vertexDegree', vertexDegree)
+
+       call mpas_pool_get_array(meshPool, 'nEdgesOnCell', nEdgesOnCell)
+       call mpas_pool_get_array(meshPool, 'edgesOnCell', edgesOnCell)
+       call mpas_pool_get_array(meshPool, 'edgesOnVertex', edgesOnVertex)
+       call mpas_pool_get_array(meshPool, 'cellsOnVertex', cellsOnVertex)
+       call mpas_pool_get_array(meshPool, 'cellsOnEdge', cellsOnEdge)
+       call mpas_pool_get_array(meshPool, 'verticesOnCell', verticesOnCell)
+       call mpas_pool_get_array(meshPool, 'verticesOnEdge', verticesOnEdge)
+       call mpas_pool_get_array(meshPool, 'edgeSignOnCell', edgeSignOnCell)
+       call mpas_pool_get_array(meshPool, 'edgeSignOnVertex', edgeSignOnVertex)
+       call mpas_pool_get_array(meshPool, 'kiteIndexOnCell', kiteIndexOnCell)
+
+       edgeSignOnCell = 0.0_RKIND
+       edgeSignOnVertex = 0.0_RKIND
+       kiteIndexOnCell = 0.0_RKIND
+
+       do iCell = 1, nCells
+         do i = 1, nEdgesOnCell(iCell)
+           iEdge = edgesOnCell(i, iCell)
+           iVertex = verticesOnCell(i, iCell)
+
+           ! Vector points from cell 1 to cell 2
+           if(iCell == cellsOnEdge(1, iEdge)) then
+             edgeSignOnCell(i, iCell) = -1
+           else
+             edgeSignOnCell(i, iCell) =  1
+           end if
+
+           do j = 1, vertexDegree
+             if(cellsOnVertex(j, iVertex) == iCell) then
+               kiteIndexOnCell(i, iCell) = j
+             end if
+           end do
+         end do
+       end do
+
+       do iVertex = 1, nVertices
+         do i = 1, vertexDegree
+           iEdge = edgesOnVertex(i, iVertex)
+
+           ! Vector points from vertex 1 to vertex 2
+           if(iVertex == verticesOnEdge(1, iEdge)) then
+             edgeSignOnVertex(i, iVertex) = -1
+           else
+             edgeSignOnVertex(i, iVertex) =  1
+           end if
+         end do
+       end do
+
+   end subroutine ocn_init_routines_setup_sign_and_index_fields!}}}
 
 end module sw_core
