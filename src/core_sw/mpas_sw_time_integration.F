@@ -1192,7 +1192,7 @@ module sw_time_integration
          invAreaTri1 = 1.0_RKIND / areaTriangle(iVertex)
          do i = 1, vertexDegree
             iEdge = edgesOnVertex(i, iVertex)
-            do k = 1, maxLevelVertexBot(iVertex)
+            do k = 1, nVertLevels
               r_tmp = dcEdge(iEdge) * u(k, iEdge)
 
               circulation(k, iVertex) = circulation(k, iVertex) + edgeSignOnVertex(i, iVertex) * r_tmp
