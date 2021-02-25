@@ -384,7 +384,7 @@ module sw_time_integration
                                                     circulation, vorticity, ke, pv_edge, divergence, h_vertex
       integer, dimension(:,:), pointer :: cellsOnEdge, cellsOnVertex, verticesOnEdge, edgesOnCell, edgesOnEdge, edgesOnVertex
       integer, dimension(:), pointer :: nEdgesOnCell, nEdgesOnEdge
-      integer, dimension(:,:), pointer :: edgeSignOnCell
+      integer, dimension(:,:), pointer :: edgeSignOnCell, edgeSignOnVertex
       real (kind=RKIND) :: r, u_diffusion
 
       real (kind=RKIND), allocatable, dimension(:,:) :: delsq_divergence
@@ -441,6 +441,7 @@ module sw_time_integration
       call mpas_pool_get_array(meshPool, 'meshScalingDel2', meshScalingDel2)
       call mpas_pool_get_array(meshPool, 'meshScalingDel4', meshScalingDel4)
       call mpas_pool_get_array(meshPool, 'edgeSignOnCell', edgeSignOnCell)
+      call mpas_pool_get_array(meshPool, 'edgeSignOnVertex', edgeSignOnVertex)
 
       call mpas_pool_get_array(tendPool, 'h', tend_h)
       call mpas_pool_get_array(tendPool, 'u', tend_u)
@@ -1186,18 +1187,31 @@ module sw_time_integration
       !
       ! Compute circulation and relative vorticity at each vertex
       !
-      circulation(:,:) = 0.0
-      do iEdge = 1, nEdges
-         do k = 1, nVertLevels
-            circulation(k,verticesOnEdge(1,iEdge)) = circulation(k,verticesOnEdge(1,iEdge)) - dcEdge(iEdge) * u(k,iEdge)
-            circulation(k,verticesOnEdge(2,iEdge)) = circulation(k,verticesOnEdge(2,iEdge)) + dcEdge(iEdge) * u(k,iEdge)
-         end do
-      end do
       do iVertex = 1, nVertices
-         do k = 1, nVertLevels
-            vorticity(k,iVertex) = circulation(k,iVertex) / areaTriangle(iVertex)
+         circulation(:, iVertex) = 0.0_RKIND
+         invAreaTri1 = 1.0_RKIND / areaTriangle(iVertex)
+         do i = 1, vertexDegree
+            iEdge = edgesOnVertex(i, iVertex)
+            do k = 1, maxLevelVertexBot(iVertex)
+              r_tmp = dcEdge(iEdge) * u(k, iEdge)
+
+              circulation(k, iVertex) = circulation(k, iVertex) + edgeSignOnVertex(i, iVertex) * r_tmp
+              vorticity(k, iVertex) = vorticity(k, iVertex) + edgeSignOnVertex(i, iVertex) * r_tmp * invAreaTri1
+            end do
          end do
       end do
+      ! old verstion:
+!      do iEdge = 1,nEdges
+!         do k = 1, nVertLevels
+!            circulation(k,verticesOnEdge(1,iEdge)) = circulation(k,verticesOnEdge(1,iEdge)) - dcEdge(iEdge) * u(k,iEdge)
+!            circulation(k,verticesOnEdge(2,iEdge)) = circulation(k,verticesOnEdge(2,iEdge)) + dcEdge(iEdge) * u(k,iEdge)
+!         end do
+!      end do
+!      do iVertex = 1, nVertices
+!         do k = 1, nVertLevels
+!            vorticity(k,iVertex) = circulation(k,iVertex) / areaTriangle(iVertex)
+!         end do
+!      end do
 
 
       !
