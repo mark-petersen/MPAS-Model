@@ -100,7 +100,6 @@ module sw_time_integration
       integer, pointer :: config_test_case
       real (kind=RKIND), pointer :: config_h_mom_eddy_visc4
 
-
       call mpas_pool_get_config(domain % configs, 'config_test_case', config_test_case)
       call mpas_pool_get_config(domain % configs, 'config_h_mom_eddy_visc4', config_h_mom_eddy_visc4)
 
@@ -110,6 +109,7 @@ module sw_time_integration
      ! Couple tracers time_levs(2) with h in time-levels
      ! Initialize RK weights
      !
+
      block => domain % blocklist
      do while (associated(block))
         call mpas_pool_get_subpool(block % structs, 'mesh', meshPool)
@@ -207,10 +207,11 @@ module sw_time_integration
           call mpas_pool_get_subpool(block % structs, 'tend', tendPool)
           call mpas_pool_get_subpool(block % structs, 'provis_state', provisStatePool)
           call mpas_pool_get_subpool(block % structs, 'mesh', meshPool)
-
+          
           call sw_compute_tend(tendPool, provisStatePool, meshPool, 1)
           call sw_compute_scalar_tend(tendPool, provisStatePool, meshPool, 1)
           call sw_enforce_boundary_edge(tendPool, meshPool)
+
           block => block % next
        end do
 
@@ -258,6 +259,7 @@ module sw_time_integration
                 uProvis(:,:) = uOld(:,:)
              end if
              call sw_compute_solve_diagnostics(dt, provisStatePool, meshPool)
+
              block => block % next
           end do
        end if
@@ -968,14 +970,15 @@ module sw_time_integration
       integer, intent(in), optional :: timeLevelIn
 
       integer :: iEdge, iCell, iVertex, k, cell1, cell2, vertex1, vertex2, eoe, i, j, cov
-      real (kind=RKIND) :: flux, vorticity_abs, workpv
+      real (kind=RKIND) :: flux, vorticity_abs, workpv, invAreaTri, r_tmp
 
       integer, pointer :: nCells, nEdges, nVertices, nVertLevels, vertexDegree
       real (kind=RKIND), dimension(:), pointer :: h_s, fVertex, fEdge, dvEdge, dcEdge, areaCell, areaTriangle
       real (kind=RKIND), dimension(:,:), pointer :: vh, weightsOnEdge, kiteAreasOnVertex, h_edge, h, u, v, tend_h, tend_u, &
                                                     circulation, vorticity, ke, pv_edge, pv_vertex, pv_cell, gradPVn, gradPVt, divergence, &
                                                     h_vertex, vorticity_cell
-      integer, dimension(:,:), pointer :: cellsOnEdge, cellsOnVertex, verticesOnEdge, edgesOnCell, edgesOnEdge, edgesOnVertex, boundaryEdge, boundaryCell, cellsOnCell
+      integer, dimension(:,:), pointer :: cellsOnEdge, cellsOnVertex, verticesOnEdge, edgesOnCell, edgesOnEdge, edgesOnVertex, boundaryEdge, boundaryCell, & 
+                                          cellsOnCell, edgeSignOnVertex
       integer, dimension(:), pointer :: nEdgesOnCell, nEdgesOnEdge
       real (kind=RKIND) :: r, h1, h2
       real (kind=RKIND) :: d2fdx2_cell1, d2fdx2_cell2
@@ -1036,6 +1039,7 @@ module sw_time_integration
       call mpas_pool_get_array(meshPool, 'fVertex', fVertex)
       call mpas_pool_get_array(meshPool, 'fEdge', fEdge)
       call mpas_pool_get_array(meshPool, 'deriv_two', deriv_two)
+      call mpas_pool_get_array(meshPool, 'edgeSignOnVertex', edgeSignOnVertex)
                   
       call mpas_pool_get_dimension(meshPool, 'nCells', nCells)
       call mpas_pool_get_dimension(meshPool, 'nEdges', nEdges)
@@ -1189,14 +1193,14 @@ module sw_time_integration
       !
       do iVertex = 1, nVertices
          circulation(:, iVertex) = 0.0_RKIND
-         invAreaTri1 = 1.0_RKIND / areaTriangle(iVertex)
+         invAreaTri = 1.0_RKIND / areaTriangle(iVertex)
          do i = 1, vertexDegree
             iEdge = edgesOnVertex(i, iVertex)
             do k = 1, nVertLevels
               r_tmp = dcEdge(iEdge) * u(k, iEdge)
 
               circulation(k, iVertex) = circulation(k, iVertex) + edgeSignOnVertex(i, iVertex) * r_tmp
-              vorticity(k, iVertex) = vorticity(k, iVertex) + edgeSignOnVertex(i, iVertex) * r_tmp * invAreaTri1
+              vorticity(k, iVertex) = vorticity(k, iVertex) + edgeSignOnVertex(i, iVertex) * r_tmp * invAreaTri
             end do
          end do
       end do
