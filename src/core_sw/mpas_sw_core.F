@@ -181,12 +181,12 @@ module sw_core
       call mpas_pool_get_array(statePool, 'uReconstructZonal', uReconstructZonal, 1)
       call mpas_pool_get_array(statePool, 'uReconstructMeridional', uReconstructMeridional, 1)
 
+      call ocn_init_routines_setup_sign_and_index_fields(meshPool)
       call sw_compute_solve_diagnostics(dt, statePool, meshPool, 1)
       call compute_mesh_scaling(meshPool) 
 
       call mpas_rbf_interp_initialize(meshPool)
       call mpas_init_reconstruct(meshPool)
-      call ocn_init_routines_setup_sign_and_index_fields(meshPool)
       call mpas_reconstruct(meshPool, u,                  &
                        uReconstructX, uReconstructY, uReconstructZ, &
                        uReconstructZonal, uReconstructMeridional)

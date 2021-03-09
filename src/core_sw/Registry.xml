@@ -105,6 +105,9 @@
 			<var name="boundaryVertex"/>
 			<var name="boundaryCell"/>
 			<var name="u_src"/>
+                        <var name="edgeSignOnCell"/>
+                        <var name="edgeSignOnVertex"/>
+                        <var name="kiteIndexOnCell"/>
 		</stream>
 		<stream name="restart" 
 				type="input;output"
@@ -164,6 +167,9 @@
 			<var name="boundaryVertex"/>
 			<var name="boundaryCell"/>
 			<var name="u_src"/>
+                        <var name="edgeSignOnCell"/>
+                        <var name="edgeSignOnVertex"/>
+                        <var name="kiteIndexOnCell"/>
 		</stream>
 		<stream name="output" 
 				type="output"
@@ -240,6 +246,9 @@
 			<var name="boundaryVertex"/>
 			<var name="boundaryCell"/>
 			<var name="u_src"/>
+                        <var name="edgeSignOnCell"/>
+                        <var name="edgeSignOnVertex"/>
+                        <var name="kiteIndexOnCell"/>
 		</stream>
 	</streams>
 	<var_struct name="state" time_levs="2">
@@ -323,12 +332,9 @@
 		<var name="boundaryVertex"                    type="integer"  dimensions="nVertLevels nVertices"/>
 		<var name="boundaryCell"                      type="integer"  dimensions="nVertLevels nCells"/>
 		<var name="u_src"                             type="real"     dimensions="nVertLevels nEdges"/>
-		<var name="edgeSignOnCell"                    type="integer"  dimensions="maxEdges nCells"
-			 description="Sign of edge contributions to a cell for each edge on cell. Used for bit-reproducible loops. Represents directionality of vector connecting cells." />
-		<var name="edgeSignOnVertex"                  type="integer"  dimensions="maxEdges nVertices"
-			 description="Sign of edge contributions to a vertex for each edge on vertex. Used for bit-reproducible loops. Represents directionality of vector connecting vertices." />
-		<var name="kiteIndexOnCell"                   type="integer"  dimensions="maxEdges nCells"
-			 description="Index of kite in dual grid, based on verticesOnCell." />
+		<var name="edgeSignOnCell"                    type="integer"  dimensions="maxEdges nCells"/>
+		<var name="edgeSignOnVertex"                  type="integer"  dimensions="maxEdges nVertices"/>
+		<var name="kiteIndexOnCell"                   type="integer"  dimensions="maxEdges nCells"/>
 	</var_struct>
 	<var_struct name="tend" time_levs="1">
 		<var name="tend_u"                            type="real"     dimensions="nVertLevels nEdges Time"           name_in_code="u"/>

@@ -207,7 +207,7 @@ module sw_time_integration
           call mpas_pool_get_subpool(block % structs, 'tend', tendPool)
           call mpas_pool_get_subpool(block % structs, 'provis_state', provisStatePool)
           call mpas_pool_get_subpool(block % structs, 'mesh', meshPool)
-          
+
           call sw_compute_tend(tendPool, provisStatePool, meshPool, 1)
           call sw_compute_scalar_tend(tendPool, provisStatePool, meshPool, 1)
           call sw_enforce_boundary_edge(tendPool, meshPool)
@@ -386,7 +386,7 @@ module sw_time_integration
                                                     circulation, vorticity, ke, pv_edge, divergence, h_vertex
       integer, dimension(:,:), pointer :: cellsOnEdge, cellsOnVertex, verticesOnEdge, edgesOnCell, edgesOnEdge, edgesOnVertex
       integer, dimension(:), pointer :: nEdgesOnCell, nEdgesOnEdge
-      integer, dimension(:,:), pointer :: edgeSignOnCell, edgeSignOnVertex
+      integer, dimension(:,:), pointer :: edgeSignOnCell
       real (kind=RKIND) :: r, u_diffusion
 
       real (kind=RKIND), allocatable, dimension(:,:) :: delsq_divergence
@@ -443,7 +443,6 @@ module sw_time_integration
       call mpas_pool_get_array(meshPool, 'meshScalingDel2', meshScalingDel2)
       call mpas_pool_get_array(meshPool, 'meshScalingDel4', meshScalingDel4)
       call mpas_pool_get_array(meshPool, 'edgeSignOnCell', edgeSignOnCell)
-      call mpas_pool_get_array(meshPool, 'edgeSignOnVertex', edgeSignOnVertex)
 
       call mpas_pool_get_array(tendPool, 'h', tend_h)
       call mpas_pool_get_array(tendPool, 'u', tend_u)
@@ -1192,19 +1191,21 @@ module sw_time_integration
       ! Compute circulation and relative vorticity at each vertex
       !
       do iVertex = 1, nVertices
-         circulation(:, iVertex) = 0.0_RKIND
+        ! circulation(:, iVertex) = 0.0_RKIND
+         vorticity(:, iVertex) = 0.0_RKIND
          invAreaTri = 1.0_RKIND / areaTriangle(iVertex)
          do i = 1, vertexDegree
             iEdge = edgesOnVertex(i, iVertex)
             do k = 1, nVertLevels
               r_tmp = dcEdge(iEdge) * u(k, iEdge)
-
-              circulation(k, iVertex) = circulation(k, iVertex) + edgeSignOnVertex(i, iVertex) * r_tmp
-              vorticity(k, iVertex) = vorticity(k, iVertex) + edgeSignOnVertex(i, iVertex) * r_tmp * invAreaTri
+              !circulation(k, iVertex) = circulation(k, iVertex) + edgeSignOnVertex(i, iVertex) * r_tmp
+             vorticity(k, iVertex) = vorticity(k, iVertex) + edgeSignOnVertex(i, iVertex) * r_tmp * invAreaTri
             end do
          end do
       end do
-      ! old verstion:
+
+      ! old version:
+!      circulation(:,:) = 0.0
 !      do iEdge = 1,nEdges
 !         do k = 1, nVertLevels
 !            circulation(k,verticesOnEdge(1,iEdge)) = circulation(k,verticesOnEdge(1,iEdge)) - dcEdge(iEdge) * u(k,iEdge)
