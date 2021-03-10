@@ -1337,6 +1337,7 @@ module sw_time_integration
       !
       do iEdge = 1, nEdges
          do k = 1, nVertLevels
+           ! note: apvm computation is not bit-for-bit across different paritions
            pv_edge(k,iEdge) = pv_edge(k,iEdge) - config_apvm_upwinding * v(k,iEdge) * dt * gradPVt(k,iEdge)
          enddo
       enddo
@@ -1379,6 +1380,7 @@ module sw_time_integration
       !
       do iEdge = 1, nEdges
          do k = 1, nVertLevels
+           ! note: apvm computation is not bit-for-bit across different paritions
            pv_edge(k,iEdge) = pv_edge(k,iEdge) - config_apvm_upwinding * u(k,iEdge) * dt * gradPVn(k,iEdge)
          enddo
       enddo
