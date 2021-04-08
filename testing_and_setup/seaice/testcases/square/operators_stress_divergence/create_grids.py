@@ -196,7 +196,7 @@ def create_grid_quad(nx, ny, dc):
 
 def create_grids():
 
-    nGrid = 4
+    nGrid = 1
 
     # hex
     dc = 0.0125
