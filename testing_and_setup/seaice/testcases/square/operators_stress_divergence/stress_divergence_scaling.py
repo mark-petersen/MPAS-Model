@@ -551,8 +551,8 @@ def scaling_lines(axis, xMin, xMax, yMin):
 def stress_divergence_scaling():
 
     # options
-    operatorMethods = ["wachspress","pwl","weak"]
-    #operatorMethods = ["wachspress","pwl"]
+    #operatorMethods = ["wachspress","pwl","weak"]
+    operatorMethods = ["wachspress","pwl"]
 
     gridTypes = ["hex","quad"]
     #gridTypes = ["hex"]
