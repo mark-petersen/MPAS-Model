@@ -388,7 +388,7 @@ contains
       endif
 
       ! compute ssh addition due to self-attraction and loading
-      call ocn_compute_self_attraction_loading(meshPool, forcingPool, diagnosticsPool, dminfo, ssh, err)
+      call ocn_compute_self_attraction_loading(meshPool, forcingPool, dminfo, ssh, err)
 
       ! Add horizontal mixing
       call ocn_vel_hmix_tend(divergence, relativeVorticity, tendVel,err)

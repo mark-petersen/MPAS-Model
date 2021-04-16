@@ -29,11 +29,10 @@ module ocn_vel_self_attraction_loading
     use mpas_timer
     use mpas_threading, only : mpas_threading_get_thread_num
     use ocn_constants
-    ! change to variables from modules later
-    !use ocn_diagnostics
-    !use ocn_diagnostics_variables
-    !use ocn_config
-    !use ocn_mesh
+    use ocn_diagnostics
+    use ocn_diagnostics_variables
+    use ocn_config
+    use ocn_mesh
     use netcdf
 #ifdef _MPI
     use mpi
@@ -105,7 +104,7 @@ contains
 !
 !-----------------------------------------------------------------------
 
-    subroutine ocn_compute_self_attraction_loading(meshPool, forcingPool, diagnosticsPool, dminfo, ssh, err)!{{{
+    subroutine ocn_compute_self_attraction_loading(meshPool, forcingPool, dminfo, ssh, err)!{{{
 
         !-----------------------------------------------------------------
         !
@@ -113,7 +112,6 @@ contains
         !
         !-----------------------------------------------------------------
         type (mpas_pool_type), intent(in) :: meshPool !< Input: mesh information
-        type (mpas_pool_type), intent(in) :: diagnosticsPool
         type (dm_info), intent(in) :: dminfo
         real (kind=RKIND), dimension(:), intent(in) :: ssh
         
@@ -153,7 +151,6 @@ contains
             return
         endif
 
-        call mpas_pool_get_array(diagnosticsPool, 'ssh_sal',ssh_sal)
         call mpas_pool_get_dimension(meshPool, 'nCellsSolve', nCellsSolve) 
         call mpas_pool_get_dimension(meshPool, 'nCells', nCells) 
 
