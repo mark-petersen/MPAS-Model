@@ -2878,7 +2878,6 @@
 		<var name="pressureAdjustedSSH" type="real" dimensions="nCells Time" units="m"
 			 description="sea surface height adjusted by sea surface pressure"
 		/>
-<<<<<<< HEAD
 		<!-- FIELD semi_implicit time stepping -->
 		<var name="barotropicCoriolisTerm" type="real" dimensions="nEdges Time" units="m s^{-2}"
 			description="f * uPerp for the semi-implicit time stepping"
@@ -2995,10 +2994,9 @@
 		<var name="CGvec_y0" type="real" dimensions="nCells Time" units="unitless"
 			description="A vector used in the semi-implicit barotropic mode solver"
 			packages="semiImplicitTimePKG"
-=======
 		<var name="ssh_sal" type="real" dimensions="nCells Time" units="m"
-			 description="sea surface height perturbation from self-attraction and loading"
->>>>>>> Add shtns submodule
+			description="sea surface height perturbation from self-attraction and loading"
+			packages="tidalForcing"
 		/>
 	</var_struct>
 	<var_struct name="shortwave" time_levs="1">

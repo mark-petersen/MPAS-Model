@@ -1053,6 +1053,8 @@ module ocn_time_integration_split
                         sshSubcycleCurWithTides(iCell) = &
                                  sshSubcycleCur(iCell) - &
                               tidalPotentialEta(iCell) - &
+                              !!!!!!!!!!!!!!!! note config flag here is not set
+                              !correctly in init for tidal !!!!!!!!!
                               config_self_attraction_and_loading_beta* &
                                  sshSubcycleCur(iCell)
                      end do

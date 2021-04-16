@@ -373,9 +373,9 @@ module ocn_time_integration_rk4
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       do rk_step = 1, 4
 
-!        if (config_disable_thick_all_tend .and. config_disable_vel_all_tend .and. config_disable_tr_all_tend) then
-!          exit ! don't compute in loop meant to update velocity, thickness, and tracers
-!        end if
+        if (config_disable_thick_all_tend .and. config_disable_vel_all_tend .and. config_disable_tr_all_tend) then
+          exit ! don't compute in loop meant to update velocity, thickness, and tracers
+        end if
 
         ! Update halos for diagnostic variables.
         if (config_use_cvmix_kpp) then
@@ -814,14 +814,7 @@ module ocn_time_integration_rk4
             sshCur, rkSubstepWeight, &
             vertAleTransportTop, err)
       endif
-<<<<<<< HEAD
-
-      call ocn_tend_vel(tendPool, provisStatePool, forcingPool, 1, dt)
-=======
-     
-      call ocn_tend_vel(tendPool, provisStatePool, forcingPool, diagnosticsPool, meshPool, &
-            scratchPool, 1, dminfo, dt)
->>>>>>> Add shtns submodule
+      call ocn_tend_vel(tendPool, provisStatePool, forcingPool, 1, dminfo, dt)
 
    end subroutine ocn_time_integrator_rk4_compute_vel_tends!}}}
 
@@ -994,15 +987,8 @@ module ocn_time_integration_rk4
             sshCur, rkWeight, &
             vertAleTransportTop, err)
       endif
-<<<<<<< HEAD
 
-      call ocn_tend_vel(tendPool, provisStatePool, forcingPool, 1, dt)
-=======
-      
-      call ocn_tend_vel(tendPool, provisStatePool, forcingPool, diagnosticsPool, meshPool, &
-            scratchPool, 1, dminfo, dt)
-      call mpas_threading_barrier()
->>>>>>> Add shtns submodule
+      call ocn_tend_vel(tendPool, provisStatePool, forcingPool, 1, dminfo, dt)
 
       if (associated(highFreqThicknessProvis)) then
          call ocn_vert_transport_velocity_top(meshPool, verticalMeshPool, scratchPool, &

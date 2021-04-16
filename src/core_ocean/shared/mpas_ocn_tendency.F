@@ -205,13 +205,8 @@ contains
 !
 !-----------------------------------------------------------------------
 
-<<<<<<< HEAD
    subroutine ocn_tend_vel(tendPool, statePool, forcingPool, &
-                           timeLevelIn, dt)!{{{
-=======
-   subroutine ocn_tend_vel(tendPool, statePool, forcingPool, diagnosticsPool, meshPool, scratchPool, timeLevelIn, dminfo, dt)!{{{
-      implicit none
->>>>>>> Add shtns submodule
+                           timeLevelIn, dminfo, dt)!{{{
 
       !-----------------------------------------------------------------
       ! input variables
@@ -260,14 +255,9 @@ contains
       type (mpas_pool_type), pointer :: tracersPool
       type (dm_info), intent(in) :: dminfo
 
-<<<<<<< HEAD
       real (kind=RKIND), dimension(:), pointer :: &
          ssh               ! sea surface height
 
-=======
-      real (kind=RKIND), dimension(:), pointer :: surfaceStress, surfaceStressMagnitude, surfaceFluxAttenuationCoefficient
-      real (kind=RKIND), dimension(:), pointer :: tidalPotentialEta, ssh
->>>>>>> Add shtns submodule
       real (kind=RKIND), dimension(:,:), pointer :: &
          normalVelocity,     &! normal velocity
          layerThickness, &
@@ -280,28 +270,16 @@ contains
       !-----------------------------------------------------------------
       ! Begin code
 
-<<<<<<< HEAD
       !*** Initialize error code and determine time level
 
       err = 0
-=======
-      logical, pointer :: config_use_self_attraction_loading
-
->>>>>>> Add shtns submodule
       if (present(timeLevelIn)) then
          timeLevel = timeLevelIn
       else
          timeLevel = 1
       end if
 
-<<<<<<< HEAD
       !*** Retrieve pool variables
-=======
-      call mpas_pool_get_config(ocnConfigs, 'config_use_self_attraction_loading', config_use_self_attraction_loading)
-      call mpas_pool_get_dimension(meshPool, 'nEdges', nEdges)
-      call mpas_pool_get_dimension(meshPool, 'nCells', nCells)
-
->>>>>>> Add shtns submodule
       call mpas_pool_get_subpool(statePool, 'tracers', tracersPool)
 
       call mpas_pool_get_array(statePool,   'normalVelocity', &
@@ -368,14 +346,8 @@ contains
       !$omp end parallel
 #endif
 
-<<<<<<< HEAD
       !*** Return early if all vel tendencies disabled
       !*** Otherwise, start timer
-=======
-      if(config_disable_vel_all_tend) then
-        return
-      endif
->>>>>>> Add shtns submodule
 
       if (config_disable_vel_all_tend) return
       call mpas_timer_start("ocn_tend_vel")
@@ -415,23 +387,11 @@ contains
         call ocn_vel_tidal_potential_tend(ssh, tendVel, err) 
       endif
 
-<<<<<<< HEAD
-      ! Add horizontal mixing
-      call ocn_vel_hmix_tend(divergence, relativeVorticity, tendVel,err)
-=======
-      !
-      ! velocity tendency: self-attraction and loading (if needed)
-      !
+      ! compute ssh addition due to self-attraction and loading
       call ocn_compute_self_attraction_loading(meshPool, forcingPool, diagnosticsPool, dminfo, ssh, err)
 
-      !
-      ! velocity tendency: del2 dissipation, \nu_2 \nabla^2 u
-      !   computed as \nu( \nabla divergence + k \times \nabla relativeVorticity )
-      !   strictly only valid for config_mom_del2 == constant
-      !
-      call ocn_vel_hmix_tend(meshPool, scratchPool, divergence, relativeVorticity, normalVelocity, tangentialVelocity, viscosity, &
-         tend_normalVelocity, err)
->>>>>>> Add shtns submodule
+      ! Add horizontal mixing
+      call ocn_vel_hmix_tend(divergence, relativeVorticity, tendVel,err)
 
       ! Add forcing and bottom drag
       call ocn_vel_forcing_tend(normalVelocity, sfcFlxAttCoeff, &

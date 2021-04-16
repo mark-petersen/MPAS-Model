@@ -29,6 +29,11 @@ module ocn_vel_self_attraction_loading
     use mpas_timer
     use mpas_threading, only : mpas_threading_get_thread_num
     use ocn_constants
+    ! change to variables from modules later
+    !use ocn_diagnostics
+    !use ocn_diagnostics_variables
+    !use ocn_config
+    !use ocn_mesh
     use netcdf
 #ifdef _MPI
     use mpi
