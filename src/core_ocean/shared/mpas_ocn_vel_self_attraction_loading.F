@@ -104,14 +104,13 @@ contains
 !
 !-----------------------------------------------------------------------
 
-    subroutine ocn_compute_self_attraction_loading(meshPool, forcingPool, dminfo, ssh, err)!{{{
+    subroutine ocn_compute_self_attraction_loading(forcingPool, dminfo, ssh, err)!{{{
 
         !-----------------------------------------------------------------
         !
         ! input variables
         !
         !-----------------------------------------------------------------
-        type (mpas_pool_type), intent(in) :: meshPool !< Input: mesh information
         type (dm_info), intent(in) :: dminfo
         real (kind=RKIND), dimension(:), intent(in) :: ssh
         
@@ -137,7 +136,6 @@ contains
         !-----------------------------------------------------------------
         
         real (kind=RKIND), dimension(:), pointer :: ssh_sal, ssh_gg
-        integer, pointer :: nCellsSolve, nCells
         real (kind=RKIND), dimension(:), pointer :: eta_SAL
         integer :: iCell, ilm
         real (kind=RKIND), dimension(:), allocatable :: globalArray, gatheredArray
@@ -151,9 +149,6 @@ contains
             return
         endif
 
-        call mpas_pool_get_dimension(meshPool, 'nCellsSolve', nCellsSolve) 
-        call mpas_pool_get_dimension(meshPool, 'nCells', nCells) 
-
         call MPI_COMM_RANK( dminfo % comm, curProc, err)
 
         ! Allocate globalArray and gatheredArray only on process 0
@@ -161,8 +156,8 @@ contains
             allocate(globalArray(nCellsGlobal), gatheredArray(nCellsGlobal))
         endif
 
-        ! Gather only the nCellsSolve from ssh (does not include Halos)
-        call MPI_GATHERV(ssh, nCellsSolve, MPI_DOUBLE, gatheredArray, nCellsPerProc, &
+        ! Gather only the nCellsOwned from ssh (does not include Halos)
+        call MPI_GATHERV(ssh, nCellsOwned, MPI_DOUBLE, gatheredArray, nCellsPerProc, &
                         nCellsDisplacement, MPI_DOUBLE, 0, dminfo % comm, err)
 
         ! Perform SAL calculation only on process 0
@@ -196,8 +191,9 @@ contains
         endif
 
         ! Scatter back to ssh_sal
+!mrp check nCellsAll on next line
         call MPI_SCATTERV(gatheredArray, nCellsPerProc, nCellsDisplacement, MPI_DOUBLE, &
-                    ssh_sal, nCells, MPI_DOUBLE, 0, dminfo % comm, err) 
+                    ssh_sal, nCellsAll, MPI_DOUBLE, 0, dminfo % comm, err) 
 
         if (curProc.eq.0) then
             deallocate(globalArray, gatheredArray)
@@ -264,7 +260,7 @@ contains
        
         ! MPI variables
         integer :: curProc
-        integer, pointer ::  nCellsSolve, nCells
+        integer, pointer ::  nCellsOwned, nCells
         integer, dimension(:), pointer :: indexToCellID
         integer :: iProc, l, ilm, nProcs
         
@@ -291,7 +287,7 @@ contains
         block_ptr => domain % blocklist
         do while ( associated( block_ptr ) )
             call mpas_pool_get_subpool(block_ptr % structs, 'mesh', meshPool)
-            call mpas_pool_get_dimension(meshPool, 'nCellsSolve', nCellsSolve) 
+            call mpas_pool_get_dimension(meshPool, 'nCellsOwned', nCellsOwned) 
             call mpas_pool_get_dimension(meshPool, 'nCells', nCells) 
             block_ptr => block_ptr % next
         end do
@@ -306,8 +302,8 @@ contains
             allocate(nCellsDisplacement(nProcs))
         endif
        
-        ! Gather nCellsSolve
-        call MPI_GATHER( nCellsSolve, 1, MPI_INTEGER, nCellsPerProc, 1, MPI_INTEGER, &
+        ! Gather nCellsOwned
+        call MPI_GATHER( nCellsOwned, 1, MPI_INTEGER, nCellsPerProc, 1, MPI_INTEGER, &
                          0, domain % dminfo % comm, err)
        
         ! Set Displacement variable for GATHERV command
@@ -323,7 +319,7 @@ contains
         endif
 
         ! Gather indexToCellID
-        call MPI_GATHERV( indexToCellID, nCellsSolve, MPI_INTEGER, indexToCellIDGathered, &
+        call MPI_GATHERV( indexToCellID, nCellsOwned, MPI_INTEGER, indexToCellIDGathered, &
                 nCellsPerProc, nCellsDisplacement, MPI_INTEGER, 0, domain % dminfo % comm, err)
      
         ! SAL calculations only need to be initialized on process 1

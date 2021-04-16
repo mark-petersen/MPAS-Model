@@ -74,9 +74,11 @@ libBGC:
 	fi
 
 libshtns: libfftw
+	echo "shtns already compiled"
 	(cd shtns; export CPP=cpp; ./configure --prefix=$(SHTNS_DIR); make; make install; export CPP='cpp -P -traditional';)
 
 libfftw:
+	echo "fftw already compiled"
 	(cd fftw; export CPP=cpp; ./configure --prefix=$(SHTNS_DIR); make; make install; export CPP='cpp -P -traditional';)
 
 shared: libcvmix libBGC libshtns libfftw

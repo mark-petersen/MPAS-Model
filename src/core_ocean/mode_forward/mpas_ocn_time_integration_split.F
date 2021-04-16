@@ -548,7 +548,7 @@ module ocn_time_integration_split
          endif
 
          call ocn_tend_vel(tendPool, statePool, forcingPool, &
-                           stage1_tend_time, dt)
+                           stage1_tend_time, domain % dminfo, dt)
 
          call mpas_timer_stop('se bcl vel tend')
 

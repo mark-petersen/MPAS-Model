@@ -464,7 +464,7 @@ module ocn_time_integration_si
 
            call mpas_pool_get_array(statePool, 'highFreqThickness', highFreqThicknessNew, 2)
 
-           call ocn_tend_vel(tendPool, statePool, forcingPool, stage1_tend_time, dt)
+           call ocn_tend_vel(tendPool, statePool, forcingPool, stage1_tend_time, dminfo, dt)
 
            block => block % next
          end do
