@@ -784,15 +784,15 @@ module ocn_time_integration_rk4
          ! End: Accumulating various parameterizations of the transport velocity
          ! ------------------------------------------------------------------
 
-         call mpas_reconstruct(meshPool,  normalVelocityNew, &
-                          velocityX, velocityY, velocityZ,   &
-                          velocityZonal, velocityMeridional, &
-                          includeHalos = .true.)
+         !call mpas_reconstruct(meshPool,  normalVelocityNew, &
+         !                 velocityX, velocityY, velocityZ,   &
+         !                 velocityZonal, velocityMeridional, &
+         !                 includeHalos = .true.)
 
-         call mpas_reconstruct(meshPool, gradSSH,          &
-                          gradSSHX, gradSSHY, gradSSHZ,    &
-                          gradSSHZonal, gradSSHMeridional, &
-                          includeHalos = .true.)
+         !call mpas_reconstruct(meshPool, gradSSH,          &
+         !                 gradSSHX, gradSSHY, gradSSHZ,    &
+         !                 gradSSHZonal, gradSSHMeridional, &
+         !                 includeHalos = .true.)
 
          !$omp parallel
          !$omp do schedule(runtime) 
@@ -1530,7 +1530,7 @@ module ocn_time_integration_rk4
       currentTime = daysSinceStartOfSim*86400.0_RKIND + dt
       call ocn_diagnostic_solve(dt, currentTime, statePool, forcingPool, meshPool, diagnosticsPool, scratchPool, tracersPool, 2)
 
-      call ocn_vmix_implicit(dt, meshPool, diagnosticsPool, statePool, forcingPool, scratchPool, err, 2)
+      !call ocn_vmix_implicit(dt, meshPool, diagnosticsPool, statePool, forcingPool, scratchPool, err, 2)
 
    end subroutine ocn_time_integrator_rk4_cleanup!}}}
 

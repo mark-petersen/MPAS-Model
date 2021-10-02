@@ -192,16 +192,15 @@ contains
          timeLevel = 1
       end if
 
-      call mpas_pool_get_dimension(tracersPool, 'index_temperature', indexTemperature)
-      call mpas_pool_get_dimension(tracersPool, 'index_salinity', indexSalinity)
+      !call mpas_pool_get_dimension(tracersPool, 'index_temperature', indexTemperature)
+      !call mpas_pool_get_dimension(tracersPool, 'index_salinity', indexSalinity)
 
       call mpas_pool_get_array(statePool, 'layerThickness', layerThickness, timeLevel)
       call mpas_pool_get_array(statePool, 'normalVelocity', normalVelocity, timeLevel)
-      call mpas_pool_get_array(tracersPool, 'activeTracers', activeTracers, timeLevel)
-      call mpas_pool_get_array(statePool, 'ssh', ssh, timeLevel)
-
-      call mpas_pool_get_array(diagnosticsPool, 'zMid', zMid)
-      call mpas_pool_get_array(diagnosticsPool, 'zTop', zTop)
+      !call mpas_pool_get_array(tracersPool, 'activeTracers', activeTracers, timeLevel)
+      !call mpas_pool_get_array(statePool, 'ssh', ssh, timeLevel)
+      !call mpas_pool_get_array(diagnosticsPool, 'zMid', zMid)
+      !call mpas_pool_get_array(diagnosticsPool, 'zTop', zTop)
       call mpas_pool_get_array(diagnosticsPool, 'divergence', divergence)
       call mpas_pool_get_array(diagnosticsPool, 'circulation', circulation)
       call mpas_pool_get_array(diagnosticsPool, 'relativeVorticity', relativeVorticity)
@@ -209,25 +208,25 @@ contains
       call mpas_pool_get_array(diagnosticsPool, 'normalizedPlanetaryVorticityEdge', normalizedPlanetaryVorticityEdge)
       call mpas_pool_get_array(diagnosticsPool, 'normalizedRelativeVorticityEdge', normalizedRelativeVorticityEdge)
       call mpas_pool_get_array(diagnosticsPool, 'normalizedRelativeVorticityCell', normalizedRelativeVorticityCell)
-      call mpas_pool_get_array(diagnosticsPool, 'density', density)
-      call mpas_pool_get_array(diagnosticsPool, 'displacedDensity', displacedDensity)
-      call mpas_pool_get_array(diagnosticsPool, 'potentialDensity', potentialDensity)
-      call mpas_pool_get_array(diagnosticsPool, 'montgomeryPotential', montgomeryPotential)
-      call mpas_pool_get_array(diagnosticsPool, 'pressure', pressure)
-      call mpas_pool_get_array(diagnosticsPool, 'inSituThermalExpansionCoeff',inSituThermalExpansionCoeff)
-      call mpas_pool_get_array(diagnosticsPool, 'inSituSalineContractionCoeff', inSituSalineContractionCoeff)
-      call mpas_pool_get_array(diagnosticsPool, 'BruntVaisalaFreqTop', BruntVaisalaFreqTop)
+      !call mpas_pool_get_array(diagnosticsPool, 'density', density)
+      !call mpas_pool_get_array(diagnosticsPool, 'displacedDensity', displacedDensity)
+      !call mpas_pool_get_array(diagnosticsPool, 'potentialDensity', potentialDensity)
+      !!call mpas_pool_get_array(diagnosticsPool, 'montgomeryPotential', montgomeryPotential)
+      !!call mpas_pool_get_array(diagnosticsPool, 'pressure', pressure)
+      !call mpas_pool_get_array(diagnosticsPool, 'inSituThermalExpansionCoeff',inSituThermalExpansionCoeff)
+      !call mpas_pool_get_array(diagnosticsPool, 'inSituSalineContractionCoeff', inSituSalineContractionCoeff)
+      !call mpas_pool_get_array(diagnosticsPool, 'BruntVaisalaFreqTop', BruntVaisalaFreqTop)
       call mpas_pool_get_array(diagnosticsPool, 'tangentialVelocity', tangentialVelocity)
       call mpas_pool_get_array(diagnosticsPool, 'layerThicknessEdge', layerThicknessEdge)
       call mpas_pool_get_array(diagnosticsPool, 'kineticEnergyCell', kineticEnergyCell)
-      call mpas_pool_get_array(diagnosticsPool, 'vertVelocityTop', vertVelocityTop)
-      call mpas_pool_get_array(diagnosticsPool, 'vertTransportVelocityTop', vertTransportVelocityTop)
-      call mpas_pool_get_array(diagnosticsPool, 'vertGMBolusVelocityTop', vertGMBolusVelocityTop)
-      call mpas_pool_get_array(diagnosticsPool, 'normalGMBolusVelocity', normalGMBolusVelocity)
-      call mpas_pool_get_array(diagnosticsPool, 'normalTransportVelocity', normalTransportVelocity)
-      call mpas_pool_get_array(diagnosticsPool, 'gradSSH', gradSSH)
-      call mpas_pool_get_array(diagnosticsPool, 'RiTopOfCell', RiTopOfCell)
-      call mpas_pool_get_array(diagnosticsPool, 'pressureAdjustedSSH', pressureAdjustedSSH)
+      !call mpas_pool_get_array(diagnosticsPool, 'vertVelocityTop', vertVelocityTop)
+      !call mpas_pool_get_array(diagnosticsPool, 'vertTransportVelocityTop', vertTransportVelocityTop)
+      !call mpas_pool_get_array(diagnosticsPool, 'vertGMBolusVelocityTop', vertGMBolusVelocityTop)
+      !!call mpas_pool_get_array(diagnosticsPool, 'normalGMBolusVelocity', normalGMBolusVelocity)
+      !!call mpas_pool_get_array(diagnosticsPool, 'normalTransportVelocity', normalTransportVelocity)
+      !call mpas_pool_get_array(diagnosticsPool, 'gradSSH', gradSSH)
+      !call mpas_pool_get_array(diagnosticsPool, 'RiTopOfCell', RiTopOfCell)
+      !call mpas_pool_get_array(diagnosticsPool, 'pressureAdjustedSSH', pressureAdjustedSSH)
       call mpas_pool_get_array(diagnosticsPool, 'edgeAreaFractionOfCell', edgeAreaFractionOfCell)
 
       call mpas_pool_get_array(meshPool, 'weightsOnEdge', weightsOnEdge)
@@ -258,11 +257,11 @@ contains
       call mpas_pool_get_array(meshPool, 'edgeSignOnCell', edgeSignOnCell)
       call mpas_pool_get_array(meshPool, 'edgeMask', edgeMask)
 
-      call mpas_pool_get_array(forcingPool, 'seaIcePressure', seaIcePressure)
-      call mpas_pool_get_array(forcingPool, 'atmosphericPressure', atmosphericPressure)
-      call mpas_pool_get_array(forcingPool, 'landIcePressure', landIcePressure)
-      call mpas_pool_get_array(forcingPool, 'landIceDraft', landIceDraft)
-      call mpas_pool_get_array(forcingPool, 'frazilSurfacePressure', frazilSurfacePressure)
+      !call mpas_pool_get_array(forcingPool, 'seaIcePressure', seaIcePressure)
+      !call mpas_pool_get_array(forcingPool, 'atmosphericPressure', atmosphericPressure)
+      !call mpas_pool_get_array(forcingPool, 'landIcePressure', landIcePressure)
+      !call mpas_pool_get_array(forcingPool, 'landIceDraft', landIceDraft)
+      !call mpas_pool_get_array(forcingPool, 'frazilSurfacePressure', frazilSurfacePressure)
 
       call mpas_pool_get_dimension(meshPool, 'nCellsArray', nCellsArray)
       call mpas_pool_get_dimension(meshPool, 'nEdgesArray', nEdgesArray)
@@ -270,16 +269,16 @@ contains
       call mpas_pool_get_dimension(meshPool, 'nVertLevels', nVertLevels)
       call mpas_pool_get_dimension(meshPool, 'vertexDegree', vertexDegree)
 
-      call mpas_pool_get_array(diagnosticsPool, 'tracersSurfaceValue', tracersSurfaceValue)
-      call mpas_pool_get_array(diagnosticsPool, 'tracersSurfaceLayerValue', tracersSurfaceLayerValue)
-      call mpas_pool_get_array(diagnosticsPool, 'normalVelocitySurfaceLayer', normalVelocitySurfaceLayer)
-      call mpas_pool_get_array(diagnosticsPool, 'indexSurfaceLayerDepth', indexSurfaceLayerDepth)
+      !call mpas_pool_get_array(diagnosticsPool, 'tracersSurfaceValue', tracersSurfaceValue)
+      !call mpas_pool_get_array(diagnosticsPool, 'tracersSurfaceLayerValue', tracersSurfaceLayerValue)
+      !call mpas_pool_get_array(diagnosticsPool, 'normalVelocitySurfaceLayer', normalVelocitySurfaceLayer)
+      !call mpas_pool_get_array(diagnosticsPool, 'indexSurfaceLayerDepth', indexSurfaceLayerDepth)
 
-      call mpas_pool_get_array(diagnosticsPool, 'surfaceFluxAttenuationCoefficient', surfaceFluxAttenuationCoefficient)
-      call mpas_pool_get_array(diagnosticsPool, 'surfaceFluxAttenuationCoefficientRunoff', surfaceFluxAttenuationCoefficientRunoff)
-      !
-      ! Compute height on cell edges at velocity locations
-      !   Namelist options control the order of accuracy of the reconstructed layerThicknessEdge value
+      !call mpas_pool_get_array(diagnosticsPool, 'surfaceFluxAttenuationCoefficient', surfaceFluxAttenuationCoefficient)
+      !call mpas_pool_get_array(diagnosticsPool, 'surfaceFluxAttenuationCoefficientRunoff', surfaceFluxAttenuationCoefficientRunoff)
+      !!
+      !! Compute height on cell edges at velocity locations
+      !!   Namelist options control the order of accuracy of the reconstructed layerThicknessEdge value
       !
 
       nEdges = nEdgesArray( size(nEdgesArray) )
@@ -348,8 +347,8 @@ contains
 
       normalVelocity(:,nEdges+1) = -1e34
       layerThickness(:,nCells+1) = -1e34
-      activeTracers(indexTemperature,:,nCells+1) = -1e34
-      activeTracers(indexSalinity,:,nCells+1) = -1e34
+      !activeTracers(indexTemperature,:,nCells+1) = -1e34
+      !activeTracers(indexSalinity,:,nCells+1) = -1e34
 
       call ocn_relativeVorticity_circulation(relativeVorticity, circulation, meshPool, normalVelocity, err)
 
@@ -390,7 +389,7 @@ contains
          kineticEnergyCell(:, iCell) = 0.0_RKIND
          div_hu(:) = 0.0_RKIND
          div_huTransport(:) = 0.0_RKIND
-         div_huGMBolus(:) = 0.0_RKIND
+         !div_huGMBolus(:) = 0.0_RKIND
          invAreaCell1 = 1.0_RKIND / areaCell(iCell)
          do i = 1, nEdgesOnCell(iCell)
             iEdge = edgesOnCell(i, iCell)
@@ -405,22 +404,22 @@ contains
                kineticEnergyCell(k, iCell) = kineticEnergyCell(k, iCell) &
                                               + 0.25 * r_tmp * dcEdge_temp * normalVelocity(k,iEdge)
                ! Compute vertical velocity from the horizontal total transport
-               div_huTransport(k) = div_huTransport(k) &
-                                    - layerThicknessEdge(k, iEdge) * edgeSignOnCell_temp &
-                                    * dvEdge_temp * normalTransportVelocity(k, iEdge) * invAreaCell1
+               !div_huTransport(k) = div_huTransport(k) &
+               !                     - layerThicknessEdge(k, iEdge) * edgeSignOnCell_temp &
+               !                     * dvEdge_temp * normalTransportVelocity(k, iEdge) * invAreaCell1
                ! Compute vertical velocity from the horizontal GM Bolus velocity
-               div_huGMBolus(k) = div_huGMBolus(k) &
-                                  - layerThicknessEdge(k, iEdge) * edgeSignOnCell_temp * dvEdge_temp &
-                                  * normalGMBolusVelocity(k, iEdge) * invAreaCell1
+               !div_huGMBolus(k) = div_huGMBolus(k) &
+               !                   - layerThicknessEdge(k, iEdge) * edgeSignOnCell_temp * dvEdge_temp &
+               !                   * normalGMBolusVelocity(k, iEdge) * invAreaCell1
             end do
          end do
          ! Vertical velocity at bottom (maxLevelCell(iCell)+1) is zero, initialized above.
-         vertVelocityTop(maxLevelCell(iCell)+1, iCell) = 0.0_RKIND
-         do k=maxLevelCell(iCell),1,-1
-            vertVelocityTop(k,iCell) = vertVelocityTop(k+1,iCell) - div_hu(k)
-            vertTransportVelocityTop(k,iCell) = vertTransportVelocityTop(k+1,iCell) - div_huTransport(k)
-            vertGMBolusVelocityTop(k,iCell) = vertGMBolusVelocityTop(k+1,iCell) - div_huGMBolus(k)
-         end do
+         !vertVelocityTop(maxLevelCell(iCell)+1, iCell) = 0.0_RKIND
+         !do k=maxLevelCell(iCell),1,-1
+         !   vertVelocityTop(k,iCell) = vertVelocityTop(k+1,iCell) - div_hu(k)
+         !   vertTransportVelocityTop(k,iCell) = vertTransportVelocityTop(k+1,iCell) - div_huTransport(k)
+         !   !vertGMBolusVelocityTop(k,iCell) = vertGMBolusVelocityTop(k+1,iCell) - div_huGMBolus(k)
+         !end do
       end do
       !$omp end do
       !$omp end parallel
@@ -633,300 +632,300 @@ contains
       ! equation of state
       !
 
-      ! Only need densities on 0, 1, and 2 halo cells
-      nCells = nCellsArray( size(nCellsArray) )
-
-      ! compute in-place density
-      call ocn_equation_of_state_density(statePool, diagnosticsPool, meshPool, &
-                                         nCells, 0, 'relative', density, err, &
-                                         inSituThermalExpansionCoeff, inSituSalineContractionCoeff, &
-                                         timeLevelIn=timeLevel)
-
-      ! compute potentialDensity, the density displaced adiabatically to the mid-depth of top layer.
-      call ocn_equation_of_state_density(statePool, diagnosticsPool, meshPool, &
-                                         nCells, 1, 'absolute', potentialDensity, &
-                                         err, timeLevelIn=timeLevel)
-
-      ! compute displacedDensity, density displaced adiabatically to the mid-depth one layer deeper.
-      ! That is, layer k has been displaced to the depth of layer k+1.
-      call ocn_equation_of_state_density(statePool, diagnosticsPool, meshPool, &
-                                         nCells, 1, 'relative', displacedDensity, &
-                                         err, timeLevelIn=timeLevel)
-
-      !
-      ! Pressure
-      ! This section must be placed in the code after computing the density.
-      !
-      nCells = nCellsArray( size(nCellsArray) )
-      if (config_pressure_gradient_type.eq.'MontgomeryPotential') then
-
-        ! use Montgomery Potential when layers are isopycnal.
-        ! However, one may use 'pressure_and_zmid' when layers are isopycnal as well.
-        ! Compute pressure at top of each layer, and then Montgomery Potential.
-
-        allocate(pTop(nVertLevels))
-
-        !$omp parallel
-        !$omp do schedule(runtime) private(pTop, k)
-        do iCell = 1, nCells
-
-           ! assume atmospheric pressure at the surface is zero for now.
-           pTop(1) = 0.0_RKIND
-           ! At top layer it is g*SSH, where SSH may be off by a
-           ! constant (ie, bottomDepth can be relative to top or bottom)
-           montgomeryPotential(1,iCell) = gravity &
-              * (bottomDepth(iCell) + sum(layerThickness(1:nVertLevels,iCell)))
-
-           do k = 2, nVertLevels
-              pTop(k) = pTop(k-1) + density(k-1,iCell)*gravity* layerThickness(k-1,iCell)
-
-              ! from delta M = p delta / density
-              montgomeryPotential(k,iCell) = montgomeryPotential(k-1,iCell) &
-                 + pTop(k)*(1.0_RKIND/density(k,iCell) - 1.0_RKIND/density(k-1,iCell))
-           end do
-
-        end do
-        !$omp end do
-        !$omp end parallel
-
-        deallocate(pTop)
-
-      else
-
-        !$omp parallel
-        !$omp do schedule(runtime) private(k)
-        do iCell = 1, nCells
-           ! Pressure for generalized coordinates.
-           ! Pressure at top surface may be due to atmospheric pressure
-           ! or an ice-shelf depression.
-           pressure(1,iCell) = atmosphericPressure(iCell) + seaIcePressure(iCell)
-           if ( associated(frazilSurfacePressure) ) pressure(1,iCell) = pressure(1,iCell) + frazilSurfacePressure(iCell)
-           if ( associated(landIcePressure) ) pressure(1,iCell) = pressure(1,iCell) + landIcePressure(iCell)
-           pressure(1,iCell) = pressure(1,iCell) + density(1,iCell)*gravity*0.5_RKIND*layerThickness(1,iCell)
-
-           do k = 2, maxLevelCell(iCell)
-              pressure(k,iCell) = pressure(k-1,iCell)  &
-                + 0.5_RKIND*gravity*(  density(k-1,iCell)*layerThickness(k-1,iCell) &
-                               + density(k  ,iCell)*layerThickness(k  ,iCell))
-           end do
-
-           ! Compute zMid, the z-coordinate of the middle of the layer.
-           ! Compute zTop, the z-coordinate of the top of the layer.
-           ! Note the negative sign, since bottomDepth is positive
-           ! and z-coordinates are negative below the surface.
-           k = maxLevelCell(iCell)
-           zMid(k:nVertLevels,iCell) = -bottomDepth(iCell) + 0.5_RKIND*layerThickness(k,iCell)
-           zTop(k:nVertLevels,iCell) = -bottomDepth(iCell) +     layerThickness(k,iCell)
-
-           do k = maxLevelCell(iCell)-1, 1, -1
-              zMid(k,iCell) = zMid(k+1,iCell)  &
-                + 0.5_RKIND*(  layerThickness(k+1,iCell) &
-                       + layerThickness(k  ,iCell))
-              zTop(k,iCell) = zTop(k+1,iCell)  &
-                       + layerThickness(k  ,iCell)
-           end do
-
-           ! copy zTop(1,iCell) into sea-surface height array
-           ssh(iCell) = zTop(1,iCell)
-
-        end do
-        !$omp end do
-        !$omp end parallel
-
-      endif
-
-      nCells = nCellsArray( size(nCellsArray) )
-
-      !
-      ! Brunt-Vaisala frequency (this has units of s^{-2})
-      !
-      coef = -gravity / rho_sw
-      !$omp parallel
-      !$omp do schedule(runtime) private(k)
-      do iCell = 1, nCells
-         BruntVaisalaFreqTop(1,iCell) = 0.0_RKIND
-         do k = 2, maxLevelCell(iCell)
-            BruntVaisalaFreqTop(k,iCell) = coef * (displacedDensity(k-1,iCell) - density(k,iCell)) &
-              / (zMid(k-1,iCell) - zMid(k,iCell))
-          end do
-      end do
-      !$omp end do
-      !$omp end parallel
-
-      !
-      ! Gradient Richardson number
-      !
-
-      nCells = nCellsArray(3)
-      !$omp parallel
-      !$omp do schedule(runtime) private(invAreaCell1, k, shearSquared, i, iEdge, delU2, shearMean)
-      do iCell=1,nCells
-         RiTopOfCell(:,iCell) = 100.0_RKIND
-         do k=2,maxLevelCell(iCell)
-           shearSquared = 0.0_RKIND
-           do i = 1, nEdgesOnCell(iCell)
-             iEdge = edgesOnCell(i, iCell)
-             delU2 = (normalVelocity(k-1,iEdge) - normalVelocity(k,iEdge))**2
-             shearSquared = shearSquared + edgeAreaFractionOfCell(i,iCell) * delU2
-           enddo
-           ! Note that the factor of two is from averaging dot product to cell center on a C-grid
-           shearMean = sqrt(2.0_RKIND*shearSquared )
-           shearMean = shearMean / (zMid(k-1,iCell) - zMid(k,iCell))
-           RiTopOfCell(k,iCell) = BruntVaisalaFreqTop(k,iCell) / (shearMean**2 + 1.0e-10_RKIND)
-          end do
-          RiTopOfCell(1,iCell) = RiTopOfCell(2,iCell)
-      end do
-      !$omp end do
-
-      !
-      ! extrapolate tracer values to ocean surface
-      ! this eventually be a modelled process
-      ! at present, just copy k=1 tracer values onto surface values
-      ! field will be updated below is better approximations are available
-
-!TDR need to consider how to handle tracersSurfaceValues
-      !$omp do schedule(runtime)
-      do iCell = 1, nCells
-         tracersSurfaceValue(:, iCell) = activeTracers(:,1, iCell)
-      end do
-      !$omp end do
-
-      !$omp do schedule(runtime)
-      do iEdge = 1, nEdges
-         normalVelocitySurfaceLayer(iEdge) = normalVelocity(1, iEdge)
-      end do
-      !$omp end do
-      !$omp end parallel
-
-      !
-      ! average tracer values over the ocean surface layer
-      ! the ocean surface layer is generally assumed to be about 0.1 of the boundary layer depth
-      if(config_use_cvmix_kpp) then
-
-        nCells = nCellsArray( 1 )
-
-        !$omp parallel
-        !$omp do schedule(runtime) private(surfaceLayerDepth, sumSurfaceLayer, k, rSurfaceLayer)
-        do iCell=1,nCells
-          surfaceLayerDepth = config_cvmix_kpp_surface_layer_averaging
-          sumSurfaceLayer=0.0_RKIND
-          tracersSurfaceLayerValue(:,iCell) = 0.0_RKIND
-          indexSurfaceLayerDepth(iCell) = -9.e30
-          do k=1,maxLevelCell(iCell)
-           sumSurfaceLayer = sumSurfaceLayer + layerThickness(k,iCell)
-           rSurfaceLayer = maxLevelCell(iCell)
-           if(sumSurfaceLayer.gt.surfaceLayerDepth) then
-             sumSurfaceLayer = sumSurfaceLayer - layerThickness(k,iCell)
-             rSurfaceLayer = int(k-1) + (surfaceLayerDepth-sumSurfaceLayer)/layerThickness(k,iCell)
-             indexSurfaceLayerDepth(iCell) = rSurfaceLayer
-             exit
-           endif
-          end do
-          tracersSurfaceLayerValue(:, iCell) = 0.0_RKIND
-          do k=1,int(rSurfaceLayer)
-            tracersSurfaceLayerValue(:,iCell) = tracersSurfaceLayerValue(:,iCell) + activeTracers(:,k,iCell) &
-                                              * layerThickness(k,iCell)
-          enddo
-          k=min( int(rSurfaceLayer)+1, maxLevelCell(iCell) )
-          tracersSurfaceLayerValue(:,iCell) = (tracersSurfaceLayerValue(:,iCell) + fraction(rSurfaceLayer) &
-                                            * activeTracers(:,k,iCell) * layerThickness(k,iCell)) / surfaceLayerDepth
-        enddo
-        !$omp end do
-        !$omp end parallel
-
-        nEdges = nEdgesArray( 1 )
-
-        !
-        ! average normal velocity values over the ocean surface layer
-        ! the ocean surface layer is generally assumed to be about 0.1 of the boundary layer depth
-        !
-
-        !$omp parallel
-        !$omp do schedule(runtime) private(cell1, cell2, surfaceLayerDepth, sumSurfaceLayer, k, rSurfaceLayer)
-        do iEdge=1,nEdges
-          normalVelocitySurfaceLayer(iEdge) = 0.0_RKIND
-          cell1=cellsOnEdge(1,iEdge)
-          cell2=cellsOnEdge(2,iEdge)
-          surfaceLayerDepth = config_cvmix_kpp_surface_layer_averaging
-          sumSurfaceLayer=0.0_RKIND
-          rSurfaceLayer = min(1, maxLevelEdgeTop(iEdge))
-          do k=1,maxLevelEdgeTop(iEdge)
-           rSurfaceLayer = k
-           sumSurfaceLayer = sumSurfaceLayer + layerThicknessEdge(k,iEdge)
-           if(sumSurfaceLayer.gt.surfaceLayerDepth) then
-             sumSurfaceLayer = sumSurfaceLayer - layerThicknessEdge(k,iEdge)
-             rSurfaceLayer = int(k-1) + (surfaceLayerDepth-sumSurfaceLayer)/layerThicknessEdge(k,iEdge)
-             exit
-           endif
-          end do
-          normalVelocitySurfaceLayer(iEdge) = 0.0_RKIND
-          do k=1,int(rSurfaceLayer)
-            normalVelocitySurfaceLayer(iEdge) = normalVelocitySurfaceLayer(iEdge) + normalVelocity(k,iEdge) &
-                                              * layerThicknessEdge(k,iEdge)
-          enddo
-          k=int(rSurfaceLayer)+1
-          if(k.le.maxLevelEdgeTop(iEdge)) then
-            normalVelocitySurfaceLayer(iEdge) = (normalVelocitySurfaceLayer(iEdge) + fraction(rSurfaceLayer) &
-                                              * normalVelocity(k,iEdge) * layerThicknessEdge(k,iEdge)) / surfaceLayerDepth
-          end if
-        enddo
-        !$omp end do
-        !$omp end parallel
-
-      endif
-
-      nCells = nCellsArray( 2 )
-
-      ! compute the attenuation coefficient for surface fluxes
-      !$omp parallel
-      !$omp do schedule(runtime)
-      do iCell = 1, nCells
-         surfaceFluxAttenuationCoefficient(iCell) = config_flux_attenuation_coefficient
-         surfaceFluxAttenuationCoefficientRunoff(iCell) = config_flux_attenuation_coefficient_runoff
-      end do
-      !$omp end do
-      !$omp end parallel
-
-      !
-      !  compute fields needed to compute land-ice fluxes, either in the ocean model or in the coupler
-      call ocn_compute_land_ice_flux_input_fields(meshPool, statePool, forcingPool, scratchPool, &
-                                         diagnosticsPool, timeLevel)
-
-      nCells = nCellsArray( 2 )
-      !$omp parallel
-      !$omp do schedule(runtime)
-      do iCell = 1, nCells
-         pressureAdjustedSSH(iCell) = ssh(iCell) + ( seaIcePressure(iCell) / ( gravity * rho_sw ) )
-      end do
-      !$omp end do
-      !$omp end parallel
-
-      if(associated(landIceDraft)) then
-         !$omp parallel
-         !$omp do schedule(runtime)
-         do iCell = 1, nCells
-            ! subtract the land ice draft from the SSH so sea ice doesn't experience tilt
-            ! toward land ice
-            pressureAdjustedSSH(iCell) = pressureAdjustedSSH(iCell) - landIceDraft(iCell)
-         end do
-         !$omp end do
-         !$omp end parallel
-      end if
-
-      nEdges = nEdgesArray( 2 )
-
-      !$omp parallel
-      !$omp do schedule(runtime) private(cell1, cell2)
-      do iEdge = 1, nEdges
-         cell1 = cellsOnEdge(1, iEdge)
-         cell2 = cellsOnEdge(2, iEdge)
-
-         gradSSH(iEdge) = edgeMask(1, iEdge) * ( pressureAdjustedSSH(cell2) - pressureAdjustedSSH(cell1) ) / dcEdge(iEdge)
-      end do
-      !$omp end do
-      !$omp end parallel
-
-      call ocn_verification_solution(currentTime, statePool, meshPool, diagnosticsPool, tracersPool)
+!      ! Only need densities on 0, 1, and 2 halo cells
+!      !nCells = nCellsArray( size(nCellsArray) )
+!
+!      ! compute in-place density
+!      !call ocn_equation_of_state_density(statePool, diagnosticsPool, meshPool, &
+!      !                                   nCells, 0, 'relative', density, err, &
+!      !                                   inSituThermalExpansionCoeff, inSituSalineContractionCoeff, &
+!      !                                   timeLevelIn=timeLevel)
+!
+!      !! compute potentialDensity, the density displaced adiabatically to the mid-depth of top layer.
+!      !call ocn_equation_of_state_density(statePool, diagnosticsPool, meshPool, &
+!      !                                   nCells, 1, 'absolute', potentialDensity, &
+!      !                                   err, timeLevelIn=timeLevel)
+!
+!      !! compute displacedDensity, density displaced adiabatically to the mid-depth one layer deeper.
+!      !! That is, layer k has been displaced to the depth of layer k+1.
+!      !call ocn_equation_of_state_density(statePool, diagnosticsPool, meshPool, &
+!      !                                   nCells, 1, 'relative', displacedDensity, &
+!      !                                   err, timeLevelIn=timeLevel)
+!
+!      !!
+!      !! Pressure
+!      !! This section must be placed in the code after computing the density.
+!      !!
+!      !nCells = nCellsArray( size(nCellsArray) )
+!      !if (config_pressure_gradient_type.eq.'MontgomeryPotential') then
+!
+!      !  ! use Montgomery Potential when layers are isopycnal.
+!      !  ! However, one may use 'pressure_and_zmid' when layers are isopycnal as well.
+!      !  ! Compute pressure at top of each layer, and then Montgomery Potential.
+!
+!      !  allocate(pTop(nVertLevels))
+!
+!      !  !$omp parallel
+!      !  !$omp do schedule(runtime) private(pTop, k)
+!      !  do iCell = 1, nCells
+!
+!      !     ! assume atmospheric pressure at the surface is zero for now.
+!      !     pTop(1) = 0.0_RKIND
+!      !     ! At top layer it is g*SSH, where SSH may be off by a
+!      !     ! constant (ie, bottomDepth can be relative to top or bottom)
+!      !     montgomeryPotential(1,iCell) = gravity &
+!      !        * (bottomDepth(iCell) + sum(layerThickness(1:nVertLevels,iCell)))
+!
+!      !     do k = 2, nVertLevels
+!      !        pTop(k) = pTop(k-1) + density(k-1,iCell)*gravity* layerThickness(k-1,iCell)
+!
+!      !        ! from delta M = p delta / density
+!      !        montgomeryPotential(k,iCell) = montgomeryPotential(k-1,iCell) &
+!      !           + pTop(k)*(1.0_RKIND/density(k,iCell) - 1.0_RKIND/density(k-1,iCell))
+!      !     end do
+!
+!      !  end do
+!      !  !$omp end do
+!      !  !$omp end parallel
+!
+!      !  deallocate(pTop)
+!
+!      !else
+!
+!      !  !$omp parallel
+!      !  !$omp do schedule(runtime) private(k)
+!      !  do iCell = 1, nCells
+!      !     ! Pressure for generalized coordinates.
+!      !     ! Pressure at top surface may be due to atmospheric pressure
+!      !     ! or an ice-shelf depression.
+!      !     pressure(1,iCell) = atmosphericPressure(iCell) + seaIcePressure(iCell)
+!      !     if ( associated(frazilSurfacePressure) ) pressure(1,iCell) = pressure(1,iCell) + frazilSurfacePressure(iCell)
+!      !     if ( associated(landIcePressure) ) pressure(1,iCell) = pressure(1,iCell) + landIcePressure(iCell)
+!      !     pressure(1,iCell) = pressure(1,iCell) + density(1,iCell)*gravity*0.5_RKIND*layerThickness(1,iCell)
+!
+!      !     do k = 2, maxLevelCell(iCell)
+!      !        pressure(k,iCell) = pressure(k-1,iCell)  &
+!      !          + 0.5_RKIND*gravity*(  density(k-1,iCell)*layerThickness(k-1,iCell) &
+!      !                         + density(k  ,iCell)*layerThickness(k  ,iCell))
+!      !     end do
+!
+!      !     ! Compute zMid, the z-coordinate of the middle of the layer.
+!      !     ! Compute zTop, the z-coordinate of the top of the layer.
+!      !     ! Note the negative sign, since bottomDepth is positive
+!      !     ! and z-coordinates are negative below the surface.
+!      !     k = maxLevelCell(iCell)
+!      !     zMid(k:nVertLevels,iCell) = -bottomDepth(iCell) + 0.5_RKIND*layerThickness(k,iCell)
+!      !     zTop(k:nVertLevels,iCell) = -bottomDepth(iCell) +     layerThickness(k,iCell)
+!
+!      !     do k = maxLevelCell(iCell)-1, 1, -1
+!      !        zMid(k,iCell) = zMid(k+1,iCell)  &
+!      !          + 0.5_RKIND*(  layerThickness(k+1,iCell) &
+!      !                 + layerThickness(k  ,iCell))
+!      !        zTop(k,iCell) = zTop(k+1,iCell)  &
+!      !                 + layerThickness(k  ,iCell)
+!      !     end do
+!
+!      !     ! copy zTop(1,iCell) into sea-surface height array
+!      !     ssh(iCell) = zTop(1,iCell)
+!
+!      !  end do
+!      !  !$omp end do
+!      !  !$omp end parallel
+!
+!      !endif
+!
+!      !nCells = nCellsArray( size(nCellsArray) )
+!
+!      !!
+!      !! Brunt-Vaisala frequency (this has units of s^{-2})
+!      !!
+!      !coef = -gravity / rho_sw
+!      !!$omp parallel
+!      !!$omp do schedule(runtime) private(k)
+!      !do iCell = 1, nCells
+!      !   BruntVaisalaFreqTop(1,iCell) = 0.0_RKIND
+!      !   do k = 2, maxLevelCell(iCell)
+!      !      BruntVaisalaFreqTop(k,iCell) = coef * (displacedDensity(k-1,iCell) - density(k,iCell)) &
+!      !        / (zMid(k-1,iCell) - zMid(k,iCell))
+!      !    end do
+!      !end do
+!      !!$omp end do
+!      !!$omp end parallel
+!
+!      !!
+!      !! Gradient Richardson number
+!      !!
+!
+!      !nCells = nCellsArray(3)
+!      !!$omp parallel
+!      !!$omp do schedule(runtime) private(invAreaCell1, k, shearSquared, i, iEdge, delU2, shearMean)
+!      !do iCell=1,nCells
+!      !   RiTopOfCell(:,iCell) = 100.0_RKIND
+!      !   do k=2,maxLevelCell(iCell)
+!      !     shearSquared = 0.0_RKIND
+!      !     do i = 1, nEdgesOnCell(iCell)
+!      !       iEdge = edgesOnCell(i, iCell)
+!      !       delU2 = (normalVelocity(k-1,iEdge) - normalVelocity(k,iEdge))**2
+!      !       shearSquared = shearSquared + edgeAreaFractionOfCell(i,iCell) * delU2
+!      !     enddo
+!      !     ! Note that the factor of two is from averaging dot product to cell center on a C-grid
+!      !     shearMean = sqrt(2.0_RKIND*shearSquared )
+!      !     shearMean = shearMean / (zMid(k-1,iCell) - zMid(k,iCell))
+!      !     RiTopOfCell(k,iCell) = BruntVaisalaFreqTop(k,iCell) / (shearMean**2 + 1.0e-10_RKIND)
+!      !    end do
+!      !    RiTopOfCell(1,iCell) = RiTopOfCell(2,iCell)
+!      !end do
+!      !!$omp end do
+!
+!      !!
+!      !! extrapolate tracer values to ocean surface
+!      !! this eventually be a modelled process
+!      !! at present, just copy k=1 tracer values onto surface values
+!      !! field will be updated below is better approximations are available
+!
+!!TDR n!eed to consider how to handle tracersSurfaceValues
+!      !!$omp do schedule(runtime)
+!      !do iCell = 1, nCells
+!      !   tracersSurfaceValue(:, iCell) = activeTracers(:,1, iCell)
+!      !end do
+!      !!$omp end do
+!
+!      !!$omp do schedule(runtime)
+!      !do iEdge = 1, nEdges
+!      !   normalVelocitySurfaceLayer(iEdge) = normalVelocity(1, iEdge)
+!      !end do
+!      !!$omp end do
+!      !!$omp end parallel
+!
+!      !!
+!      !! average tracer values over the ocean surface layer
+!      !! the ocean surface layer is generally assumed to be about 0.1 of the boundary layer depth
+!      !if(config_use_cvmix_kpp) then
+!
+!      !  nCells = nCellsArray( 1 )
+!
+!      !  !$omp parallel
+!      !  !$omp do schedule(runtime) private(surfaceLayerDepth, sumSurfaceLayer, k, rSurfaceLayer)
+!      !  do iCell=1,nCells
+!      !    surfaceLayerDepth = config_cvmix_kpp_surface_layer_averaging
+!      !    sumSurfaceLayer=0.0_RKIND
+!      !    tracersSurfaceLayerValue(:,iCell) = 0.0_RKIND
+!      !    indexSurfaceLayerDepth(iCell) = -9.e30
+!      !    do k=1,maxLevelCell(iCell)
+!      !     sumSurfaceLayer = sumSurfaceLayer + layerThickness(k,iCell)
+!      !     rSurfaceLayer = maxLevelCell(iCell)
+!      !     if(sumSurfaceLayer.gt.surfaceLayerDepth) then
+!      !       sumSurfaceLayer = sumSurfaceLayer - layerThickness(k,iCell)
+!      !       rSurfaceLayer = int(k-1) + (surfaceLayerDepth-sumSurfaceLayer)/layerThickness(k,iCell)
+!      !       indexSurfaceLayerDepth(iCell) = rSurfaceLayer
+!      !       exit
+!      !     endif
+!      !    end do
+!      !    tracersSurfaceLayerValue(:, iCell) = 0.0_RKIND
+!      !    do k=1,int(rSurfaceLayer)
+!      !      tracersSurfaceLayerValue(:,iCell) = tracersSurfaceLayerValue(:,iCell) + activeTracers(:,k,iCell) &
+!      !                                        * layerThickness(k,iCell)
+!      !    enddo
+!      !    k=min( int(rSurfaceLayer)+1, maxLevelCell(iCell) )
+!      !    tracersSurfaceLayerValue(:,iCell) = (tracersSurfaceLayerValue(:,iCell) + fraction(rSurfaceLayer) &
+!      !                                      * activeTracers(:,k,iCell) * layerThickness(k,iCell)) / surfaceLayerDepth
+!      !  enddo
+!      !  !$omp end do
+!      !  !$omp end parallel
+!
+!      !  nEdges = nEdgesArray( 1 )
+!
+!      !  !
+!      !  ! average normal velocity values over the ocean surface layer
+!      !  ! the ocean surface layer is generally assumed to be about 0.1 of the boundary layer depth
+!      !  !
+!
+!      !  !$omp parallel
+!      !  !$omp do schedule(runtime) private(cell1, cell2, surfaceLayerDepth, sumSurfaceLayer, k, rSurfaceLayer)
+!      !  do iEdge=1,nEdges
+!      !    normalVelocitySurfaceLayer(iEdge) = 0.0_RKIND
+!      !    cell1=cellsOnEdge(1,iEdge)
+!      !    cell2=cellsOnEdge(2,iEdge)
+!      !    surfaceLayerDepth = config_cvmix_kpp_surface_layer_averaging
+!      !    sumSurfaceLayer=0.0_RKIND
+!      !    rSurfaceLayer = min(1, maxLevelEdgeTop(iEdge))
+!      !    do k=1,maxLevelEdgeTop(iEdge)
+!      !     rSurfaceLayer = k
+!      !     sumSurfaceLayer = sumSurfaceLayer + layerThicknessEdge(k,iEdge)
+!      !     if(sumSurfaceLayer.gt.surfaceLayerDepth) then
+!      !       sumSurfaceLayer = sumSurfaceLayer - layerThicknessEdge(k,iEdge)
+!      !       rSurfaceLayer = int(k-1) + (surfaceLayerDepth-sumSurfaceLayer)/layerThicknessEdge(k,iEdge)
+!      !       exit
+!      !     endif
+!      !    end do
+!      !    normalVelocitySurfaceLayer(iEdge) = 0.0_RKIND
+!      !    do k=1,int(rSurfaceLayer)
+!      !      normalVelocitySurfaceLayer(iEdge) = normalVelocitySurfaceLayer(iEdge) + normalVelocity(k,iEdge) &
+!      !                                        * layerThicknessEdge(k,iEdge)
+!      !    enddo
+!      !    k=int(rSurfaceLayer)+1
+!      !    if(k.le.maxLevelEdgeTop(iEdge)) then
+!      !      normalVelocitySurfaceLayer(iEdge) = (normalVelocitySurfaceLayer(iEdge) + fraction(rSurfaceLayer) &
+!      !                                        * normalVelocity(k,iEdge) * layerThicknessEdge(k,iEdge)) / surfaceLayerDepth
+!      !    end if
+!      !  enddo
+!      !  !$omp end do
+!      !  !$omp end parallel
+!
+!      !endif
+!
+!      !nCells = nCellsArray( 2 )
+!
+!      !! compute the attenuation coefficient for surface fluxes
+!      !!$omp parallel
+!      !!$omp do schedule(runtime)
+!      !do iCell = 1, nCells
+!      !   surfaceFluxAttenuationCoefficient(iCell) = config_flux_attenuation_coefficient
+!      !   surfaceFluxAttenuationCoefficientRunoff(iCell) = config_flux_attenuation_coefficient_runoff
+!      !end do
+!      !!$omp end do
+!      !!$omp end parallel
+!
+!      !!
+!      !!  compute fields needed to compute land-ice fluxes, either in the ocean model or in the coupler
+!      !call ocn_compute_land_ice_flux_input_fields(meshPool, statePool, forcingPool, scratchPool, &
+!      !                                   diagnosticsPool, timeLevel)
+!
+!      !nCells = nCellsArray( 2 )
+!      !!$omp parallel
+!      !!$omp do schedule(runtime)
+!      !do iCell = 1, nCells
+!      !   pressureAdjustedSSH(iCell) = ssh(iCell) + ( seaIcePressure(iCell) / ( gravity * rho_sw ) )
+!      !end do
+!      !!$omp end do
+!      !!$omp end parallel
+!
+!      !if(associated(landIceDraft)) then
+!      !   !$omp parallel
+!      !   !$omp do schedule(runtime)
+!      !   do iCell = 1, nCells
+!      !      ! subtract the land ice draft from the SSH so sea ice doesn't experience tilt
+!      !      ! toward land ice
+!      !      pressureAdjustedSSH(iCell) = pressureAdjustedSSH(iCell) - landIceDraft(iCell)
+!      !   end do
+!      !   !$omp end do
+!      !   !$omp end parallel
+!      !end if
+!
+!      !nEdges = nEdgesArray( 2 )
+!
+!      !!$omp parallel
+!      !!$omp do schedule(runtime) private(cell1, cell2)
+!      !do iEdge = 1, nEdges
+!      !   cell1 = cellsOnEdge(1, iEdge)
+!      !   cell2 = cellsOnEdge(2, iEdge)
+!
+!      !   gradSSH(iEdge) = edgeMask(1, iEdge) * ( pressureAdjustedSSH(cell2) - pressureAdjustedSSH(cell1) ) / dcEdge(iEdge)
+!      !end do
+!      !$omp end do
+!      !$omp end parallel
+!
+!      !call ocn_verification_solution(currentTime, statePool, meshPool, diagnosticsPool, tracersPool)
 !      if (config_verification_enable) then
 !       call mpas_pool_get_array(diagnosticsPool, 'sshSolution', sshSolution)
 !       call mpas_pool_get_array(diagnosticsPool, 'normalVelocitySolution', normalVelocitySolution)
@@ -2009,7 +2008,7 @@ contains
 
       integer :: debugUnit
       character (len=StrKIND) :: debugFilename, fieldName
-
+return
       if ( present(timeLevel) ) then
          timeLevelLocal = timeLevel
       else

@@ -509,7 +509,7 @@ module ocn_forward_mode
 
       ! read initial data required for variable shortwave
       call mpas_timer_start('io_shortwave',.false.)
-      call ocn_get_shortWaveData(domain % streamManager, domain, domain % clock, .true.)
+      !call ocn_get_shortWaveData(domain % streamManager, domain, domain % clock, .true.)
       call mpas_timer_stop('io_shortwave')
 
       ! read initial data required for ecosys forcing
@@ -527,9 +527,9 @@ module ocn_forward_mode
         call mpas_timer_stop('io_monthly_surface_salinity')
       endif
 
-      ! initialize time-varying forcing
-      call ocn_time_varying_forcing_init(domain)
-      call ocn_time_varying_forcing_get(domain % streamManager, domain, domain % clock)
+     ! ! initialize time-varying forcing
+     ! call ocn_time_varying_forcing_init(domain)
+     ! call ocn_time_varying_forcing_get(domain % streamManager, domain, domain % clock)
 
       ! During integration, time level 1 stores the model state at the beginning of the
       !   time step, and time level 2 stores the state advanced dt in time by timestep(...)
@@ -565,14 +565,14 @@ module ocn_forward_mode
            call mpas_pool_get_subpool(block_ptr % structs, 'forcing', forcingPool)
            call mpas_pool_get_subpool(block_ptr % structs, 'diagnostics', diagnosticsPool)
            call mpas_pool_get_subpool(block_ptr % structs, 'scratch', scratchPool)
-           call ocn_forcing_build_fraction_absorbed_array(meshPool, statePool, diagnosticsPool, forcingPool, ierr, 1)
-           call mpas_timer_start("land_ice_build_arrays")
-           call ocn_surface_land_ice_fluxes_build_arrays(meshPool, diagnosticsPool, &
-                                                         forcingPool, scratchPool, statePool, dt, err)
-           call mpas_timer_stop("land_ice_build_arrays")
+           !call ocn_forcing_build_fraction_absorbed_array(meshPool, statePool, diagnosticsPool, forcingPool, ierr, 1)
+           !call mpas_timer_start("land_ice_build_arrays")
+           !call ocn_surface_land_ice_fluxes_build_arrays(meshPool, diagnosticsPool, &
+           !                                              forcingPool, scratchPool, statePool, dt, err)
+           !call mpas_timer_stop("land_ice_build_arrays")
 
-           call ocn_frazil_forcing_build_arrays(domain, meshPool, forcingPool, diagnosticsPool, statePool, err)
-           call ocn_tidal_forcing_build_array(domain, meshPool, forcingPool, diagnosticsPool, statePool, err)
+           !call ocn_frazil_forcing_build_arrays(domain, meshPool, forcingPool, diagnosticsPool, statePool, err)
+           !call ocn_tidal_forcing_build_array(domain, meshPool, forcingPool, diagnosticsPool, statePool, err)
 
            ! Compute normalGMBolusVelocity, relativeSlope and RediDiffVertCoef if respective flags are turned on
            if (config_use_Redi.or.config_use_GM) then
@@ -679,7 +679,7 @@ module ocn_forward_mode
          call ocn_time_varying_forcing_get(domain % streamManager, domain, domain % clock)
 
          ! Validate that the state is OK to run with for the next timestep.
-         call ocn_validate_state(domain, timeLevel=1)
+         !call ocn_validate_state(domain, timeLevel=1)
 
       end do
 
