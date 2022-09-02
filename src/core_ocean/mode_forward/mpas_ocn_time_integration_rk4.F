@@ -36,7 +36,6 @@ module ocn_time_integration_rk4
    use ocn_equation_of_state
    use ocn_vmix
    use ocn_time_average_coupled
-   use ocn_wetting_drying
 
    use ocn_effective_density_in_land_ice
 
@@ -128,10 +127,6 @@ module ocn_time_integration_rk4
       logical, pointer :: config_disable_tr_all_tend
       real (kind=RKIND), pointer :: config_mom_del4
       real (kind=RKIND), pointer :: config_drying_min_cell_height
-      logical, pointer :: config_use_wetting_drying
-      logical, pointer :: config_verify_not_dry
-      logical, pointer :: config_prevent_drying
-      logical, pointer :: config_zero_drying_velocity
       character (len=StrKIND), pointer :: config_land_ice_flux_mode
 
       ! State indices
@@ -179,7 +174,6 @@ module ocn_time_integration_rk4
 
       ! State/Tend Field Pointers
       type (field2DReal), pointer :: normalVelocityField, layerThicknessField
-      type (field2DReal), pointer :: wettingVelocityField
       type (field3DReal), pointer :: tracersGroupField
 
       ! Tracer Group Iteartion
@@ -209,13 +203,6 @@ module ocn_time_integration_rk4
       call mpas_pool_get_config(domain % configs, 'config_disable_vel_all_tend', config_disable_vel_all_tend)
       call mpas_pool_get_config(domain % configs, 'config_disable_thick_all_tend', config_disable_thick_all_tend)
       call mpas_pool_get_config(domain % configs, 'config_disable_tr_all_tend', config_disable_tr_all_tend)
-      call mpas_pool_get_config(domain % configs, 'config_use_wetting_drying', config_use_wetting_drying)
-      call mpas_pool_get_config(domain % configs, 'config_prevent_drying', config_prevent_drying)
-      call mpas_pool_get_config(domain % configs, 'config_verify_not_dry', config_verify_not_dry)
-      call mpas_pool_get_config(domain % configs, 'config_drying_min_cell_height', config_drying_min_cell_height)
-      call mpas_pool_get_config(domain % configs, 'config_zero_drying_velocity', config_zero_drying_velocity)
-      call mpas_pool_get_config(domain % configs, 'config_use_tidal_forcing', config_use_tidal_forcing)
-      call mpas_pool_get_config(domain % configs, 'config_tidal_forcing_type', config_tidal_forcing_type)
 
       !
       ! Initialize time_levs(2) with state at current time
@@ -337,19 +324,7 @@ module ocn_time_integration_rk4
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       do rk_step = 1, 4
 
-        if (config_disable_thick_all_tend .and. config_disable_vel_all_tend .and. config_disable_tr_all_tend) then
-          exit ! don't compute in loop meant to update velocity, thickness, and tracers
-        end if
-
         call mpas_pool_get_subpool(domain % blocklist % structs, 'diagnostics', diagnosticsPool)
-
-        ! Update halos for diagnostic variables.
-        if (config_use_cvmix_kpp) then
-           call mpas_timer_start("RK4-boundary layer depth halo update")
-           call mpas_dmpar_field_halo_exch(domain, 'boundaryLayerDepth')
-           call mpas_timer_stop("RK4-boundary layer depth halo update")
-        end if
-
 
         call mpas_timer_start("RK4-diagnostic halo update")
 
@@ -366,6 +341,7 @@ module ocn_time_integration_rk4
         ! which is the same as k_j / h.
         call mpas_timer_start("RK4 vel/thick tendency computations")
 
+! mrp forward backward: compute tendencies
         block => domain % blocklist
         do while (associated(block))
            call ocn_time_integrator_rk4_compute_vel_tends( block, dt, rk_substep_weights(rk_step), err )
@@ -394,22 +370,6 @@ module ocn_time_integration_rk4
               block => block % next
            end do
         end if
-         if (config_verification_enable) then
-            call mpas_pool_get_array(diagnosticsPool, 'normalVelocitySolution', normalVelocitySolution)
-            call mpas_pool_get_array(meshPool, 'boundaryEdge', boundaryEdge)
-            !$omp parallel
-            !$omp do schedule(runtime) 
-            do iEdge = 1, nEdges
-               do k = 1, maxLevelEdgeTop(iEdge)
-                  if (boundaryEdge(k,iEdge).eq.1) then 
-                     normalVelocityNew(k, iEdge) = normalVelocitySolution(k, iEdge)
-                  endif
-               end do
-            end do
-            !$omp end do
-            !$omp end parallel
-         end if
-
 
         call mpas_timer_stop("RK4-update diagnostic variables")
 
@@ -757,7 +717,6 @@ module ocn_time_integration_rk4
 !      call mpas_pool_get_array(diagnosticsPool, 'normalTransportVelocity', normalTransportVelocity)
 !      call mpas_pool_get_array(diagnosticsPool, 'normalGMBolusVelocity', normalGMBolusVelocity)
 !
-      !call mpas_pool_get_array(diagnosticsPool, 'wettingVelocity', wettingVelocity)
 
       !$omp parallel
       !$omp do schedule(runtime) private(k)
@@ -765,7 +724,6 @@ module ocn_time_integration_rk4
          do k = 1, maxLevelEdgeTop(iEdge)
             normalVelocityProvis(k, iEdge) = normalVelocityCur(k, iEdge) + rkSubstepWeight &
                                            * normalVelocityTend(k, iEdge)
-            !normalVelocityProvis(k, iEdge) = normalVelocityProvis(k, iEdge) * (1.0_RKIND - wettingVelocity(k, iEdge))
          end do
       end do
       !$omp end do
@@ -893,7 +851,6 @@ module ocn_time_integration_rk4
       !$omp do schedule(runtime) 
       do iEdge = 1, nEdges
          normalVelocityNew(:, iEdge) = normalVelocityNew(:, iEdge) + rkWeight * normalVelocityTend(:, iEdge)
-         !normalVelocityNew(:, iEdge) = normalVelocityNew(:, iEdge) * (1.0_RKIND - wettingVelocity(:, iEdge))
       end do
       !$omp end do
       !$omp end parallel
