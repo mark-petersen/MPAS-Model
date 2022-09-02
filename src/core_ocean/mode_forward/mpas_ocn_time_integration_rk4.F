@@ -272,47 +272,47 @@ module ocn_time_integration_rk4
          !$omp end do
          !$omp end parallel
 
-         call mpas_pool_begin_iteration(tracersPool)
-         do while ( mpas_pool_get_next_member(tracersPool, groupItr) )
+         !call mpas_pool_begin_iteration(tracersPool)
+         !do while ( mpas_pool_get_next_member(tracersPool, groupItr) )
 
-            if ( groupItr % memberType == MPAS_POOL_FIELD ) then
+         !   if ( groupItr % memberType == MPAS_POOL_FIELD ) then
 
-               call mpas_pool_get_array(tracersPool, trim(groupItr % memberName), tracersCur, 1)
-               call mpas_pool_get_array(tracersPool, trim(groupItr % memberName), tracersNew, 2)
+         !      call mpas_pool_get_array(tracersPool, trim(groupItr % memberName), tracersCur, 1)
+         !      call mpas_pool_get_array(tracersPool, trim(groupItr % memberName), tracersNew, 2)
 
-               if ( associated(tracersCur) .and. associated(tracersNew) ) then
-                  !$omp parallel
-                  !$omp do schedule(runtime) private(k)
-                  do iCell = 1, nCells  ! couple tracers to thickness
-                     do k = 1, maxLevelCell(iCell)
-                        tracersNew(:, k, iCell) = tracersCur(:, k, iCell) * layerThicknessCur(k, iCell)
-                     end do
-                  end do
-                  !$omp end do
-                  !$omp end parallel
-               end if
-            end if
-         end do
+         !      if ( associated(tracersCur) .and. associated(tracersNew) ) then
+         !         !$omp parallel
+         !         !$omp do schedule(runtime) private(k)
+         !         do iCell = 1, nCells  ! couple tracers to thickness
+         !            do k = 1, maxLevelCell(iCell)
+         !               tracersNew(:, k, iCell) = tracersCur(:, k, iCell) * layerThicknessCur(k, iCell)
+         !            end do
+         !         end do
+         !         !$omp end do
+         !         !$omp end parallel
+         !      end if
+         !   end if
+         !end do
 
-         if (associated(highFreqThicknessCur)) then
-              !$omp parallel
-              !$omp do schedule(runtime)
-              do iCell = 1, nCells
-                 highFreqThicknessNew(:, iCell) = highFreqThicknessCur(:, iCell)
-              end do
-              !$omp end do
-              !$omp end parallel
-         end if
+         !if (associated(highFreqThicknessCur)) then
+         !     !$omp parallel
+         !     !$omp do schedule(runtime)
+         !     do iCell = 1, nCells
+         !        highFreqThicknessNew(:, iCell) = highFreqThicknessCur(:, iCell)
+         !     end do
+         !     !$omp end do
+         !     !$omp end parallel
+         !end if
 
-         if (associated(lowFreqDivergenceCur)) then
-              !$omp parallel
-              !$omp do schedule(runtime) 
-              do iCell = 1, nCells
-                 lowFreqDivergenceNew(:, iCell) = lowFreqDivergenceCur(:, iCell)
-              end do
-              !$omp end do
-              !$omp end parallel
-         end if
+         !if (associated(lowFreqDivergenceCur)) then
+         !     !$omp parallel
+         !     !$omp do schedule(runtime) 
+         !     do iCell = 1, nCells
+         !        lowFreqDivergenceNew(:, iCell) = lowFreqDivergenceCur(:, iCell)
+         !     end do
+         !     !$omp end do
+         !     !$omp end parallel
+         !end if
 
          block => block % next
       end do
@@ -515,29 +515,31 @@ module ocn_time_integration_rk4
 
         call mpas_timer_stop("RK4 vel/thick prognostic halo update")
 
-        call mpas_timer_start("RK4 tracer tendency computations")
+        ! mrp turn off:
+        !call mpas_timer_start("RK4 tracer tendency computations")
 
-        block => domain % blocklist
-        do while (associated(block))
-           call ocn_time_integrator_rk4_compute_tracer_tends( block, dt, rk_substep_weights(rk_step), err )
-           block => block % next
-        end do
+        !block => domain % blocklist
+        !do while (associated(block))
+        !   call ocn_time_integrator_rk4_compute_tracer_tends( block, dt, rk_substep_weights(rk_step), err )
+        !   block => block % next
+        !end do
 
-        call mpas_timer_stop("RK4 tracer tendency computations")
+        !call mpas_timer_stop("RK4 tracer tendency computations")
 
-        call mpas_timer_start("RK4 tracer prognostic halo update")
+        ! mrp turn off:
+        !call mpas_timer_start("RK4 tracer prognostic halo update")
 
-        call mpas_pool_get_subpool(domain % blocklist % structs, 'tend', tendPool)
-        call mpas_pool_get_subpool(tendPool, 'tracersTend', tracersTendPool)
+        !call mpas_pool_get_subpool(domain % blocklist % structs, 'tend', tendPool)
+        !call mpas_pool_get_subpool(tendPool, 'tracersTend', tracersTendPool)
 
-        call mpas_pool_begin_iteration(tracersTendPool)
-        do while ( mpas_pool_get_next_member(tracersTendPool, groupItr) )
-           if ( groupItr % memberType == MPAS_POOL_FIELD ) then
-              call mpas_dmpar_field_halo_exch(domain, trim(groupItr % memberName))
-           end if
-        end do
+        !call mpas_pool_begin_iteration(tracersTendPool)
+        !do while ( mpas_pool_get_next_member(tracersTendPool, groupItr) )
+        !   if ( groupItr % memberType == MPAS_POOL_FIELD ) then
+        !      call mpas_dmpar_field_halo_exch(domain, trim(groupItr % memberName))
+        !   end if
+        !end do
 
-        call mpas_timer_stop("RK4 tracer prognostic halo update")
+        !call mpas_timer_stop("RK4 tracer prognostic halo update")
 
         ! Compute next substep state for velocity, thickness, and tracers.
         ! In RK4 notation, we are computing y_n + a_j k_j.
@@ -622,28 +624,29 @@ module ocn_time_integration_rk4
         block => block % next
       end do
 
-      call mpas_timer_start("RK4-implicit vert mix")
-      ! Update halo on u and tracers, which were just updated for implicit vertical mixing.  If not done,
-      ! this leads to lack of volume conservation.  It is required because halo updates in RK4 are only
-      ! conducted on tendencies, not on the velocity and tracer fields.  So this update is required to
-      ! communicate the change due to implicit vertical mixing across the boundary.
-      call mpas_timer_start("RK4-implicit vert mix halos")
+      ! mrp turn off:
+      !call mpas_timer_start("RK4-implicit vert mix")
+      !! Update halo on u and tracers, which were just updated for implicit vertical mixing.  If not done,
+      !! this leads to lack of volume conservation.  It is required because halo updates in RK4 are only
+      !! conducted on tendencies, not on the velocity and tracer fields.  So this update is required to
+      !! communicate the change due to implicit vertical mixing across the boundary.
+      !call mpas_timer_start("RK4-implicit vert mix halos")
 
-      call mpas_pool_get_subpool(domain % blocklist % structs, 'state', statePool)
-      call mpas_pool_get_subpool(statePool, 'tracers', tracersPool)
+      !call mpas_pool_get_subpool(domain % blocklist % structs, 'state', statePool)
+      !call mpas_pool_get_subpool(statePool, 'tracers', tracersPool)
 
-      call mpas_dmpar_field_halo_exch(domain, 'normalVelocity', timeLevel=2)
+      !call mpas_dmpar_field_halo_exch(domain, 'normalVelocity', timeLevel=2)
 
-      call mpas_pool_begin_iteration(tracersPool)
-      do while ( mpas_pool_get_next_member(tracersPool, groupItr) )
-         if ( groupItr % memberType == MPAS_POOL_FIELD ) then
-            call mpas_dmpar_field_halo_exch(domain, groupItr % memberName, timeLevel=2)
-         end if
-      end do
+      !call mpas_pool_begin_iteration(tracersPool)
+      !do while ( mpas_pool_get_next_member(tracersPool, groupItr) )
+      !   if ( groupItr % memberType == MPAS_POOL_FIELD ) then
+      !      call mpas_dmpar_field_halo_exch(domain, groupItr % memberName, timeLevel=2)
+      !   end if
+      !end do
 
-      call mpas_timer_stop("RK4-implicit vert mix halos")
+      !call mpas_timer_stop("RK4-implicit vert mix halos")
 
-      call mpas_timer_stop("RK4-implicit vert mix")
+      !call mpas_timer_stop("RK4-implicit vert mix")
 
       block => domain % blocklist
       do while (associated(block))
@@ -1500,30 +1503,30 @@ module ocn_time_integration_rk4
       call mpas_pool_get_array(statePool, 'normalVelocity', normalVelocityNew, 2)
 
       call mpas_pool_get_array(diagnosticsPool, 'normalTransportVelocity', normalTransportVelocity)
-      call mpas_pool_get_array(diagnosticsPool, 'normalGMBolusVelocity', normalGMBolusVelocity)
+      !call mpas_pool_get_array(diagnosticsPool, 'normalGMBolusVelocity', normalGMBolusVelocity)
 
-      call mpas_pool_get_dimension(tracersPool, 'index_temperature', indexTemperature)
-      call mpas_pool_get_dimension(tracersPool, 'index_salinity', indexSalinity)
+      !call mpas_pool_get_dimension(tracersPool, 'index_temperature', indexTemperature)
+      !call mpas_pool_get_dimension(tracersPool, 'index_salinity', indexSalinity)
 
       call mpas_pool_get_array(meshPool, 'maxLevelCell', maxLevelCell)
 
-      call mpas_pool_begin_iteration(tracersPool)
-      do while ( mpas_pool_get_next_member(tracersPool, groupItr) )
-         if ( groupItr % memberType == MPAS_POOL_FIELD ) then
-            call mpas_pool_get_array(tracersPool, groupItr % memberName, tracersGroupNew, 2)
-            if ( associated(tracersGroupNew) ) then
-               !$omp parallel
-               !$omp do schedule(runtime) private(k)
-               do iCell = 1, nCells
-                 do k = 1, maxLevelCell(iCell)
-                   tracersGroupNew(:, k, iCell) = tracersGroupNew(:, k, iCell) / layerThicknessNew(k, iCell)
-                 end do
-               end do
-               !$omp end do
-               !$omp end parallel
-            end if
-         end if
-      end do
+      !call mpas_pool_begin_iteration(tracersPool)
+      !do while ( mpas_pool_get_next_member(tracersPool, groupItr) )
+      !   if ( groupItr % memberType == MPAS_POOL_FIELD ) then
+      !      call mpas_pool_get_array(tracersPool, groupItr % memberName, tracersGroupNew, 2)
+      !      if ( associated(tracersGroupNew) ) then
+      !         !$omp parallel
+      !         !$omp do schedule(runtime) private(k)
+      !         do iCell = 1, nCells
+      !           do k = 1, maxLevelCell(iCell)
+      !             tracersGroupNew(:, k, iCell) = tracersGroupNew(:, k, iCell) / layerThicknessNew(k, iCell)
+      !           end do
+      !         end do
+      !         !$omp end do
+      !         !$omp end parallel
+      !      end if
+      !   end if
+      !end do
 
       call mpas_pool_get_array(diagnosticsPool, 'daysSinceStartOfSim',daysSinceStartOfSim)
       ! daysSinceStartOfSim is at old time
