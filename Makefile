@@ -855,6 +855,15 @@ ifdef MPAS_EXTERNAL_CPPFLAGS
 	override CPPFLAGS += $(MPAS_EXTERNAL_CPPFLAGS)
 endif
 ####################################################
+ifeq "$(USE_PIO2)" "true"
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),Darwin)
+    	override LIBS += -lc++
+    else
+    	override LIBS += -lstdc++
+    endif
+
+endif
 
 ifeq ($(wildcard src/core_$(CORE)), ) # CHECK FOR EXISTENCE OF CORE DIRECTORY
 
