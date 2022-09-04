@@ -374,7 +374,7 @@ contains
       !$omp end parallel
 
       ! Need 0,1,2 halo cells
-      nCells = nCellsArray( 3 )
+      nCells = nCellsArray( 2 )
       !
       ! Compute divergence, kinetic energy, and vertical velocity
       !
@@ -445,7 +445,7 @@ contains
       !$omp end parallel
 
       ! Need 0,1,2 halo cells
-      nCells = nCellsArray( 3 )
+      nCells = nCellsArray( 2 )
       !
       ! Compute kinetic energy
       !
@@ -1555,12 +1555,12 @@ contains
                salineContractionCoeff(nVertLevels, nCells))
 
       ! Only need to compute over the 0 and 1 halos
-      nCells = nCellsArray( 3 )
+      nCells = nCellsArray( 2 )
 
       ! compute EOS by displacing SST/SSS to every vertical layer in column
-      call ocn_equation_of_state_density(statePool, diagnosticsPool, meshPool, nCells, 0, 'surfaceDisplaced', &
-                                         densitySurfaceDisplaced, err, thermalExpansionCoeff, salineContractionCoeff, &
-                                         timeLevel)
+      !call ocn_equation_of_state_density(statePool, diagnosticsPool, meshPool, nCells, 0, 'surfaceDisplaced', &
+      !                                   densitySurfaceDisplaced, err, thermalExpansionCoeff, salineContractionCoeff, &
+      !                                   timeLevel)
 
       !$omp parallel
       !$omp do schedule(runtime) &

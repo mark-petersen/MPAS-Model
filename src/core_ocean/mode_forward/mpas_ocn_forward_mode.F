@@ -194,63 +194,63 @@ module ocn_forward_mode
       ierr = ior(ierr, err_tmp)
       call ocn_vel_pressure_grad_init(err_tmp)
       ierr = ior(ierr, err_tmp)
-      call ocn_vel_vadv_init(err_tmp)
-      ierr = ior(ierr, err_tmp)
-      call ocn_vel_hmix_init(err_tmp)
-      ierr = ior(ierr, err_tmp)
-      call ocn_vel_forcing_init(err_tmp)
-      ierr = ior(ierr, err_tmp)
-      call ocn_vel_forcing_surface_stress_init(err_tmp)
-      ierr = ior(ierr, err_tmp)
-      call ocn_surface_bulk_forcing_init(err_tmp)
-      ierr = ior(ierr, err_tmp)
-      call ocn_surface_land_ice_fluxes_init(err_tmp)
-      ierr = ior(ierr, err_tmp)
-      call ocn_frazil_forcing_init(err_tmp)
-      ierr = ior(ierr, err_tmp)
-      call ocn_tidal_forcing_init(err_tmp)
-      ierr = ior(ierr, err_tmp)
-      call ocn_vel_tidal_potential_init(domain,err_tmp)
-      ierr = ior(ierr, err_tmp)
+      !call ocn_vel_vadv_init(err_tmp)
+      !ierr = ior(ierr, err_tmp)
+      !call ocn_vel_hmix_init(err_tmp)
+      !ierr = ior(ierr, err_tmp)
+      !call ocn_vel_forcing_init(err_tmp)
+      !ierr = ior(ierr, err_tmp)
+      !call ocn_vel_forcing_surface_stress_init(err_tmp)
+      !ierr = ior(ierr, err_tmp)
+      !call ocn_surface_bulk_forcing_init(err_tmp)
+      !ierr = ior(ierr, err_tmp)
+      !call ocn_surface_land_ice_fluxes_init(err_tmp)
+      !ierr = ior(ierr, err_tmp)
+      !call ocn_frazil_forcing_init(err_tmp)
+      !ierr = ior(ierr, err_tmp)
+      !call ocn_tidal_forcing_init(err_tmp)
+      !ierr = ior(ierr, err_tmp)
+      !call ocn_vel_tidal_potential_init(domain,err_tmp)
+      !ierr = ior(ierr, err_tmp)
 
-      call ocn_tracer_hmix_init(err_tmp)
-      ierr = ior(ierr, err_tmp)
-      call ocn_tracer_hmix_redi_init(domain,err_tmp)
-      ierr = ior(ierr, err_tmp)
-      call ocn_tracer_surface_flux_init(err_tmp)
-      ierr = ior(ierr, err_tmp)
-      call ocn_tracer_advection_init(err_tmp)
-      ierr = ior(ierr,err_tmp)
-      call ocn_tracer_short_wave_absorption_init(domain,err_tmp)
-      ierr = ior(ierr,err_tmp)
-      call ocn_gm_init(domain, err_tmp)
-      ierr = ior(ierr,err_tmp)
-      call ocn_tracer_nonlocalflux_init(err_tmp)
-      ierr = ior(ierr,err_tmp)
-      call ocn_tracer_ecosys_init(domain, err_tmp)
-      ierr = ior(ierr,err_tmp)
-      call ocn_tracer_DMS_init(domain, err_tmp)
-      ierr = ior(ierr,err_tmp)
-      call ocn_tracer_MacroMolecules_init(domain, err_tmp)
-      ierr = ior(ierr,err_tmp)
+      !call ocn_tracer_hmix_init(err_tmp)
+      !ierr = ior(ierr, err_tmp)
+      !call ocn_tracer_hmix_redi_init(domain,err_tmp)
+      !ierr = ior(ierr, err_tmp)
+      !call ocn_tracer_surface_flux_init(err_tmp)
+      !ierr = ior(ierr, err_tmp)
+      !call ocn_tracer_advection_init(err_tmp)
+      !ierr = ior(ierr,err_tmp)
+      !call ocn_tracer_short_wave_absorption_init(domain,err_tmp)
+      !ierr = ior(ierr,err_tmp)
+      !call ocn_gm_init(domain, err_tmp)
+      !ierr = ior(ierr,err_tmp)
+      !call ocn_tracer_nonlocalflux_init(err_tmp)
+      !ierr = ior(ierr,err_tmp)
+      !call ocn_tracer_ecosys_init(domain, err_tmp)
+      !ierr = ior(ierr,err_tmp)
+      !call ocn_tracer_DMS_init(domain, err_tmp)
+      !ierr = ior(ierr,err_tmp)
+      !call ocn_tracer_MacroMolecules_init(domain, err_tmp)
+      !ierr = ior(ierr,err_tmp)
 
-      call ocn_vmix_init(domain, err_tmp)
-      ierr = ior(ierr, err_tmp)
+      !call ocn_vmix_init(domain, err_tmp)
+      !ierr = ior(ierr, err_tmp)
 
-      call ocn_equation_of_state_init(domain, err_tmp)
-      ierr = ior(ierr, err_tmp)
+      !call ocn_equation_of_state_init(domain, err_tmp)
+      !ierr = ior(ierr, err_tmp)
 
       call ocn_tendency_init(err_tmp)
       ierr = ior(ierr,err_tmp)
       call ocn_diagnostics_init(err_tmp)
       ierr = ior(ierr,err_tmp)
 
-      call ocn_forcing_init(err_tmp)
-      ierr = ior(ierr,err_tmp)
+      !call ocn_forcing_init(err_tmp)
+      !ierr = ior(ierr,err_tmp)
 
-      call mpas_pool_get_dimension(domain % blocklist % dimensions, 'nVertLevels', nVertLevels)
-      call ocn_sea_ice_init(nVertLevels, err_tmp)
-      ierr = ior(ierr, err_tmp)
+      !call mpas_pool_get_dimension(domain % blocklist % dimensions, 'nVertLevels', nVertLevels)
+      !call ocn_sea_ice_init(nVertLevels, err_tmp)
+      !ierr = ior(ierr, err_tmp)
 
       if(ierr.eq.1) then
           call mpas_log_write('An error was encountered while initializing the MPAS-Ocean forward mode', MPAS_LOG_CRIT)
@@ -262,9 +262,9 @@ module ocn_forward_mode
 
       call ocn_init_routines_compute_max_level(domain)
 
-      call ocn_init_routines_verification(domain)
+      !call ocn_init_routines_verification(domain)
 
-      call ocn_time_integration_split_init(domain)
+      !call ocn_time_integration_split_init(domain)
 
       call mpas_log_write(' Vertical coordinate movement is: ' // trim(config_vert_coord_movement))
 
@@ -277,30 +277,30 @@ module ocn_forward_mode
          call mpas_log_write('Incorrect choice of config_vert_coord_movement.', MPAS_LOG_CRIT)
       endif
 
-      if (config_vert_coord_movement .ne. 'impermeable_interfaces' &
-             .and. config_pressure_gradient_type .eq. 'MontgomeryPotential') then
-         call mpas_log_write( &
-             'Incorrect combination of config_vert_coord_movement and config_pressure_gradient_type', MPAS_LOG_CRIT)
-      end if
+      !if (config_vert_coord_movement .ne. 'impermeable_interfaces' &
+      !       .and. config_pressure_gradient_type .eq. 'MontgomeryPotential') then
+      !   call mpas_log_write( &
+      !       'Incorrect combination of config_vert_coord_movement and config_pressure_gradient_type', MPAS_LOG_CRIT)
+      !end if
 
-      if (config_filter_btr_mode.and. &
-          config_vert_coord_movement.ne.'fixed')then
-         call mpas_log_write('filter_btr_mode has only been tested with config_vert_coord_movement=fixed.', MPAS_LOG_CRIT)
-      endif
+      !if (config_filter_btr_mode.and. &
+      !    config_vert_coord_movement.ne.'fixed')then
+      !   call mpas_log_write('filter_btr_mode has only been tested with config_vert_coord_movement=fixed.', MPAS_LOG_CRIT)
+      !endif
 
-      ! find the maximum value of the meshDensity
-      if (config_maxMeshDensity < 0.0_RKIND) then
-        maxDensity=-1
-        block => domain % blocklist
-        do while (associated(block))
-          call mpas_pool_get_subpool(block % structs, 'mesh', meshPool)
-          call mpas_pool_get_array(meshPool, 'meshDensity', meshDensity)
-          maxDensity = max(maxDensity, maxval(meshDensity))
-          block => block % next
-        end do
-        call mpas_dmpar_max_real(domain % dminfo, maxDensity, maxDensity_global)
-        config_maxMeshDensity = maxDensity_global
-      endif
+      !! find the maximum value of the meshDensity
+      !if (config_maxMeshDensity < 0.0_RKIND) then
+      !  maxDensity=-1
+      !  block => domain % blocklist
+      !  do while (associated(block))
+      !    call mpas_pool_get_subpool(block % structs, 'mesh', meshPool)
+      !    call mpas_pool_get_array(meshPool, 'meshDensity', meshDensity)
+      !    maxDensity = max(maxDensity, maxval(meshDensity))
+      !    block => block % next
+      !  end do
+      !  call mpas_dmpar_max_real(domain % dminfo, maxDensity, maxDensity_global)
+      !  config_maxMeshDensity = maxDensity_global
+      !endif
 
       !
       ! Initialize core
